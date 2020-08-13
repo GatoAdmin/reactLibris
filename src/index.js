@@ -1,13 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import App from './components/App';
+import About from './components/About';
+import NotFound from './components/NotFound';
 import * as serviceWorker from './serviceWorker';
 
+import {BrowserRouter, Switch, Route, Link} from 'react-router-dom';
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+
+  <BrowserRouter>
+        <div className='Menu-wrapper'>
+          <ul>
+            <Link to='/'><li>Home</li></Link>
+            <Link to='/about'><li>about</li></Link>
+          </ul>
+        </div>
+        <div className='Contents-wrapper'>
+        <Switch>
+
+              <Route exact path="/" component={App} />
+              <Route path="/about" component={About} />
+              <Route component={NotFound} />
+
+        </Switch>
+        </div>
+
+ </BrowserRouter>,
   document.getElementById('root')
 );
 
