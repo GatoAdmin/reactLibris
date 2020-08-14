@@ -1,0 +1,1208 @@
+var express = require('express');
+var router = express.Router();
+var passport = require("passport");
+var mongoose = require('mongoose');
+var User = mongoose.model('UserInfo');
+var Chronicle = mongoose.model('Chronicle');
+var Replay = mongoose.model('Replay');
+var MasterTag = mongoose.model('MasterTag');
+var Comment = mongoose.model('Comment');
+const bcrypt = require('bcryptjs');
+var moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault('Asia/Seoul');
+var nowDate = moment().format();
+var masterTags = null;
+MasterTag.aggregate().match({ enabled: true, })
+.project({
+  _id: 0,
+  name: 1,
+  tags: { _id: 1, tag: 1 },
+})
+.exec((err, results) => {
+  masterTags = results
+});
+//템플릿용 변수 설정
+router.use(function(req,res,next){
+    res.locals.currentUser = req.user;
+    res.locals.title = '리브리스';
+    res.locals.errors = req.flash("error");
+    res.locals.infos = req.flash("info");
+    next();
+  });
+  
+
+  function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+      next();
+    } else {
+      req.session.current_url = req.originalUrl;
+      req.flash("info", "먼저 로그인해야 이 페이지를 볼 수 있습니다.");
+      res.redirect("/login");
+    }
+  }
+
+  const agg_replay_project = {
+    id: 1,
+    price: 1,
+    view: 1,
+    ruleTag: {
+      $let: {
+        vars: {
+          rule_tags: { $arrayElemAt: ["$ruleTag", 0] },
+        },
+        in: {
+          $let: {
+            vars: {
+              rule_tag: {
+                $arrayElemAt:
+                  [{
+                    $filter: {
+                      input: "$$rule_tags.tags",
+                      as: "tag",
+                      cond: { $eq: ["$rule", "$$tag._id"] }
+                    }
+                  }, 0]
+              }
+            },
+            in: "$$rule_tag.tag"
+          }
+        }
+      }
+    },
+    created: 1,
+    version: {
+      $let: {
+        vars: {
+          last: { $arrayElemAt: ["$versions", -1] }
+        },
+        in: {
+          title: "$$last.title",
+          peoples:"$$last.peoples"
+        }
+      }
+    },
+    author: {
+      $let: {
+        vars: {
+          user: {
+            $arrayElemAt: ["$author", 0]
+          }
+        },
+        in: {
+          userName: "$$user.userName",
+          userEmail: "$$user.userEmail"
+        }
+      }
+    },
+    subTags: {
+      $let: {
+        vars: {
+          subtag: { $arrayElemAt: ["$subTags", 0] },
+          version: { $arrayElemAt: ["$versions", -1] }
+        },
+        in: {
+          $let: {
+            vars: {
+              subtags: {
+                $filter: {
+                  input: "$$subtag.tags",
+                  as: "tag",
+                  cond: { $in: ["$$tag._id", "$$version.subTags"] }
+                }
+              }
+            },
+            in: "$$subtags.tag"
+          }
+        }
+      }
+    },
+    genreTags: {
+      $let: {
+        vars: {
+          genretag: { $arrayElemAt: ["$genreTags", 0] },
+          version: { $arrayElemAt: ["$versions", -1] }
+        },
+        in: {
+          $let: {
+            vars: {
+              genretags: {
+                $filter: {
+                  input: "$$genretag.tags",
+                  as: "tag",
+                  cond: { $in: ["$$tag._id", "$$version.genreTags"] }
+                }
+              }
+            },
+            in: "$$genretags.tag"
+          }
+        }
+      }
+    },
+    backgroundTag: {
+      $let: {
+        vars: {
+          background_tag: { $arrayElemAt: ["$backgroundTag", 0] },
+          version: { $arrayElemAt: ["$versions", -1] }
+        },
+        in: {
+          $let: {
+            vars: {
+              background: {
+                $filter: {
+                  input: "$$background_tag.tags",
+                  as: "tag",
+                  cond: { $eq: ["$$tag._id", "$$version.backgroundTag"] }
+                }
+              }
+            },
+            in: { $arrayElemAt: ["$$background.tag", 0] }
+          }
+        }
+      }
+    },
+    viewUsers:1
+  };
+  const agg_lookup_user = {
+    from: 'userinfos', localField: 'author', foreignField: '_id', as: 'author'
+  };
+  const agg_lookup_rule =
+  {
+    from: 'mastertags',
+    localField: 'rule',
+    foreignField: 'tags._id',
+    as: 'ruleTag'
+  };
+  const agg_lookup_genre =
+  {
+    from: 'mastertags',
+    localField: 'versions.genreTags',
+    foreignField: 'tags._id',
+    as: 'genreTags'
+  };
+  const agg_lookup_background =
+  {
+    from: 'mastertags',
+    localField: 'versions.backgroundTag',
+    foreignField: 'tags._id',
+    as: 'backgroundTag'
+  };
+  const agg_lookup_subtags =
+  {
+    from: 'mastertags',
+    localField: 'versions.subTags',
+    foreignField: "tags._id",
+    as: 'subTags'
+  };
+  const agg_lookup_comment = {
+    from: 'comments',
+    let:{"replay_id":"$_id"},
+    pipeline:[
+      {$match:{$expr:{$and:[{$eq:["$$replay_id","$article"]},{$eq:["$onModel",'Replay']},{$eq:["$enabled",true]}]}}},
+      {$sort:{"created":-1}},
+      {$lookup:{
+          from:"userinfos",    
+          localField: 'user',
+          foreignField: "_id",
+          as:"user"
+       }},
+       {$project:{
+           user:{      
+               $let: {
+          vars: {
+            user: {
+              $arrayElemAt: ["$user", 0]
+            }
+          },
+          in: {
+            userName: "$$user.userName",
+            userEmail: "$$user.userEmail"
+          }
+        }},
+        "work.version":1,
+        "content":1,
+        "created":1,
+        "updated":1,
+        "stopped":1,
+        }}
+    ],
+    as: 'comments'
+  };
+
+  router.get("/",function(req,res,next){
+    Replay.find().sort({create:"descending"})
+    .populate('author')
+    // .populate('aboutScenario')
+    .exec(function(err,results){
+        if(err){return next(err);}  
+        req.session.current_url = req.originalUrl;
+        res.render("replay/replays",{replays:results});
+    });
+  });
+
+
+  router.post("/", function (req, res, next) {
+    var data = req.body.params;
+    var alignType = "-created";
+    var order = "descending";
+    if (data) {
+      order = data.align_order;
+      if (order == "descending") {
+        if (data.align_type === "title") {
+          alignType = "-versions.title"
+        } else {
+          alignType = "-" + data.align_type.toString();
+        }
+      } else {
+        if (data.align_type === "title") {
+          alignType = "versions.title"
+        } else {
+          alignType = data.align_type.toString();
+        }
+      }
+      // var alignType = data.align_type;
+    }
+  
+    var agg_match = { $and:[{enabled: true},{isOpened: true}]  };
+    // var agg_unwind = { $$ruleTags };
+    // Replay.aggregate().match(agg_match)
+    //   .lookup(agg_lookup_user)
+    //   .lookup(agg_lookup_rule)
+    //   .lookup(agg_lookup_genre)
+    //   .lookup(agg_lookup_background)
+    //   .lookup(agg_lookup_subtags)
+    //   .project(agg_replay_project)
+    //   .sort(alignType)
+    //   .exec(function (err, results) {
+    //     if (err) { console.log(err); next(err); }
+    //     return res.json({ articles: results, masterTags: masterTags });
+    //   });
+      
+    var findSearch = {enabled: true,isOpened: true}
+    Replay.find(findSearch)
+    .sort(alignType)
+    .exec(function (err, results) {
+      if (err) { console.log(err); next(err); }
+      results = filterBlockResult(req.user,results);
+      return res.json({ articles: results, masterTags: masterTags });
+    });
+
+  });
+  
+router.get("/make", ensureAuthenticated, function (req, res, next) {
+  res.render("replay/makeReplays", { chronicle_id: null, masterTags: masterTags });
+});
+  
+router.post("/make", ensureAuthenticated, function (req, res, next) {
+  var formData = req.body;
+  var article = formData.article;
+  var price = 0;
+  var user = req.user;
+  var aboutScenarioId = null;
+  var data_players = JSON.parse(formData.play_peoples);
+
+  if(isChecked(formData.is_base_scenario)){
+    aboutScenarioId=formData.scenario_name; //추후 ID로 교체
+  }
+  if (isChecked(formData.is_paid)) {
+    if (user.agreeList.paidContent.agree) {
+      price = formData.price;
+    } else {
+      if (isChecked(formData.is_agree_paid)) {
+        var nowDate = moment().format();
+        price = formData.price;
+        user.agreeList.paidContent = { agree: true, agreeDate: new Date(nowDate) };
+      }
+      user.save();
+    }
+  }
+
+  var newReplay = new Replay({
+    author: user._id,
+    isFree: isChecked(formData.is_paid) ? false : true,
+    isAgreeComment: isChecked(formData.is_agree_comment),
+    rule: toObjectId(formData.rule),
+    price: isChecked(formData.is_paid) ? price: 0 ,
+    aboutScenario: isChecked(formData.is_base_scenario) ? aboutScenarioId : null,
+    versions: {
+      title: formData.title,
+      peoples:{
+        master: isMirrorChecked(formData.is_need_master)?formData.master_name:null,
+        players: data_players
+      },
+      rating: formData.rating,
+      content: article,
+      backgroundTag: toObjectId(formData.background_tag),
+      genreTags: toObjectId(formData.genre_tags),
+      subTags: toObjectId(formData.sub_tags),
+    }
+  });
+  
+
+  newReplay.save()
+  var newChronicle = new Chronicle({
+    title: formData.title,
+    author: user._id,
+    chronicle_type: 3,//TODO:ENUM 값으로 바꿀것
+    works: [newReplay._id]
+  });
+  newChronicle.save()
+    .then(chronicle => {
+      req.flash("info", "성공적으로 발행되었습니다.");
+      res.redirect("/replays");
+    });
+
+});
+router.get("/make/:id", ensureAuthenticated, function (req, res, next) {
+  console.log("");
+  Chronicle.findOne({ _id: toObjectId(req.param("id")), author: req.user._id }, function (err, chronicle) {
+    if (err) { return next(err); }
+    if (!chronicle) {
+      req.flash("error", "잘못된 접속 방법입니다.");
+      return res.redirect("/replays/chronicles/" + req.param("id"));
+    }
+    res.render("replay/makeReplays", { chronicle_id: chronicle._id, masterTags: masterTags });
+  });
+});
+  
+router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
+  Chronicle.findOne({ _id: toObjectId(req.param("id")), author: req.user._id, enabled: true }, function (err, chronicle) {
+    if (err) { return next(err); }
+    if (!chronicle) { return next(404); }
+
+    var formData = req.body;
+    var article = formData.article;
+    var price = 0;
+    var user = req.user;
+    var aboutScenarioId = null;
+    var data_players = JSON.parse(formData.play_peoples);
+  
+    if(isChecked(formData.is_base_scenario)){
+      aboutScenarioId=formData.scenario_name; //추후 ID로 교체
+    }
+    if (isChecked(formData.is_paid)) {
+      if (user.agreeList.paidContent.agree) {
+        price = formData.price;
+      } else {
+        if (isChecked(formData.is_agree_paid)) {
+          var nowDate = moment().format();
+          price = formData.price;
+          user.agreeList.paidContent = { agree: true, agreeDate: new Date(nowDate) };
+        }
+        user.save();
+      }
+    }
+
+
+    var newReplay = new Replay({
+      author: user._id,
+      isFree: isChecked(formData.is_paid) ? false : true,
+      isAgreeComment: isChecked(formData.is_agree_comment),
+      rule: toObjectId(formData.rule),
+      price: isChecked(formData.is_paid) ? price: 0 ,
+      aboutScenario: isChecked(formData.is_base_scenario) ? aboutScenarioId : null,
+      versions: {
+        title: formData.title,
+        peoples:{
+          master: isMirrorChecked(formData.is_need_master)?formData.master_name:null,
+          players: data_players
+        },
+        rating: formData.rating,
+        content: article,
+        backgroundTag: toObjectId(formData.background_tag),
+        genreTags: toObjectId(formData.genre_tags),
+        subTags: toObjectId(formData.sub_tags),
+      }
+    });
+    
+  
+    newReplay.save()
+
+    chronicle.works.push(newReplay);
+    chronicle.save(err, chronicle => {
+      if (err) { console.error(err); return next(err); }
+      req.flash("info", "성공적으로 발행되었습니다.");
+      return res.redirect("/replays/chronicles/" + req.param("id"));
+    });
+  });
+});
+
+
+router.post("/search", function (req, res, next) {
+  var data = req.body.params;
+  var alignType = "-created";
+  var order = "descending";
+  var before_searchs = {};
+  var after_searchs = {};
+
+  if (data) {
+    if (data.align_order) order = data.align_order;
+    if (data.align_type) alignType = data.align_type;
+    if (order == "descending") {
+      if (alignType == "title") {
+        alignType = "-versions.title"
+      }else if(alignType == "author"){
+        alignType = "-author.userName"
+      }else {
+        alignType = "-" + alignType;
+      }
+    } else {
+      if (alignType == "title") {
+        alignType = "versions.title"
+      }else if(alignType == "author"){
+        alignType = "author.userName"
+      }
+    }
+
+    // data.searchs.forEach(tag => {
+    //   searchs.push({ "versions.useSearchTags": { $in: Array.isArray(tag) ? tag : [tag] } });
+    // });
+    var search = data.searchs;
+
+    // search.filter_author != "" ? after_searchs.push({ "author.userName":{$regex:search.filter_author} }) : "";
+    // search.filter_title != "" ? before_searchs.push({ "versions.title": {$regex:search.filter_title }}) : "";
+    if(search.filter_author != ""){
+      after_searchs.author = {};
+      // after_searchs.author.userName={$regex:search.filter_author};
+
+      after_searchs.author.userName=search.filter_author;
+    }
+    
+    search.filter_title != "" ? before_searchs.versions.title = {$regex:search.filter_title } : "";
+ 
+    if (search.filter_background.length > 0) {
+      if (search.filter_background[0] != "") {
+        // before_searchs.push({ "versions.backgroundTag": { $in: toObjectId(search.filter_background) } });
+
+        before_searchs.versions = {};
+        before_searchs.versions.backgroundTag={ $in: toObjectId(search.filter_background) };
+      }
+    }
+    if (search.filter_genre.length > 0) {
+      if (search.filter_genre[0] != "") {
+        before_searchs.versions = {};
+        // before_searchs.push({ "versions.genreTags": { $in: toObjectId(search.filter_genre) } });
+        before_searchs.versions.genreTags= { $in: toObjectId(search.filter_genre) } ;
+      }
+    }
+    if (search.filter_rule.length > 0) {
+      if (search.filter_rule[0] != "") {
+        before_searchs.versions = {};
+        // before_searchs.push({ "rule": { $in: toObjectId(search.filter_rule) } });
+        before_searchs.rule= { $in: toObjectId(search.filter_rule) };
+      }
+    }
+    if (search.filter_sub_tags.length > 0) {
+      if (search.filter_sub_tags[0] != "") {
+        before_searchs.versions = {};
+        // before_searchs.push({ "versions.subTags": { $in: toObjectId(search.filter_sub_tags) } });
+        before_searchs.versions.subTags = { $in: toObjectId(search.filter_sub_tags) };
+      }
+    }
+    if (search.filter_price_min != "" || search.filter_price_max != "") {
+      before_searchs.versions = {};
+      // before_searchs.push({ "price": convertGteLte(search.filter_price_min, search.filter_price_max) });
+      before_searchs.price = convertGteLte(search.filter_price_min, search.filter_price_max) ;
+    }
+  }
+
+  var agg_match = {
+    $and:[{enabled: true},{isOpened: true}] 
+  };
+  var agg_after_match = {};
+  if (before_searchs.length > 0) {
+    agg_match = {
+      $and:[{$and:[{enabled: true},{isOpened: true}]}, {$and: before_searchs}]
+    };
+  }
+  if (after_searchs.length > 0) {
+    agg_after_match ={$and:after_searchs};
+  }
+
+  // Replay.aggregate().match(agg_match)
+  //   .lookup(agg_lookup_user)
+  //   .lookup(agg_lookup_rule)
+  //   .lookup(agg_lookup_genre)
+  //   .lookup(agg_lookup_background)
+  //   .lookup(agg_lookup_subtags)
+  //   .match(agg_after_match)
+  //   .project(agg_replay_project)
+  //   // .sort("version.title")
+  //   .sort(alignType)
+  //   .exec(function (err, results) {
+  //     if (err) { console.log(err); next(err); }
+  //     return res.json({ articles: results, masterTags: masterTags });
+  //   });
+  var findSearch = before_searchs;
+  findSearch.enabled = true;
+  findSearch.isOpened= true;
+  // if(after_searchs.author.userName != undefined){
+  //   findSearch["author.userName"] = after_searchs.author.userName;
+  // }
+  // findSearch["author.userName"] = after_searchs["author.userName"]!=undefined?after_searchs["author.userName"]:"";
+  
+    Replay.find(findSearch)
+    .sort(alignType)
+    .exec(function (err, results) {
+      if (err) { console.log(err); next(err); }
+      if(results != undefined&& after_searchs.author != undefined){
+        results.filter(function(result){
+          result.findAuthorUserName(after_searchs);
+        });
+      }
+      if(results.length > 0 && checkAfterAlignType(alignType)){
+        results = results.sort(function(a,b){
+          return sortAfterResult(a,b,data.align_type, order);
+        });
+      }
+      results = filterBlockResult(req.user,results);
+      return res.json({ articles: results, masterTags: masterTags });
+    });
+
+});
+
+function sortAfterResult(a, b, alignType,order){
+  if(order =="descending" && alignType =="ruleTag"){   
+    return a[alignType]<b[alignType]?-1:(a[alignType]>b[alignType]?1:0);
+  }else if(order =="ascending" && alignType =="ruleTag"){   
+    return a[alignType]<b[alignType]?1:(a[alignType]>b[alignType]?-1:0);
+  }else if(order =="descending" && alignType =="view"){   
+    return a[alignType] - b[alignType];
+  }else if(order =="ascending" && alignType =="view"){   
+    return b[alignType]-a[alignType] ;
+  }else if(order =="descending" && alignType =="author"){   
+    return a.author.userName<b.author.userName?-1:(a.author.userName>b.author.userName?1:0);
+  }else if(order =="ascending" && alignType =="author"){   
+    return a.author.userName<b.author.userName?1:(a.author.userName>b.author.userName?-1:0);
+  }
+}
+function checkAfterAlignType(alignType){
+  if(alignType=="ruleTag"||alignType=="-ruleTag"){
+    return true;
+  }else if(alignType=="view"||alignType=="-view"){
+    return true;
+  }else if(alignType=="author.userName"||alignType=="-author.userName"){
+    return true;
+  }
+  return false;
+}
+
+router.get("/edit/:id", ensureAuthenticated, function (req, res, next) {
+  Replay.findOne({ $and:[{_id: toObjectId(req.param("id"))}, {author: req.user._id}] })
+  .populate('author')
+  .exec( function (err, result) {
+    if (err) { return next(err); }
+    if (!result) {
+      req.flash("error", "잘못된 접속 방법입니다.");
+      return res.redirect("/replays/" + req.param("id"));
+    }
+    res.render("replay/editReplays", { result: result, masterTags: masterTags });
+  });
+});
+
+router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {
+  Replay.findOne({ $and:[{_id: toObjectId(req.param("id"))}, {author: req.user._id},{enabled: true}]}, function (err, result) {
+    if (err) { return next(err); }
+    if (!result) { return next(404); }
+
+    var formData = req.body;
+    var article = formData.article;
+    var price = 0;
+    var user = req.user;
+    var aboutScenarioId = null;
+    var data_players = JSON.parse(formData.play_peoples);
+  
+    if(isChecked(formData.is_base_scenario)){
+      aboutScenarioId=formData.scenario_name; //추후 ID로 교체
+    }
+    if (isChecked(formData.is_paid)) {
+      if (user.agreeList.paidContent.agree) {
+        price = formData.price;
+      } else {
+        if (isChecked(formData.is_agree_paid)) {
+          var nowDate = moment().format();
+          price = formData.price;
+          user.agreeList.paidContent = { agree: true, agreeDate: new Date(nowDate) };
+        }
+        user.save();
+      }
+    }
+
+    result.versions.push({
+        title: formData.title,
+        peoples:{
+          master: isMirrorChecked(formData.is_need_master)?formData.master_name:null,
+          players: data_players
+        },
+        rating: formData.rating,
+        content: article,
+        backgroundTag: toObjectId(formData.background_tag),
+        genreTags: toObjectId(formData.genre_tags),
+        subTags: toObjectId(formData.sub_tags),
+    });
+    result.isFree = isChecked(formData.is_paid) ? false : true;
+    result.isAgreeComment=isChecked(formData.is_agree_comment);
+    result.price=isChecked(formData.is_paid) ? 0 : price;
+    result.save(err, result =>{
+      if (err) { console.error(err); return next(err); }
+      req.flash("info", "성공적으로 수정되었습니다.");
+      return res.redirect("/replays/view/" + req.param("id"));
+    });
+  });
+});
+
+router.get("/view/:id", function (req, res, next) {
+console.log(req.param("id"));
+  var agg_match = { _id: toObjectId(req.param("id")), enabled: true};
+  const agg_replay_view_project = {
+    id: 1,
+    price: 1,
+    view: 1,
+    ruleTag: {
+      $let: {
+        vars: {
+          rule_tags: { $arrayElemAt: ["$ruleTag", 0] },
+        },
+        in: {
+          $let: {
+            vars: {
+              rule_tag: {
+                $arrayElemAt:
+                  [{
+                    $filter: {
+                      input: "$$rule_tags.tags",
+                      as: "tag",
+                      cond: { $eq: ["$rule", "$$tag._id"] }
+                    }
+                  }, 0]
+              }
+            },
+            in: "$$rule_tag.tag"
+          }
+        }
+      }
+    },
+    created: 1,
+    isOpened:1,
+    isFree:1,
+    isAgreeComment:1,
+    version: {
+      $let: {
+        vars: {
+          last: { $arrayElemAt: ["$versions", -1] }
+        },
+        in: {
+          title: "$$last.title",
+          peoples:"$$last.peoples",
+          content:"$$last.content",
+          rating:"$$last.rating",
+          created:"$$last.created",
+        }
+      }
+    },
+    author: {
+      $let: {
+        vars: {
+          user: {
+            $arrayElemAt: ["$author", 0]
+          }
+        },
+        in: {
+          userName: "$$user.userName",
+          userEmail: "$$user.userEmail"
+        }
+      }
+    },
+    subTags: {
+      $let: {
+        vars: {
+          subtag: { $arrayElemAt: ["$subTags", 0] },
+          version: { $arrayElemAt: ["$versions", -1] }
+        },
+        in: {
+          $let: {
+            vars: {
+              subtags: {
+                $filter: {
+                  input: "$$subtag.tags",
+                  as: "tag",
+                  cond: { $in: ["$$tag._id", "$$version.subTags"] }
+                }
+              }
+            },
+            in: "$$subtags.tag"
+          }
+        }
+      }
+    },
+    genreTags: {
+      $let: {
+        vars: {
+          genretag: { $arrayElemAt: ["$genreTags", 0] },
+          version: { $arrayElemAt: ["$versions", -1] }
+        },
+        in: {
+          $let: {
+            vars: {
+              genretags: {
+                $filter: {
+                  input: "$$genretag.tags",
+                  as: "tag",
+                  cond: { $in: ["$$tag._id", "$$version.genreTags"] }
+                }
+              }
+            },
+            in: "$$genretags.tag"
+          }
+        }
+      }
+    },
+    backgroundTag: {
+      $let: {
+        vars: {
+          background_tag: { $arrayElemAt: ["$backgroundTag", 0] },
+          version: { $arrayElemAt: ["$versions", -1] }
+        },
+        in: {
+          $let: {
+            vars: {
+              background: {
+                $filter: {
+                  input: "$$background_tag.tags",
+                  as: "tag",
+                  cond: { $eq: ["$$tag._id", "$$version.backgroundTag"] }
+                }
+              }
+            },
+            in: { $arrayElemAt: ["$$background.tag", 0] }
+          }
+        }
+      }
+    },
+    viewUsers:1,
+    comments: 1,
+  };
+  User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.param("id"))]}},function(err,users)
+  {
+    var isCanDelete = true;
+    if(err){ console.log(err); return next(err);}
+    if(users.length>0){
+      isCanDelete = false;
+    }
+    // Replay.aggregate().match(agg_match)
+    // .lookup(agg_lookup_user)
+    // .lookup(agg_lookup_rule)
+    // .lookup(agg_lookup_genre)
+    // .lookup(agg_lookup_background)
+    // .lookup(agg_lookup_subtags)
+    // .lookup(agg_lookup_comment)
+    // .project(agg_replay_view_project)
+    Replay.findOne({_id: toObjectId(req.param("id")), enabled: true})
+    .populate('author')
+    .exec(function (err, result) {
+      if (err) { console.log(err); return next(err); }
+      if (typeof (result) == undefined || typeof (result) == "undefined"||result === null) { return res.redirect("/") }
+      var isUser = false;
+      var isAuthor = false;
+      if(req.user){
+        isUser= true;
+        if(req.user.userEmail == result.author.userEmail){
+          isAuthor = true;
+        }else{
+          if(!result.viewUsers.some(view=>view.user.equals(req.user._id))){
+            result.updateOne(
+              { _id: result._id, viewUsers:result.viewUsers},
+              { $set: { "viewUsers.$" : result.viewUsers.push({user:req.user._id}) } }
+              );
+              result.save();
+          }
+        }
+      }
+      if(!result.isFree ||!result.isOpened ){
+        if(isUser&&!isAuthor){
+            if(req.user.paidContentList.replayList.find(content=>content===results._id!=null))
+            {
+              res.render("replay/viewReplay", { result: result.toJSON(),version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,moment });
+            }
+        }else if(!isUser){        
+          req.session.current_url = req.originalUrl;
+          req.flash("info", "먼저 로그인해야 이 페이지를 볼 수 있습니다.");
+          return res.redirect("/login");
+        }
+      }
+      req.session.current_url = req.originalUrl;
+      res.render("replay/viewReplay", { result: result.toJSON(),version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,moment });
+    });
+  });
+});
+router.get("/view/:id/:version", function (req, res, next) {
+
+  User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.param("id"))]}},function(err,users)
+  {
+    var isCanDelete = true;
+    if(err){ console.log(err); return next(err);}
+    if(users.length>0){
+      isCanDelete = false;
+    }
+
+    Replay.findOne({_id: toObjectId(req.param("id")), enabled: true})
+    .populate('author')
+    .exec(function (err, result) {
+      if (err) { console.log(err); return next(err); }
+      if (typeof (result) == undefined || typeof (result) == "undefined"||result === null) { return res.redirect("/") }
+      var isUser = false;
+      var isAuthor = false;
+      if(req.user){
+        isUser= true;
+        if(req.user.userEmail == result.author.userEmail){
+          isAuthor = true;
+        }else{
+          if(!result.viewUsers.some(view=>view.user.equals(req.user._id))){
+            result.updateOne(
+              { _id: result._id, viewUsers:result.viewUsers},
+              { $set: { "viewUsers.$" : result.viewUsers.push({user:req.user._id}) } }
+              );
+              result.save();
+          }
+        }
+      }
+      if(!result.isFree ||!result.isOpened ){
+        if(isUser&&!isAuthor){
+            if(req.user.paidContentList.replayList.find(content=>content===results._id!=null))
+            {
+              res.render("replay/viewReplay", { result: result,version: req.param("version"),isAuthor: isAuthor,isCanDelete:isCanDelete,moment });
+            }
+        }else if(!isUser){        
+          req.session.current_url = req.originalUrl;
+          req.flash("info", "먼저 로그인해야 이 페이지를 볼 수 있습니다.");
+          return res.redirect("/login");
+        }
+      }
+      req.session.current_url = req.originalUrl;
+      res.render("replay/viewReplay", { result: result.toJSON(),version: req.param("version"),isAuthor: isAuthor,isCanDelete:isCanDelete,moment });
+    });
+  });
+});
+
+
+
+router.get("/chronicles/:id", function (req, res, next) {
+  var alignType = "-works.created";
+  var order = "descending";
+  var agg_chronicle_project = {
+    _id: 1,
+    author: {
+      $let: {
+        vars: {
+          user: {
+            $arrayElemAt: ["$author", 0]
+          }
+        },
+        in: {
+          userName: "$$user.userName",
+          userEmail: "$$user.userEmail"
+        }
+      }
+    },
+    title: 1,
+    description: 1,
+    works: {
+      $map:
+      {
+        input: "$works",
+        as: "work",
+        in: {
+          _id: "$$work._id",
+          price: "$$work.price",
+          view: "$$work.view",
+          created: "$$work.created",
+          version: {
+            $let:
+            {
+              vars: { version: { $arrayElemAt: ["$$work.versions", -1] } },
+              in:
+              {
+                title: "$$version.title",
+                peoples:"$$version.peoples"
+              }
+            }
+          },
+
+          ruleTag: {
+            $let: {
+              vars: {
+                rule_tags: { $arrayElemAt: ["$$work.ruleTag", -1] },
+              },
+              in: {
+                $let: {
+                  vars: {
+                    rule_tag: {
+                      $arrayElemAt:
+                        [{
+                          $filter: {
+                            input: "$$rule_tags.tags",
+                            as: "tag",
+                            cond: { $eq: ["$$work.rule", "$$tag._id"] }
+                          }
+                        }, 0]
+                    }
+                  },
+                  in: "$$rule_tag.tag"
+                }
+              }
+            }
+          },
+
+          subTags: {
+            $let: {
+              vars: {
+                subtag: { $arrayElemAt: ["$$work.subTags", 0] },
+                version: { $arrayElemAt: ["$$work.versions", -1] }
+              },
+              in: {
+                $let: {
+                  vars: {
+                    subtags: {
+                      $filter: {
+                        input: "$$subtag.tags",
+                        as: "tag",
+                        cond: { $in: ["$$tag._id", "$$version.subTags"] }
+                      }
+                    }
+                  },
+                  in: "$$subtags.tag"
+                }
+              }
+            }
+          },
+          genreTags: {
+            $let: {
+              vars: {
+                genretag: { $arrayElemAt: ["$$work.genreTags", 0] },
+                version: { $arrayElemAt: ["$$work.versions", -1] }
+              },
+              in: {
+                $let: {
+                  vars: {
+                    genretags: {
+                      $filter: {
+                        input: "$$genretag.tags",
+                        as: "tag",
+                        cond: { $in: ["$$tag._id", "$$version.genreTags"] }
+                      }
+                    }
+                  },
+                  in: "$$genretags.tag"
+                }
+              }
+            }
+          },
+          backgroundTag: {
+            $let: {
+              vars: {
+                background_tag: { $arrayElemAt: ["$$work.backgroundTag", 0] },
+                version: { $arrayElemAt: ["$$work.versions", -1] }
+              },
+              in: {
+                $let: {
+                  vars: {
+                    background: {
+                      $filter: {
+                        input: "$$background_tag.tags",
+                        as: "tag",
+                        cond: { $eq: ["$$version.backgroundTag", "$$tag._id"] }
+                      }
+                    }
+                  },
+                  in: { $arrayElemAt: ["$$background.tag", 0] }
+                }
+              }
+            }
+          },
+
+
+        }
+      },
+    },
+    isOpened: 1
+
+  };
+  var agg_lookup_works =
+  {
+    from: 'replays',
+    let: { "workId": "$works" },
+    pipeline: [
+      //{ $match: {$and:[ { $expr: { "$in": ["$_id", "$$workId"] } },{$expr: { "$eq": ["$enabled", true] }}
+      //{ $expr: { "$in": ["$_id", "$$workId"] } } },
+      { $match: {$and:[ { $expr: { "$in": ["$_id", "$$workId"] }},{$expr: { "$eq": ["$enabled", true] }}]}
+       },      
+      { $lookup: agg_lookup_rule },
+      { $lookup: agg_lookup_background },
+      { $lookup: agg_lookup_genre },
+      { $lookup: agg_lookup_subtags }
+    ],
+    as: 'works'
+  };
+  var agg_match = { $and:[{_id: toObjectId(req.param("id"))}, {enabled: true}] };
+  var agg_unwind = "$works";
+  var agg_group ={
+    _id:"$_id",
+    "author":{$first:"$author"},
+    "title":{$first:"$title"},
+    "description":{$first:"$description"},
+    "works":{$push:"$works"},
+    isOpened:{$first:"$isOpened"}
+    };
+  // var agg_unwind = { $$ruleTags };
+  Chronicle.aggregate().match(agg_match)
+    .lookup(agg_lookup_user)
+    .lookup(agg_lookup_works)
+    .project(agg_chronicle_project)
+    .unwind(agg_unwind)
+    .sort(alignType)
+    .group(agg_group)
+    .exec(function (err, results) {
+      if (err) { console.log(err); return next(err); }
+      if (results.length<1|| typeof (results) == undefined) { return res.redirect("/") }
+      req.session.current_url = req.originalUrl;
+      res.render("replay/chronicleReplays", { chronicle: results[0], moment });
+    });
+});
+
+router.post("/delete/:id", function (req, res, next) {
+  
+  User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.param("id"))]}},function(err,users)
+  {
+    if(err){ console.log(err); return next(err);}
+    if(users.length>0){
+      req.flash("error","해당 리플레이는 구매한 유저가 있는 유료 리플레이 이므로 삭제할 수 없습니다.");
+      var errMsg = "해당 리플레이는 구매한 유저가 있는 유료 리플레이 이므로 삭제할 수 없습니다.";
+      redirectStr ="/replays/view/"+req.param("id");
+      res.json({redirect:redirectStr, err:errMsg});
+    }else{
+      Replay.findOne({_id: toObjectId(req.param("id")), author: req.user._id,enabled: true})
+        .exec(function (err, result) {
+          if (err) { console.log(err); return next(err); }
+          if (typeof (result) == undefined || typeof (result) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+          Chronicle.findOne({works: {$in: result._id}}).exec(function (err,chronicle){
+            if (err) { console.log(err); return next(err); }
+            if (typeof (chronicle) == undefined || typeof (chronicle) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+            
+            result.enabled= false;
+          
+            result.save(); 
+            redirectStr ="/replays/chronicles/"+chronicle._id;
+            res.json({redirect:redirectStr});
+          });
+        });
+    }
+  });
+});
+
+router.post("/switchOpen/:id", function (req, res, next) {
+  Replay.findOne({_id: toObjectId(req.param("id")), author: req.user._id, isOpened:req.body.params.isOpened,enabled: true})
+    .exec(function (err, result) {
+      if (err) { console.log(err); return next(err); }
+      if (typeof (result) == undefined || typeof (result) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+      result.isOpened=result.isOpened ? false:true;
+      
+      result.save(); 
+      res.json(true);
+    });
+});
+
+
+router.post("/report/:id", function (req, res, next) {
+  User.findOne({_id:req.user._id}).exec(function (err, user) {
+    if (err) { console.log(err); return next(err); }
+    if (typeof (user) == undefined || typeof (user) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+     {
+       
+     }
+    Replay.findOne({_id: toObjectId(req.param("id")), isOpened:req.body.params.isOpened, enabled: true})
+      .exec(function (err, result) {
+        if (err) { console.log(err); return next(err); }
+        if (typeof (result) == undefined || typeof (result) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+        
+        result.isOpened=result.isOpened ? false:true;
+        
+        result.save(); 
+        res.json(true);
+      });
+  });
+});
+
+
+router.post("/bookmark/:id/:version", function (req, res, next) {
+  User.findOne({_id:req.user._id, enabled: true})
+      .exec(function (err, user){
+        if (err) { console.log(err); return next(err); }
+        if (typeof (user) == undefined || typeof (user) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+        var userList = user.bookmarks.replayList;
+        if(userList.some(replay=>replay.content.equals(toObjectId(req.param("id")))&&replay.version==req.param("version"))){
+              userList.splice(userList.findIndex(replay=>replay.content.equals(toObjectId(req.param("id")))&&replay.version==req.param("version")),1);
+              user.bookmarks.replayList = userList;
+              user.save();
+              return res.json(true);
+        }
+        Replay.findOne({_id: toObjectId(req.param("id")), enabled: true})
+          .exec(function (err, result) {
+            if (err) { console.log(err); return next(err); }
+            if (typeof (result) == undefined || typeof (result) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+            user.bookmarks.replayList.push({content:result._id, version: req.param("version")});
+            user.save();
+            return res.json(true);
+          });
+  });
+});
+
+
+function filterBlockResult(user,results){
+  if(results!=null && user!=null){
+    var blockList = user.blockList;
+    // if(results[0] instanceof User){
+    // }
+    // if(results[0] instanceof Scenario){
+    //   results = results.filter(function(result){
+    //      return !blockList.scenarioList.some(scenario=>scenario.content._id.equals(result._id));
+    //   });
+    //   results = results.filter(function(result){
+    //     console.log(blockList.userList.some(scenario=>scenario.content._id.equals(result.author._id)));
+    //      return !blockList.userList.some(scenario=>scenario.content._id.equals(result.author._id));
+    //   });
+      
+    // }
+    if(results[0] instanceof Replay){
+      results = results.filter(function(result){
+        return !blockList.replayList.some(scenario=>scenario.content._id.equals(result._id));
+     });
+     results = results.filter(function(result){
+        return !blockList.userList.some(scenario=>scenario.content._id.equals(result.author._id));
+     });
+    }
+    if(results[0] instanceof Chronicle){
+      console.log("dk1");
+    }
+  }
+  return results;
+}
+function isChecked(value) {
+  if (value === "check" ||value === "on" ) { return true; }
+  else { return false; }
+}
+function isMirrorChecked(value) {
+  if (value === undefined|| value === "undefined") { return true; }
+  else { return false; }
+}
+function toObjectId(strings) {
+  if (Array.isArray(strings)) {
+    return strings.map(mongoose.Types.ObjectId);
+  }
+  return mongoose.Types.ObjectId(strings);
+}
+function convertGteLte(gte, lte) {
+  if (gte != "" && lte != "") return { $gte: Number(gte), $lte: Number(lte) };
+  else if (gte != "") return { $gte: Number(gte) };
+  else if (lte != "") return { $lte: Number(lte) };
+}
+module.exports = router;

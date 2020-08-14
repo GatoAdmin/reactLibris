@@ -26,7 +26,7 @@ class About extends Component {
         <h1>
           About
       </h1>
-      <span>          {username ? `Hello ${username}` : 'Hello World'}</span>
+      <span>{username ? `Hello ${username}` : 'Hello World'}</span>
       </div>
     );
 
