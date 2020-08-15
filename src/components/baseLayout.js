@@ -1,10 +1,13 @@
 import React from 'react';
 import './Main/style.css';
 import {Switch, Route, Link} from 'react-router-dom';
+import { Button } from 'semantic-ui-react'
+import 'semantic-ui-css/semantic.css';
 import Main from './Main';
 import About from './About';
 import NotFound from './NotFound';
-import Replay from './Replay';
+import ReplayMain from './Replay';
+import ReplayMake from './Replay/Make'
 import Scenario from './Scenario';
 import Profile from './Profile';
 
@@ -15,11 +18,13 @@ class BaseLayout extends React.Component {
     <header>
         <nav className='Menu-wrapper'>
           <ul>
-            <Link to='/'><li>Home</li></Link>
-            <Link to='/about'><li>about</li></Link>
-            <Link to='/user/설묘'><li>Profile</li></Link>
-            <Link to='/replays'><li>Replay</li></Link>
-            <Link to='/scenarios'><li>Scenario</li></Link>
+            <Button.Group>
+            <Button as={Link} to='/'>Home</Button>{/* <Link to='/'><li>Home</li></Link> */}
+            <Button as={Link} to='/about'>about</Button>
+            <Button as={Link} to='/user/설묘'>Profile</Button>
+            <Button as={Link} to='/replays'>Replay</Button>
+            <Button as={Link} to='/scenarios'>Scenario</Button>
+            </Button.Group>
           </ul>
         </nav>
     </header>
@@ -27,7 +32,12 @@ class BaseLayout extends React.Component {
         <Switch>
               <Route exact path="/" component={Main} />
               <Route path="/about" component={About} />
-              <Route path="/replays" component={Replay} />
+              <Route exact path="/replays/:path?">
+                <Switch>
+                  <Route exact path="/replays" component={ReplayMain} />
+                  <Route exact path="/replays/make" component={ReplayMake} />
+                </Switch>
+              </Route> 
               <Route path="/scenarios" component={Scenario} /> 
               <Route path="/user/설묘" component={Profile} />
               <Route component={NotFound} />
