@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import Moment from 'react-moment';
+import {Switch, Route, Link} from 'react-router-dom';
 
 const e = React.createElement;
 
@@ -173,8 +174,11 @@ class ArticleList extends React.Component {
                 })
             )
         }
+    
         var component = 
-        <div>
+        <div>            
+            <span>리플레이</span>
+            {this.props.currentUser!=null?<Link to='/replays/make'>새로 만들기</Link>:null}
             <div className="search_window">
                 <form id= "tag-form" action="/replays/search" method= "POST">
                     <ul className = "search_ul" >
@@ -260,7 +264,7 @@ class ArticleList extends React.Component {
                             return (
                                 <tr key = {index.toString()} >
                                     <td>
-                                        <a  href={"/replays/view/"+data._id} >{latest.title}</a>
+                                        <Link to={"/replays/view/"+data._id} >{latest.title}</Link>
                                     </td>
                                     <td>
                                         {data.ruleTag}

@@ -6,10 +6,11 @@ import 'semantic-ui-css/semantic.css';
 import Main from './Main';
 import About from './About';
 import NotFound from './NotFound';
-import ReplayMain from './Replay';
-import ReplayMake from './Replay/Make'
+import Replay from './Replay';
+// import ReplayMake from './Replay/Make'
+// import ReplayViewer from './Replay/View';
 import Scenario from './Scenario';
-import Profile from './Profile';
+import User from './User';
 
 class BaseLayout extends React.Component {
   render() {
@@ -32,14 +33,9 @@ class BaseLayout extends React.Component {
         <Switch>
               <Route exact path="/" component={Main} />
               <Route path="/about" component={About} />
-              <Route exact path="/replays/:path?">
-                <Switch>
-                  <Route exact path="/replays" component={ReplayMain} />
-                  <Route exact path="/replays/make" component={ReplayMake} />
-                </Switch>
-              </Route> 
+              <Route path="/replays" component={Replay} />
               <Route path="/scenarios" component={Scenario} /> 
-              <Route path="/user/설묘" component={Profile} />
+              <Route path="/user" component={User} />
               <Route component={NotFound} />
 
         </Switch>

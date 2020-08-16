@@ -198,40 +198,6 @@ const agg_lookup_subtags =
   foreignField: "tags._id",
   as: 'subTags'
 };
-const agg_lookup_comment = {
-  from: 'comments',
-  let:{"scenario_id":"$_id"},
-  pipeline:[
-    {$match:{$expr:{$and:[{$eq:["$$scenario_id","$article"]},{$eq:["$onModel",'Scenario']},{$eq:["$enabled",true]}]}}},
-    {$sort:{"created":-1}},
-    {$lookup:{
-        from:"userinfos",    
-        localField: 'user',
-        foreignField: "_id",
-        as:"user"
-     }},
-     {$project:{
-         user:{      
-             $let: {
-        vars: {
-          user: {
-            $arrayElemAt: ["$user", 0]
-          }
-        },
-        in: {
-          userName: "$$user.userName",
-          userEmail: "$$user.userEmail"
-        }
-      }},
-      "work.version":1,
-      "content":1,
-      "created":1,
-      "updated":1,
-      "stopped":1,
-      }}
-  ],
-  as: 'comments'
-};
 router.get("/", function (req, res, next) {
 
   Scenario.find().sort({ created: "descending" })
@@ -265,8 +231,6 @@ router.post("/", function (req, res, next) {
     // var alignType = data.align_type;
   }
 
-  var agg_match = { $and: [{ enabled: true }, { isOpened: true }] };
-  
   var findSearch = {enabled: true,isOpened: true};
   Scenario.find(findSearch)
   .sort(alignType)
@@ -275,19 +239,6 @@ router.post("/", function (req, res, next) {
     results = filterBlockResult(req.user,results);
     return res.json({ articles: results, masterTags: masterTags });
   });
-  // var agg_unwind = { $$ruleTags };
-  // Scenario.aggregate().match(agg_match)
-  //   .lookup(agg_lookup_user)
-  //   .lookup(agg_lookup_rule)
-  //   .lookup(agg_lookup_genre)
-  //   .lookup(agg_lookup_background)
-  //   .lookup(agg_lookup_subtags)
-  //   .project(agg_scenraio_project)
-  //   .sort(alignType)
-  //   .exec(function (err, results) {
-  //     if (err) { console.log(err); next(err); }
-  //     return res.json({ articles: results, masterTags: masterTags });
-  //   });
 });
 
 router.get("/make", ensureAuthenticated, function (req, res, next) {
@@ -892,153 +843,14 @@ router.get("/chronicles/edit/:id", function (req, res, next) {
 });
 
 router.get("/view/:id", function (req, res, next) {
+  // var agg_match = { _id: toObjectId(req.param("id")), enabled: true };
 
-  var agg_match = { _id: toObjectId(req.param("id")), enabled: true };
-  const agg_scenraio_view_project = {
-    id: 1,
-    price: 1,
-    view: 1,
-    ruleTag: {
-      $let: {
-        vars: {
-          rule_tags: { $arrayElemAt: ["$ruleTag", 0] },
-        },
-        in: {
-          $let: {
-            vars: {
-              rule_tag: {
-                $arrayElemAt:
-                  [{
-                    $filter: {
-                      input: "$$rule_tags.tags",
-                      as: "tag",
-                      cond: { $eq: ["$rule", "$$tag._id"] }
-                    }
-                  }, 0]
-              }
-            },
-            in: "$$rule_tag.tag"
-          }
-        }
-      }
-    },
-    created: 1,
-    isOpened: 1,
-    isFree: 1,
-    isAgreeComment: 1,
-    version: {
-      $let: {
-        vars: {
-          last: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          title: "$$last.title",
-          capacity: "$$last.capacity",
-          masterDifficulty: "$$last.masterDifficulty",
-          playerDifficulty: "$$last.playerDifficulty",
-          orpgPredictingTime: "$$last.orpgPredictingTime",
-          trpgPredictingTime: "$$last.trpgPredictingTime",
-          content: "$$last.content",
-          rating: "$$last.rating",
-          created: "$$last.created",
-        }
-      }
-    },
-    author: {
-      $let: {
-        vars: {
-          user: {
-            $arrayElemAt: ["$author", 0]
-          }
-        },
-        in: {
-          userName: "$$user.userName",
-          userEmail: "$$user.userEmail"
-        }
-      }
-    },
-    subTags: {
-      $let: {
-        vars: {
-          subtag: { $arrayElemAt: ["$subTags", 0] },
-          version: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          $let: {
-            vars: {
-              subtags: {
-                $filter: {
-                  input: "$$subtag.tags",
-                  as: "tag",
-                  cond: { $in: ["$$tag._id", "$$version.subTags"] }
-                }
-              }
-            },
-            in: "$$subtags.tag"
-          }
-        }
-      }
-    },
-    genreTags: {
-      $let: {
-        vars: {
-          genretag: { $arrayElemAt: ["$genreTags", 0] },
-          version: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          $let: {
-            vars: {
-              genretags: {
-                $filter: {
-                  input: "$$genretag.tags",
-                  as: "tag",
-                  cond: { $in: ["$$tag._id", "$$version.genreTags"] }
-                }
-              }
-            },
-            in: "$$genretags.tag"
-          }
-        }
-      }
-    },
-    backgroundTag: {
-      $let: {
-        vars: {
-          background_tag: { $arrayElemAt: ["$backgroundTag", 0] },
-          version: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          $let: {
-            vars: {
-              background: {
-                $filter: {
-                  input: "$$background_tag.tags",
-                  as: "tag",
-                  cond: { $eq: ["$$tag._id", "$$version.backgroundTag"] }
-                }
-              }
-            },
-            in: { $arrayElemAt: ["$$background.tag", 0] }
-          }
-        }
-      }
-    },
-    comments: 1,
-  };
   User.find({ "paidContentList.scenarioList.content": { $in: [toObjectId(req.param("id"))] } }, function (err, users) {
     var isCanDelete = true;
     if (err) { console.log(err); return next(err); }
     if (users.length > 0) {
       isCanDelete = false;
     }
-    // Scenario.aggregate().match(agg_match)
-    //   .lookup(agg_lookup_user)
-    //   .lookup(agg_lookup_rule)
-    //   .lookup(agg_lookup_genre)
-    //   .lookup(agg_lookup_background)
-    //   .lookup(agg_lookup_subtags)
-    //   .lookup(agg_lookup_comment)
-    //   .project(agg_scenraio_view_project)
       Scenario.findOne({ _id: toObjectId(req.param("id")), enabled: true })
       .populate('author')
       .exec(function (err, result) {
@@ -1073,6 +885,53 @@ router.get("/view/:id", function (req, res, next) {
         }
         req.session.current_url = req.originalUrl;
         res.render("scenario/viewScenario", { result: result.toJSON(), version: result.versions.length ,isAuthor: isAuthor, isCanDelete: isCanDelete, moment });
+      });
+  });
+});
+
+router.post("/view/:id", function (req, res, next) {
+  // var agg_match = { _id: toObjectId(req.param("id")), enabled: true };
+
+  User.find({ "paidContentList.scenarioList.content": { $in: [toObjectId(req.param("id"))] } }, function (err, users) {
+    var isCanDelete = true;
+    if (err) { console.log(err); return next(err); }
+    if (users.length > 0) {
+      isCanDelete = false;
+    }
+      Scenario.findOne({ _id: toObjectId(req.param("id")), enabled: true })
+      .populate('author')
+      .exec(function (err, result) {
+        if (err) { console.log(err); return next(err); }
+        if (typeof (result) == undefined || typeof (result) == "undefined"|| result === null) { return res.redirect("/") }
+        var isUser = false;
+        var isAuthor = false;
+        if (req.user) {
+          isUser = true;
+          if (req.user.userEmail == result.author.userEmail) {
+            isAuthor = true;
+          }else{
+            if(!result.viewUsers.some(view=>view.user.equals(req.user._id))){
+              result.updateOne(
+                { _id: result._id, viewUsers:result.viewUsers},
+                { $set: { "viewUsers.$" : result.viewUsers.push({user:req.user._id}) } }
+                );
+                result.save();
+            }
+          }
+        }
+        if (!result.isFree || !result.isOpened) {
+          if (isUser && !isAuthor) {
+            if (req.user.paidContentList.scenarioList.find(content => content === result._id != null)) {
+              return res.json({ result: result, version: result.versions.length ,isAuthor: isAuthor, isCanDelete: isCanDelete });
+            }
+          } else if (!isUser) {
+            req.session.current_url = req.originalUrl;
+            req.flash("info", "먼저 로그인해야 이 페이지를 볼 수 있습니다.");
+            return res.redirect("/login");
+          }
+        }
+        req.session.current_url = req.originalUrl;
+        res.json({ result: result, version: result.versions.length ,isAuthor: isAuthor, isCanDelete: isCanDelete });
       });
   });
 });

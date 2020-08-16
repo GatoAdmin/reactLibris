@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import Moment from 'react-moment';
+import {Link} from 'react-router-dom';
 
 const e = React.createElement;
 
@@ -192,6 +193,8 @@ class ArticleList extends React.Component {
         }
         var component =
             e("div", null,
+                e("span",null,"시나리오"),
+                e("Link", {to:'/scenarios/make'},"새로 만들기"),
                 e("div", { className: "search_window" },
                     e("form", { action: "/scenarios/search", method: "POST", id: "tag-form" },
                         e("ul", { className: "search_ul" },

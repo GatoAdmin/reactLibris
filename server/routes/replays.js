@@ -194,40 +194,6 @@ router.use(function(req,res,next){
     foreignField: "tags._id",
     as: 'subTags'
   };
-  const agg_lookup_comment = {
-    from: 'comments',
-    let:{"replay_id":"$_id"},
-    pipeline:[
-      {$match:{$expr:{$and:[{$eq:["$$replay_id","$article"]},{$eq:["$onModel",'Replay']},{$eq:["$enabled",true]}]}}},
-      {$sort:{"created":-1}},
-      {$lookup:{
-          from:"userinfos",    
-          localField: 'user',
-          foreignField: "_id",
-          as:"user"
-       }},
-       {$project:{
-           user:{      
-               $let: {
-          vars: {
-            user: {
-              $arrayElemAt: ["$user", 0]
-            }
-          },
-          in: {
-            userName: "$$user.userName",
-            userEmail: "$$user.userEmail"
-          }
-        }},
-        "work.version":1,
-        "content":1,
-        "created":1,
-        "updated":1,
-        "stopped":1,
-        }}
-    ],
-    as: 'comments'
-  };
 
   router.get("/",function(req,res,next){
     Replay.find().sort({create:"descending"})
@@ -264,19 +230,6 @@ router.use(function(req,res,next){
     }
   
     var agg_match = { $and:[{enabled: true},{isOpened: true}]  };
-    // var agg_unwind = { $$ruleTags };
-    // Replay.aggregate().match(agg_match)
-    //   .lookup(agg_lookup_user)
-    //   .lookup(agg_lookup_rule)
-    //   .lookup(agg_lookup_genre)
-    //   .lookup(agg_lookup_background)
-    //   .lookup(agg_lookup_subtags)
-    //   .project(agg_replay_project)
-    //   .sort(alignType)
-    //   .exec(function (err, results) {
-    //     if (err) { console.log(err); next(err); }
-    //     return res.json({ articles: results, masterTags: masterTags });
-    //   });
       
     var findSearch = {enabled: true,isOpened: true}
     Replay.find(findSearch)
@@ -561,31 +514,6 @@ router.post("/search", function (req, res, next) {
 
 });
 
-function sortAfterResult(a, b, alignType,order){
-  if(order =="descending" && alignType =="ruleTag"){   
-    return a[alignType]<b[alignType]?-1:(a[alignType]>b[alignType]?1:0);
-  }else if(order =="ascending" && alignType =="ruleTag"){   
-    return a[alignType]<b[alignType]?1:(a[alignType]>b[alignType]?-1:0);
-  }else if(order =="descending" && alignType =="view"){   
-    return a[alignType] - b[alignType];
-  }else if(order =="ascending" && alignType =="view"){   
-    return b[alignType]-a[alignType] ;
-  }else if(order =="descending" && alignType =="author"){   
-    return a.author.userName<b.author.userName?-1:(a.author.userName>b.author.userName?1:0);
-  }else if(order =="ascending" && alignType =="author"){   
-    return a.author.userName<b.author.userName?1:(a.author.userName>b.author.userName?-1:0);
-  }
-}
-function checkAfterAlignType(alignType){
-  if(alignType=="ruleTag"||alignType=="-ruleTag"){
-    return true;
-  }else if(alignType=="view"||alignType=="-view"){
-    return true;
-  }else if(alignType=="author.userName"||alignType=="-author.userName"){
-    return true;
-  }
-  return false;
-}
 
 router.get("/edit/:id", ensureAuthenticated, function (req, res, next) {
   Replay.findOne({ $and:[{_id: toObjectId(req.param("id"))}, {author: req.user._id}] })
@@ -884,6 +812,53 @@ router.get("/view/:id/:version", function (req, res, next) {
   });
 });
 
+router.post("/view/:id", function (req, res, next) {
+  console.log(req.param("id"));
+    User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.param("id"))]}},function(err,users)
+    {
+      var isCanDelete = true;
+      if(err){ console.log(err); return next(err);}
+      if(users.length>0){
+        isCanDelete = false;
+      }
+      Replay.findOne({_id: toObjectId(req.param("id")), enabled: true})
+      .populate('author')
+      .exec(function (err, result) {
+        if (err) { console.log(err); return next(err); }
+        if (typeof (result) == undefined || typeof (result) == "undefined"||result === null) { return res.redirect("/") }
+        var isUser = false;
+        var isAuthor = false;
+        if(req.user){
+          isUser= true;
+          if(req.user.userEmail == result.author.userEmail){
+            isAuthor = true;
+          }else{
+            if(!result.viewUsers.some(view=>view.user.equals(req.user._id))){
+              result.updateOne(
+                { _id: result._id, viewUsers:result.viewUsers},
+                { $set: { "viewUsers.$" : result.viewUsers.push({user:req.user._id}) } }
+                );
+                result.save();
+            }
+          }
+        }
+        if(!result.isFree ||!result.isOpened ){
+          if(isUser&&!isAuthor){
+              if(req.user.paidContentList.replayList.find(content=>content===results._id!=null))
+              {
+                res.json( { result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete });
+              }
+          }else if(!isUser){        
+            req.session.current_url = req.originalUrl;
+            req.flash("info", "먼저 로그인해야 이 페이지를 볼 수 있습니다.");
+            return res.redirect("/login");
+          }
+        }
+        req.session.current_url = req.originalUrl;
+        res.json({ result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete });
+      });
+    });
+  });
 
 
 router.get("/chronicles/:id", function (req, res, next) {
@@ -1156,6 +1131,32 @@ router.post("/bookmark/:id/:version", function (req, res, next) {
   });
 });
 
+function sortAfterResult(a, b, alignType,order){
+  if(order =="descending" && alignType =="ruleTag"){   
+    return a[alignType]<b[alignType]?-1:(a[alignType]>b[alignType]?1:0);
+  }else if(order =="ascending" && alignType =="ruleTag"){   
+    return a[alignType]<b[alignType]?1:(a[alignType]>b[alignType]?-1:0);
+  }else if(order =="descending" && alignType =="view"){   
+    return a[alignType] - b[alignType];
+  }else if(order =="ascending" && alignType =="view"){   
+    return b[alignType]-a[alignType] ;
+  }else if(order =="descending" && alignType =="author"){   
+    return a.author.userName<b.author.userName?-1:(a.author.userName>b.author.userName?1:0);
+  }else if(order =="ascending" && alignType =="author"){   
+    return a.author.userName<b.author.userName?1:(a.author.userName>b.author.userName?-1:0);
+  }
+}
+
+function checkAfterAlignType(alignType){
+  if(alignType=="ruleTag"||alignType=="-ruleTag"){
+    return true;
+  }else if(alignType=="view"||alignType=="-view"){
+    return true;
+  }else if(alignType=="author.userName"||alignType=="-author.userName"){
+    return true;
+  }
+  return false;
+}
 
 function filterBlockResult(user,results){
   if(results!=null && user!=null){

@@ -5,8 +5,8 @@ import 'react-calendar/dist/Calendar.css';
 import {Button, List}from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.css';
 import Moment from 'react-moment';
-import './style.css';
-
+import QuillViewer from '../Quill/react-quill-viewer';
+import QuillEditor from '../Quill/react-quill-editor-bubble';
 class Profile extends Component {
     constructor(props) {
         super(props);
@@ -37,6 +37,11 @@ class Profile extends Component {
         let edit;
         let detail;
         var masterCanRules;
+        if(user!=null){
+            var introduction = (user.profile.introduction==undefined||user.profile.introduction=="")?null:user.profile.introduction;
+            quillViewer = <QuillViewer setValue={introduction} />;
+            quillEdit = <QuillEditor setValue={introduction}/>;
+        }
         if (currentUser != null) {
             if (currentUser.userEmail === user.userEmail) {
                 editIntro = (<div id="form-container" className="container">
@@ -49,15 +54,14 @@ class Profile extends Component {
             } else {
                 editIntro = quillViewer
             }
+            
+            if (currentUser.userEmail === user.userEmail) {
+                edit = <List.Content><button type="button" onclick={`location.href='/user/'${user.userName}'/edit/'`}>프로필 편집</button></List.Content>
+            }
         } else {
             editIntro = quillViewer
         }
 
-        if (currentUser != null) {
-            if (currentUser.userEmail === user.userEmail) {
-                edit = <List.Content><button type="button" onclick={`location.href='/user/'${user.userName}'/edit/'`}>프로필 편집</button></List.Content>
-            }
-        }
         if (user != null) {
             masterCanRules = user.profile.canMasterRules.map((value, index) => (
                 <List.Item>
@@ -87,7 +91,7 @@ class Profile extends Component {
                     <List.Item>
                         <span>소개글 :
                         <div className="quill-box" style={quillBoxStyle}>
-                                {edit}
+                                {editIntro}
                             </div>
                         </span>
                     </List.Item>
