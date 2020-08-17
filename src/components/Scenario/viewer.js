@@ -5,6 +5,7 @@ import {Switch, Route, Link} from 'react-router-dom';
 import axios from 'axios';
 import Moment from 'react-moment';
 import QuillViewer from '../Quill/react-quill-viewer';
+import CommentBox from '../Comment/commentPart';
 
 class ScenarioView extends React.Component {
   constructor(props) {
@@ -247,26 +248,27 @@ class ScenarioView extends React.Component {
   }
   render() {
     var result = this.state.result;
-    
+    let blockContent;
     // var masterTags = this.state.masterTags;
     var currentUser = this.props.currentUser;//this.state.currentUser;
     if(currentUser != null){
       var isBlock = currentUser.blockList.scenarioList.some(block=>block.content===result._id);
       var isBookmark = currentUser.bookmarks.scenarioList.some(scenario=>scenario.content===result._id&&scenario.version==this.state.version);
       this.setState({isBlock:isBlock, isBookmark:isBookmark});
+      blockContent =(this.state.isBlock?(
+          <div>
+              <span>차단된 작품입니다.</span> 
+              <Button onClick={this.removeBlock(result._id)}>해제하기</Button>
+          </div>
+          ):!this.state.isAuthor?<Button onClick={()=>{if(window.confirm("앞으로 해당 작품을 볼 수 없습니다. 차단하시겠습니까?"))this.addBlock(result._id)}}>차단하기</Button>:null
+      )
     }
     let content = <div></div>;
     if(result !=null){
     content=(
         <div>
           <h2>{result.lastVersion.title}</h2>
-            {this.state.isBlock?(
-                <div>
-                    <span>차단된 작품입니다.</span> 
-                    <Button onClick={this.removeBlock(result._id)}>해제하기</Button>
-                </div>
-                ):!this.state.isAuthor?<Button onClick={()=>{if(window.confirm("앞으로 해당 작품을 볼 수 없습니다. 차단하시겠습니까?"))this.addBlock(result._id)}}>차단하기</Button>:null
-            }
+            {blockContent}
             {currentUser!=null?(
                 <Button onClick={this.switchBookmark()}>
                     {this.state.isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}
@@ -283,7 +285,8 @@ class ScenarioView extends React.Component {
               ):null}
       
           {!isBlock?this.getViewPage(result):null}
-            </div>
+          <CommentBox/>
+        </div>
     );
 
 }

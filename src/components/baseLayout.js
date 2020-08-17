@@ -22,7 +22,6 @@ class BaseLayout extends React.Component {
             <Button.Group>
             <Button as={Link} to='/'>Home</Button>{/* <Link to='/'><li>Home</li></Link> */}
             <Button as={Link} to='/about'>about</Button>
-            <Button as={Link} to='/user/설묘'>Profile</Button>
             <Button as={Link} to='/replays'>Replay</Button>
             <Button as={Link} to='/scenarios'>Scenario</Button>
             </Button.Group>
