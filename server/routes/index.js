@@ -116,8 +116,12 @@ router.post("/login",passport.authenticate("login",{
   failureRedirect: "/login",
   failureFlash : true
 }),(req,res)=>{
-  if(req.session.current_url != "undefined"){
+  if(req.session.current_url != "undefined"&&req.session.current_url != undefined){
+    console.log(req.session.current_url)
     res.redirect(req.session.current_url);
+    // res.json({redirect:req.session.current_url, currentUser:req.user})
+  }else{
+    res.redirect("/");
   }
 }
 );

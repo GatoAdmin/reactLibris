@@ -1,92 +1,17 @@
 import React from 'react';
-import './style.css';
-import logo from './logo.svg';
-import 'react-calendar/dist/Calendar.css';
 import {Button, List}from 'semantic-ui-react';
+import {Switch, Route, Link} from 'react-router-dom';
+import Landing from './landing';
+import Home from './home';
 
-class Main extends React.Component {
-  render() {
+function Main({ match })  {
   return (
-    <div className="App">
-
-<List>
-    <List.Item>
-      <List.Icon name='folder' />
-      <List.Content>
-        <List.Header>src</List.Header>
-        <List.Description>Source files for project</List.Description>
-        <List.List>
-          <List.Item>
-            <List.Icon name='folder' />
-            <List.Content>
-              <List.Header>site</List.Header>
-              <List.Description>Your site's theme</List.Description>
-            </List.Content>
-          </List.Item>
-          <List.Item>
-            <List.Icon name='folder' />
-            <List.Content>
-              <List.Header>themes</List.Header>
-              <List.Description>Packaged theme files</List.Description>
-              <List.List>
-                <List.Item>
-                  <List.Icon name='folder' />
-                  <List.Content>
-                    <List.Header>default</List.Header>
-                    <List.Description>Default packaged theme</List.Description>
-                  </List.Content>
-                </List.Item>
-                <List.Item>
-                  <List.Icon name='folder' />
-                  <List.Content>
-                    <List.Header>my_theme</List.Header>
-                    <List.Description>
-                      Packaged themes are also available in this folder
-                    </List.Description>
-                  </List.Content>
-                </List.Item>
-              </List.List>
-            </List.Content>
-          </List.Item>
-          <List.Item>
-            <List.Icon name='file' />
-            <List.Content>
-              <List.Header>theme.config</List.Header>
-              <List.Description>
-                Config file for setting packaged themes
-              </List.Description>
-            </List.Content>
-          </List.Item>
-        </List.List>
-      </List.Content>
-    </List.Item>
-    <List.Item>
-      <List.Icon name='folder' />
-      <List.Content>
-        <List.Header>dist</List.Header>
-        <List.Description>Compiled CSS and JS files</List.Description>
-        <List.List>
-          <List.Item>
-            <List.Icon name='folder' />
-            <List.Content>
-              <List.Header>components</List.Header>
-              <List.Description>
-                Individual component CSS and JS
-              </List.Description>
-            </List.Content>
-          </List.Item>
-        </List.List>
-      </List.Content>
-    </List.Item>
-    <List.Item>
-      <List.Icon name='file' />
-      <List.Content>
-        <List.Header>semantic.json</List.Header>
-        <List.Description>Contains build settings for gulp</List.Description>
-      </List.Content>
-    </List.Item>
-  </List>
-    </div>
-  );}
+      <div>
+        <div>
+          {/* <Route exact path={match.path} component={this.props.currentUser!=undefined?Home:Landing} /> */}
+          <Route exact path={match.path} component={Landing} />
+        </div>
+      </div>
+  );
 }
 export default Main;

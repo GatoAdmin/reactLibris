@@ -55,6 +55,16 @@ router.get('/', ensureAuthenticated,function(req, res, next) {
     res.render("userPage/user",{user:user.toJSON(),moment});
   });
 });
+/* GET users listing. */
+router.post('/', function(req, res, next) {
+  var currentUser = null;
+  if(req.user){
+    currentUser = [];
+  }else{
+    currentUser = req.user;
+  }
+  res.json({currentUser:currentUser})
+});
 
 router.post("/block/user/:username",ensureAuthenticated,function(req,res,next){
   User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
