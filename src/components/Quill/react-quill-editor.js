@@ -14,7 +14,8 @@ class Editor extends React.Component {
     
     constructor (props) {
       super(props)
-      this.state = {theme: 'snow',value:'', setValue:'' }
+      var setValue = props.setValue===""?null:JSON.parse(props.setValue);
+      this.state = {theme: 'snow',value:'', setValue:setValue }
       this.handleChange = this.handleChange.bind(this)
     }
 
@@ -32,13 +33,13 @@ class Editor extends React.Component {
             'div',null, null,
                 e(ReactQuill,
                     {
-                        theme:this.state.theme,
-                    onChange:this.handleChange,
-                    value:this.state.value,
-                    defaultValue:JSON.parse(this.props.setValue),
-                    modules:Editor.modules,
-                    formats:Editor.formats,
-                    bounds:'.editor-box',
+                      theme:this.state.theme,
+                      onChange:this.handleChange,
+                      value:this.state.value,
+                      defaultValue:this.state.setValue,
+                      modules:Editor.modules,
+                      formats:Editor.formats,
+                      bounds:'.editor-box',
                 },null
 
                 )

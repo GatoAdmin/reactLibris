@@ -4,6 +4,7 @@ var passport = require("passport");
 var mongoose = require('mongoose');
 var User = mongoose.model('UserInfo');
 const bcrypt = require('bcryptjs');
+var MasterTag = mongoose.model('MasterTag');
 
 //템플릿용 변수 설정
 router.use(function(req,res,next){
@@ -49,15 +50,19 @@ router.get("/undefined",function(req,res,next){
 router.get("/signup",function(req,res){
   res.render('account/signup');
 });
+
 router.post("/masterTags", function (req, res, next) {
-    MasterTag.aggregate().match({ enabled: true, })
-  .project({
-    _id: 0,
-    name: 1,
-    tags: { _id: 1, tag: 1 },
-  })
+  //   MasterTag.aggregate().match({ enabled: true, })
+  // .project({
+  //   _id: 0,
+  //   name: 1,
+  //   tags: { _id: 1, tag: 1 },
+  // })
+  MasterTag.find({enabled:true})
+  .select('name tags')
   .exec((err, results) => {
-    return res.json({ masterTags: results });
+    if(err)console.log(err)
+    res.json({ masterTags: results });
   });
 });
 
@@ -118,17 +123,37 @@ router.post("/login",passport.authenticate("login",{
 }),(req,res)=>{
   if(req.session.current_url != "undefined"&&req.session.current_url != undefined){
     console.log(req.session.current_url)
-    res.redirect(req.session.current_url);
-    // res.json({redirect:req.session.current_url, currentUser:req.user})
+    // res.redirect(req.session.current_url);
+    res.json({redirect:req.session.current_url, currentUser:req.user})
   }else{
-    res.redirect("/");
+    // res.redirect("/");
+    res.json({redirect:"/", currentUser:req.user})
   }
 }
 );
+router.get('/login/google', function (req, res, next) {
+  passport.authenticate('google', { scope: ['profile'] })
+});
+router.get('/login/google/callback', passport.authenticate('google',  {
+  failureRedirect: '/login',
+  successRedirect: '/'
+}));
 
+
+router.post("/test",function (req, res, next) {
+  var data = req.body;
+  console.log(data);
+}
+);
 router.get("/logout",function(req,res){
   req.logout();
-  res.redirect("/");
+  res.json({currentUser:[], redirect:"/"});
+  // res.redirect("/");
+});
+
+router.post("/logout",function(req,res){
+  req.logout();
+  res.json({currentUser:[], redirect:"/"});
 });
 function ensureAuthenticated(req,res,next){
   if(req.isAuthenticated()){

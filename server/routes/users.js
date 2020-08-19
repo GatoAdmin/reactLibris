@@ -58,7 +58,7 @@ router.get('/', ensureAuthenticated,function(req, res, next) {
 /* GET users listing. */
 router.post('/', function(req, res, next) {
   var currentUser = null;
-  if(req.user){
+  if(!req.user){
     currentUser = [];
   }else{
     currentUser = req.user;

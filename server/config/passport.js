@@ -3,7 +3,10 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 var passport = require("passport");
 const mongoose = require('mongoose');
 var LocalStrategy = require("passport-local").Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
+const GOOGLE_CLIENT_ID = '376934500468-n23i56vurbm1eakqio5v3gmadhkmnfp2.apps.googleusercontent.com';
+const GOOGLE_CLIENT_SECRET = 'Ud0UgQNcPOzpLTSiCnZdTgau';
 
 const User = require('../../models/userInfo');
 // const User = mongoose.model(UserInfoModel);
@@ -14,6 +17,16 @@ const opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = keys;
 // opts.passReqToCallback = true;
+
+passport.use(new GoogleStrategy({
+  clientID: GOOGLE_CLIENT_ID,
+  clientSecret: GOOGLE_CLIENT_SECRET,
+  callbackURL: "http://localhost:3000/login/google/callback"
+},
+function(accessToken, refreshToken, profile, cb) {
+  return cb(null, profile);
+}
+));
 
 passport.use("login",new LocalStrategy({ usernameField: 'email',passwordField: 'password'},
   function(userEmail,userPasswd,done){

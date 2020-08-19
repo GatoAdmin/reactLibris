@@ -25,7 +25,6 @@ class ScenarioView extends React.Component {
 
   
   componentDidMount() {
-      console.log(window.location.href);
     let getArticle = () => {
         axios.post(window.location.href)
             .then(res => {
@@ -149,7 +148,10 @@ class ScenarioView extends React.Component {
                 })
         }
     };
-
+    setIsValue(isBlock, isBookmark)
+    {
+        this.setState({isBlock:isBlock, isBookmark:isBookmark});
+    }
   getViewPage(result){
       let content;
       
@@ -251,45 +253,44 @@ class ScenarioView extends React.Component {
     let blockContent;
     // var masterTags = this.state.masterTags;
     var currentUser = this.props.currentUser;//this.state.currentUser;
-    if(currentUser != null){
-      var isBlock = currentUser.blockList.scenarioList.some(block=>block.content===result._id);
-      var isBookmark = currentUser.bookmarks.scenarioList.some(scenario=>scenario.content===result._id&&scenario.version==this.state.version);
-      this.setState({isBlock:isBlock, isBookmark:isBookmark});
-      blockContent =(this.state.isBlock?(
-          <div>
-              <span>차단된 작품입니다.</span> 
-              <Button onClick={this.removeBlock(result._id)}>해제하기</Button>
-          </div>
-          ):!this.state.isAuthor?<Button onClick={()=>{if(window.confirm("앞으로 해당 작품을 볼 수 없습니다. 차단하시겠습니까?"))this.addBlock(result._id)}}>차단하기</Button>:null
-      )
-    }
     let content = <div></div>;
-    if(result !=null){
-    content=(
-        <div>
-          <h2>{result.lastVersion.title}</h2>
-            {blockContent}
-            {currentUser!=null?(
-                <Button onClick={this.switchBookmark()}>
-                    {this.state.isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}
-                </Button>):null
-            }
-            
-          {this.state.isAuthor?(<div>
-                  <Link href={`/scenarios/edit/${result._id}`}>
-                      <Button>수정</Button>
-                  </Link>
-                  <Button onClick={this.switchOpened(result.isOpened)}>{result.isOpened?'비공개':'공개'}</Button>
-                  {this.state.isCanDelete?<Button onClick={this.deleteScenario()}>삭제</Button>:<span>구매한 유저가 있는 유료 시나리오는 삭제할 수 없습니다.</span>}
-              </div>
-              ):null}
-      
-          {!isBlock?this.getViewPage(result):null}
-          <CommentBox/>
-        </div>
-    );
-
-}
+    var isBlock = this.state.isBlock;
+    var isBookmark = this.state.isBookmark;
+    if(result != null)
+    {
+        if(typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null){
+            isBlock = currentUser.blockList.scenarioList.some(block=>block.content===result._id);
+            isBookmark = currentUser.bookmarks.scenarioList.some(scenario=>scenario.content===result._id&&scenario.version==this.state.version);
+            blockContent =(isBlock?(
+                <div>
+                    <span>차단된 작품입니다.</span> 
+                    <Button onClick={()=>this.removeBlock(result._id)}>해제하기</Button>
+                </div>
+                ):!this.state.isAuthor?<Button onClick={()=>{this.addBlock(result._id)}}>차단하기</Button>:null
+            )
+        }
+        content=(
+            <div>
+            <h2>{result.lastVersion.title}</h2>
+                {blockContent}
+                {typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null?(
+                    <Button onClick={()=>this.switchBookmark()}>
+                        {isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}
+                    </Button>):null
+                }
+                
+            {this.state.isAuthor?(<div>
+                    <Button as={Link} to={`/scenarios/edit/${result._id}`}>수정</Button>
+                    <Button onClick={()=>this.switchOpened(result.isOpened)}>{result.isOpened?'비공개':'공개'}</Button>
+                    {this.state.isCanDelete?<Button onClick={()=>this.deleteScenario()}>삭제</Button>:<span>구매한 유저가 있는 유료 리플레이는 삭제할 수 없습니다.</span>}
+                </div>
+                ):null}
+        
+            {!isBlock?this.getViewPage(result):null}
+            <CommentBox/>
+            </div>
+        );
+    }
   return content;
  }
 }

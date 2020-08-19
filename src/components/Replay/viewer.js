@@ -23,7 +23,7 @@ class ReplayView extends React.Component {
       };
   }
 
-  
+
   componentDidMount() {
       console.log(window.location.href);
     let getArticle = () => {
@@ -47,7 +47,7 @@ class ReplayView extends React.Component {
   }
     // window.article_id = '{result._id}'
     reComment(id, button){
-        
+
     }
     deleteComment(id, text)
     {
@@ -92,7 +92,7 @@ class ReplayView extends React.Component {
         }
 
     };
-    
+
     switchBookmark()
     {
         axios.post('/replays/bookmark/'+this.state.result._id+'/'+this.state.version)
@@ -120,7 +120,7 @@ class ReplayView extends React.Component {
         }
     };
     addBlock(id){
-        var check = window.confirm("앞으로 해당 작품을 볼 수 없습니다. 차단하시겠습니까?");
+        var check = true;//window.confirm("앞으로 해당 작품을 볼 수 없습니다. 차단하시겠습니까?");
         if(check){
             axios.post("/user/block/replays/"+id)
             .then(function (res){
@@ -135,7 +135,7 @@ class ReplayView extends React.Component {
         }
     };
     removeBlock(id){
-        var check = window.confirm("차단한 작품을 다시 보시겠습니까?");
+        var check =true;// window.confirm("차단한 작품을 다시 보시겠습니까?");
         if(check){
             axios.post("/user/block/replays/"+id)
             .then(function (res){
@@ -152,7 +152,7 @@ class ReplayView extends React.Component {
 
   getViewPage(result){
       let content;
-      
+
       if(result != null){
         let quillBoxStyle = {width: "80%", marginLeft: "10%"};
           content = (
@@ -186,8 +186,8 @@ class ReplayView extends React.Component {
                                 <span>맡은 캐릭터</span>
                                 <div>{el.characters.map((value, index) => (
                                     <span className="character_name" key={index} >{value.characterName}</span>
-                                ))}</div> 
-  
+                                ))}</div>
+
                               </div>
                           ))} </span>
                           </div>
@@ -230,27 +230,27 @@ class ReplayView extends React.Component {
                             <span>태그 : </span>
                         </li>
                         {result.lastVersion.subTags.map((tag, index)=>(
-                            <li className="tag_item" key={index}> 
+                            <li className="tag_item" key={index}>
                                 #{tag}
                             </li>
                         ))}
                     </ul>
                 </div>
-  
+
                 <div className="quill-box" style={quillBoxStyle}>
                     <span>본문 </span>
                     <QuillViewer setValue={result.versions[this.state.version-1].content}/>
                     {/* {- include('../quill-viewer',{context: result.lastVersion.content}) } */}
                 </div>
             </div>
-  
+
         );
       }
       return content;
-    
+
     // <div className="comment-container">
     // </div>
-    
+
     // <script src="/components/commentPart.js"></script>
 
   }
@@ -259,45 +259,46 @@ class ReplayView extends React.Component {
     let blockContent;
     // var masterTags = this.state.masterTags;
     var currentUser = this.props.currentUser;//this.state.currentUser;
-    if(currentUser != null){
-      var isBlock = currentUser.blockList.replayList.some(block=>block.content===result._id);
-      var isBookmark = currentUser.bookmarks.replayList.some(replay=>replay.content===result._id&&replay.version==this.state.version);
-      this.setState({isBlock:isBlock, isBookmark:isBookmark});
-      blockContent = (this.state.isBlock?(
-          <div>
-              <span>차단된 작품입니다.</span> 
-              <Button onClick={this.removeBlock(result._id)}>해제하기</Button>
-          </div>
-          ):!this.state.isAuthor?<Button onClick={()=>{if(window.confirm("앞으로 해당 작품을 볼 수 없습니다. 차단하시겠습니까?"))this.addBlock(result._id)}}>차단하기</Button>:null
-      )
-    }
+    var isBlock = this.state.isBlock;
+    var isBookmark = this.state.isBookmark;
     let content = <div></div>;
-    if(result !=null){
+    if(result != null)
+    {
+        if(typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null){
+            isBlock = currentUser.blockList.replayList.some(block=>block.content===result._id);
+            isBookmark = currentUser.bookmarks.replayList.some(replay=>replay.content===result._id&&replay.version==this.state.version);
+
+            blockContent = (this.state.isBlock?(
+                <div>
+                    <span>차단된 작품입니다.</span>
+                    <Button onClick={()=>{if(window.confirm("차단한 작품을 다시 보시겠습니까?"))this.removeBlock(result._id)}}>해제하기</Button>
+                </div>
+                ):!this.state.isAuthor?<Button onClick={()=>{if(window.confirm("앞으로 해당 작품을 볼 수 없습니다. 차단하시겠습니까?"))this.addBlock(result._id)}}>차단하기</Button>:null
+            )
+        }
     content=(
         <div>
             {blockContent}
           <h2>{result.lastVersion.title}</h2>
-            {currentUser!=null?(
-                <Button onClick={this.switchBookmark()}>
-                    {this.state.isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}
+            {typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null?(
+                <Button onClick={()=>this.switchBookmark()}>
+                    {isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}
                 </Button>):null
             }
-            
+
           {this.state.isAuthor?(<div>
-                  <Link href={`/replays/edit/${result._id}`}>
-                      <Button>수정</Button>
-                  </Link>
-                  <Button onClick={this.switchOpened(result.isOpened)}>{result.isOpened?'비공개':'공개'}</Button>
-                  {this.state.isCanDelete?<Button onClick={this.deleteReplay()}>삭제</Button>:<span>구매한 유저가 있는 유료 리플레이는 삭제할 수 없습니다.</span>}
+                  <Button as={Link} to={`/replays/edit/${result._id}`}>수정</Button>
+                  <Button onClick={()=>this.switchOpened(result.isOpened)}>{result.isOpened?'비공개':'공개'}</Button>
+                  {this.state.isCanDelete?<Button onClick={()=>this.deleteReplay()}>삭제</Button>:<span>구매한 유저가 있는 유료 리플레이는 삭제할 수 없습니다.</span>}
               </div>
               ):null}
-      
+
           {!isBlock?this.getViewPage(result):null}
           <CommentBox/>
             </div>
     );
-
 }
+
   return content;
  }
 }

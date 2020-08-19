@@ -139,7 +139,6 @@ class ArticleList extends React.Component {
         // }
     }
     render() {
-        console.log(this.state.rows);
         var select_rule;
         var select_genre;
         var select_background;
@@ -178,7 +177,7 @@ class ArticleList extends React.Component {
         var component = 
         <div>            
             <span>리플레이</span>
-            {this.props.currentUser!=null?<Link to='/replays/make'>새로 만들기</Link>:null}
+            {typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?<Link to='/replays/make'>새로 만들기</Link>:null}
             <div className="search_window">
                 <form id= "tag-form" action="/replays/search" method= "POST">
                     <ul className = "search_ul" >

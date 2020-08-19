@@ -193,8 +193,8 @@ class ArticleList extends React.Component {
         }
         var component =
             e("div", null,
-                e("span",null,"시나리오"),
-                e("Link", {to:'/scenarios/make'},"새로 만들기"),
+                e("span",null,"시나리오"), 
+                typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?e(Link, {to:'/scenarios/make'},"새로 만들기"):null,
                 e("div", { className: "search_window" },
                     e("form", { action: "/scenarios/search", method: "POST", id: "tag-form" },
                         e("ul", { className: "search_ul" },
