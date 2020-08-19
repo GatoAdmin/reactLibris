@@ -10,6 +10,7 @@ class Maker extends React.Component {
         this.state = {
             chronicle_id: null,
             master_tags: [],
+            article:[],
         };
     }
 
@@ -83,16 +84,14 @@ class Maker extends React.Component {
         }
 
     }
-
     convertData() {
-        var quill;
-        this.convertQuill(quill);
+        this.convertQuill();
         var data_players = [];
         var players = document.querySelectorAll('input[name=player_name]');
         for (var i = 0; i < players.length; i++) {
             var data_characters = [];
             var characters = document.querySelectorAll('input[name=character_name_' + i + ']');
-            for (var j = 0; j < characters.length;) {
+            for (var j = 0; j < characters.length; j++) {
                 data_characters.push({ characterName: characters[j].value });
             }
             data_players.push({ playerName: players[i].value, characters: data_characters });
@@ -102,11 +101,15 @@ class Maker extends React.Component {
         peoples.value = JSON.stringify(data_players);;
         return true;
     };
-    convertQuill(quill) {
+    convertQuill() {
+        var quillContents = this.state.article;
         var about = document.querySelector('input[name=article]');
-        about.value = JSON.stringify(quill.getContents());
+        about.value = JSON.stringify(quillContents);
       };
 
+    changeQuill=(e)=>{
+        this.setState({article:e});
+    }
     getDetail() {
         var component;
         var masterTags = this.state.master_tags;
@@ -161,9 +164,10 @@ class Maker extends React.Component {
         );
 
         }
+
         component = (
             <div id="form-container" className="container">
-                <form method="POST" action={`/replays/make/${this.state.chronicle_id }`} onSubmit={()=>this.convertData()}>
+                <form method="POST" action={`/replays/make${this.state.chronicle_id!=null?"/"+this.state.chronicle_id :""}`} onSubmit={()=>this.convertData()}>
                     <div className="row">
                         {/* <div className="col-xs-4">
            <div className="img-rounded"></div>//썸네일 필요하지 않을까?
@@ -211,7 +215,7 @@ class Maker extends React.Component {
                     <div className="row form-group">
                         <label htmlFor="article">내용</label>
                         <input name="article" type="hidden" />
-                        <QuillEditor setValue="" />
+                        <QuillEditor changeQuill={this.changeQuill} setValue="" />
                     </div>
                     <div className="row">
                         <button className="btn btn-primary" type="submit">발행</button>

@@ -31,14 +31,16 @@ class Maker extends React.Component {
         getTags();
     }
 
-    changeCapacityType(obj) {
+    changeCapacityType=(e)=>{
+        e.preventDefault();
+        var obj = e.target;
         var multiple_capacity = document.querySelector('#multiple_capacity');
         if (obj.checked) {
             multiple_capacity.classList.remove('hidden');
         } else {
             multiple_capacity.classList.add('hidden');
         }
-    };
+    }
 
     checkPaid= (e) => {
         e.preventDefault();
@@ -83,11 +85,16 @@ class Maker extends React.Component {
 
     }
 
-    convertQuill(quill) {
+    convertQuill() {
+        var quillContents = this.state.article;
         var about = document.querySelector('input[name=article]');
-        about.value = JSON.stringify(quill.getContents());
+        about.value = JSON.stringify(quillContents);
         return true;
       };
+      changeQuill=(e)=>{
+          console.log(e);
+          this.setState({article:e});
+      }
 
     getDetail() {
         var component;
@@ -157,46 +164,46 @@ class Maker extends React.Component {
                                 <input className="form-control" name="title" type="text" placeholder="제목을 입력해주세요" />
                             </div>
                             {selectRule}
-                            <div class="form-group">
-                                <label for="capacity_min">필요 인원수</label>
-                                <input class="form-control size_3" name="capacity_min" type="number" value="1" title="필요 인원수" />
-                                <span id="multiple_capacity" class="hidden">
-                                <span>~</span>
-                                <input class="form-control size_3" name="capacity_max" type="number" value="1" title="최대 인원수"/>
+                            <div className="form-group">
+                                <label htmlFor="capacity_min">필요 인원수</label>
+                                <input className="form-control size_3" name="capacity_min" type="number" min="1" title="필요 인원수" />
+                                <span id="multiple_capacity" className="hidden">
+                                    <span>~</span>
+                                    <input className="form-control size_3" name="capacity_max" type="number" min="1" title="최대 인원수"/>
                                 </span>  
                                 <div>
-                                <label for="is_multiple_capacity">이 시나리오는 가변적인 인원수에 대응할 수 있습니다.</label>
-                                <input class="form-control" name="is_multiple_capacity" type="checkbox" value="check" onChange={()=>this.changeCapacityType(this)} />    
+                                <label htmlFor="is_multiple_capacity">이 시나리오는 가변적인 인원수에 대응할 수 있습니다.</label>
+                                <input className="form-control" name="is_multiple_capacity" type="checkbox" value="check" onChange={this.changeCapacityType} />    
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <div class="toggle toggle--time">
+                            <div className="form-group">
+                                <div className="toggle toggle--time">
                                     {/* <Button.Group size='large'>
                                         <Button>One</Button>
                                         <Button.Or />
                                         <Button>Three</Button>
                                     </Button.Group>
 ) */}
-                                    <input type="checkbox" id="toggle--time" name="is_online_time" class="toggle--checkbox"/>
-                                    <label class="toggle--btn" for="toggle--time">
-                                    <span class="toggle--feature" data-label-on="온라인"  data-label-off="오프라인">
+                                    <input type="checkbox" id="toggle--time" name="is_online_time" className="toggle--checkbox"/>
+                                    <label className="toggle--btn" htmlFor="toggle--time">
+                                    <span className="toggle--feature" data-label-on="온라인"  data-label-off="오프라인">
                                     </span></label>
                                 </div>
                                 <span>기준으로 </span>
-                                <input class="form-control size_3" name="predicting_time" type="number"/>
-                                <sapn>시간</sapn>
+                                <input className="form-control size_3" name="predicting_time" type="number"/>
+                                <span>시간</span>
                             </div>
                             <div className="form-group">
                                 <label htmlFor="rating">기준 등급</label>
                                 <input className="form-control" name="rating" type="number" placeholder="기준등급(안쓰셔도 됩니다)" />
                                 {/* <!--추후 보강  --> */}
                             </div>
-                            <div class="form-group">
+                            <div className="form-group">
                                 <div>추천 난이도</div>
-                                <label for="masterDifficulty">마스터링 난이도</label>
-                                <input class="form-control" name="masterDifficulty" title="높을수록 어려워요! 0~10사이로 적어주세요" type="number" min="0" max="10"  placeholder="마스터 난이도"/>
-                                <label for="playerDifficulty">플레이어 난이도</label>
-                                <input class="form-control" name="playerDifficulty" title="높을수록 어려워요! 0~10사이로 적어주세요" type="number" min="0" max="10" placeholder="플레이어 난이도"/>
+                                <label htmlFor="masterDifficulty">마스터링 난이도</label>
+                                <input className="form-control" name="masterDifficulty" title="높을수록 어려워요! 0~10사이로 적어주세요" type="number" min="0" max="10"  placeholder="마스터 난이도"/>
+                                <label htmlFor="playerDifficulty">플레이어 난이도</label>
+                                <input className="form-control" name="playerDifficulty" title="높을수록 어려워요! 0~10사이로 적어주세요" type="number" min="0" max="10" placeholder="플레이어 난이도"/>
                             </div>
                             {selectBackground}
                             {selectGenres}
@@ -225,7 +232,7 @@ class Maker extends React.Component {
                     <div className="row form-group">
                         <label htmlFor="article">내용</label>
                         <input name="article" type="hidden" />
-                        <QuillEditor setValue="" />
+                        <QuillEditor changeQuill={this.changeQuill} setValue="" />
                     </div>
                     <div className="row">
                         <button className="btn btn-primary" type="submit">발행</button>

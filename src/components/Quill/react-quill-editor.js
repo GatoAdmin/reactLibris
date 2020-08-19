@@ -19,8 +19,9 @@ class Editor extends React.Component {
       this.handleChange = this.handleChange.bind(this)
     }
 
-    handleChange (html) {
+    handleChange=(html, delta, source, editor)=>{ //(html) {
         this.setState({ value: html });
+        this.props.changeQuill(editor.getContents());
     }
 
     handleThemeChange (newTheme) {
@@ -47,6 +48,7 @@ class Editor extends React.Component {
       return component;
     }
   }
+
   var toolbarOptions = [
     [{ 'font': [] }],
     [{ 'header': [1, 2, 3, 4, 5, 6, false] }],

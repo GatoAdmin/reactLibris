@@ -248,12 +248,15 @@ router.get("/make", ensureAuthenticated, function (req, res, next) {
   
 router.post("/make", ensureAuthenticated, function (req, res, next) {
   var formData = req.body;
+  console.log(formData);
   var article = formData.article;
   var price = 0;
   var user = req.user;
   var aboutScenarioId = null;
+  console.log("여기0-1");
   var data_players = JSON.parse(formData.play_peoples);
 
+  console.log("여기0-2");
   if(isChecked(formData.is_base_scenario)){
     aboutScenarioId=formData.scenario_name; //추후 ID로 교체
   }
@@ -270,6 +273,7 @@ router.post("/make", ensureAuthenticated, function (req, res, next) {
     }
   }
 
+  console.log("여기1");
   var newReplay = new Replay({
     author: user._id,
     isFree: isChecked(formData.is_paid) ? false : true,
@@ -290,22 +294,26 @@ router.post("/make", ensureAuthenticated, function (req, res, next) {
       subTags: toObjectId(formData.sub_tags),
     }
   });
-  
+  console.log("여기2");
 
   newReplay.save()
   var newChronicle = new Chronicle({
     title: formData.title,
     author: user._id,
-    chronicle_type: 3,//TODO:ENUM 값으로 바꿀것
+    onModel: 'Replay',//TODO:ENUM 값으로 바꿀것
     works: [newReplay._id]
   });
+  
+  console.log("여기3");
   newChronicle.save()
     .then(chronicle => {
       req.flash("info", "성공적으로 발행되었습니다.");
+      console.log("여기4");
       res.redirect("/replays");
-    });
-
+    })
+    .catch(err=>console.log(err));
 });
+
 router.get("/make/:id", ensureAuthenticated, function (req, res, next) {
   console.log("");
   Chronicle.findOne({ _id: toObjectId(req.param("id")), author: req.user._id }, function (err, chronicle) {
@@ -582,134 +590,7 @@ router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {
 router.get("/view/:id", function (req, res, next) {
 console.log(req.param("id"));
   var agg_match = { _id: toObjectId(req.param("id")), enabled: true};
-  const agg_replay_view_project = {
-    id: 1,
-    price: 1,
-    view: 1,
-    ruleTag: {
-      $let: {
-        vars: {
-          rule_tags: { $arrayElemAt: ["$ruleTag", 0] },
-        },
-        in: {
-          $let: {
-            vars: {
-              rule_tag: {
-                $arrayElemAt:
-                  [{
-                    $filter: {
-                      input: "$$rule_tags.tags",
-                      as: "tag",
-                      cond: { $eq: ["$rule", "$$tag._id"] }
-                    }
-                  }, 0]
-              }
-            },
-            in: "$$rule_tag.tag"
-          }
-        }
-      }
-    },
-    created: 1,
-    isOpened:1,
-    isFree:1,
-    isAgreeComment:1,
-    version: {
-      $let: {
-        vars: {
-          last: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          title: "$$last.title",
-          peoples:"$$last.peoples",
-          content:"$$last.content",
-          rating:"$$last.rating",
-          created:"$$last.created",
-        }
-      }
-    },
-    author: {
-      $let: {
-        vars: {
-          user: {
-            $arrayElemAt: ["$author", 0]
-          }
-        },
-        in: {
-          userName: "$$user.userName",
-          userEmail: "$$user.userEmail"
-        }
-      }
-    },
-    subTags: {
-      $let: {
-        vars: {
-          subtag: { $arrayElemAt: ["$subTags", 0] },
-          version: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          $let: {
-            vars: {
-              subtags: {
-                $filter: {
-                  input: "$$subtag.tags",
-                  as: "tag",
-                  cond: { $in: ["$$tag._id", "$$version.subTags"] }
-                }
-              }
-            },
-            in: "$$subtags.tag"
-          }
-        }
-      }
-    },
-    genreTags: {
-      $let: {
-        vars: {
-          genretag: { $arrayElemAt: ["$genreTags", 0] },
-          version: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          $let: {
-            vars: {
-              genretags: {
-                $filter: {
-                  input: "$$genretag.tags",
-                  as: "tag",
-                  cond: { $in: ["$$tag._id", "$$version.genreTags"] }
-                }
-              }
-            },
-            in: "$$genretags.tag"
-          }
-        }
-      }
-    },
-    backgroundTag: {
-      $let: {
-        vars: {
-          background_tag: { $arrayElemAt: ["$backgroundTag", 0] },
-          version: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          $let: {
-            vars: {
-              background: {
-                $filter: {
-                  input: "$$background_tag.tags",
-                  as: "tag",
-                  cond: { $eq: ["$$tag._id", "$$version.backgroundTag"] }
-                }
-              }
-            },
-            in: { $arrayElemAt: ["$$background.tag", 0] }
-          }
-        }
-      }
-    },
-    viewUsers:1,
-    comments: 1,
-  };
+
   User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.param("id"))]}},function(err,users)
   {
     var isCanDelete = true;
@@ -717,14 +598,6 @@ console.log(req.param("id"));
     if(users.length>0){
       isCanDelete = false;
     }
-    // Replay.aggregate().match(agg_match)
-    // .lookup(agg_lookup_user)
-    // .lookup(agg_lookup_rule)
-    // .lookup(agg_lookup_genre)
-    // .lookup(agg_lookup_background)
-    // .lookup(agg_lookup_subtags)
-    // .lookup(agg_lookup_comment)
-    // .project(agg_replay_view_project)
     Replay.findOne({_id: toObjectId(req.param("id")), enabled: true})
     .populate('author')
     .exec(function (err, result) {

@@ -306,7 +306,7 @@ router.post("/make", ensureAuthenticated, function (req, res, next) {
   var newChronicle = new Chronicle({
     title: formData.title,
     author: user._id,
-    chronicle_type: 2,//TODO:ENUM 값으로 바꿀것
+    onModel: 'Scenario',//TODO:ENUM 값으로 바꿀것
     works: [newScenario._id]
   });
   newChronicle.save()
