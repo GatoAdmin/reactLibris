@@ -15,12 +15,13 @@ class Editor extends React.Component {
     constructor (props) {
       super(props)
       var setValue = props.setValue===""?null:JSON.parse(props.setValue);
-      this.state = {theme: 'snow',value:'', setValue:setValue }
+      this.state = {theme: 'snow',value:setValue, setValue:setValue }
       this.handleChange = this.handleChange.bind(this)
     }
 
     handleChange=(html, delta, source, editor)=>{ //(html) {
-        this.setState({ value: html });
+      // console.log(editor.getContents());
+        this.setState({ value: editor.getContents() });
         this.props.changeQuill(editor.getContents());
     }
 

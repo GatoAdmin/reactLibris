@@ -2,8 +2,9 @@ import React from 'react';
 import './style.css';
 import {Switch, Route, Link} from 'react-router-dom';
 import ArticleList from './replayArticleList'
-import Make from './replayMake';
+import Maker from './replayMaker';
 import Viewer from './viewer';
+import Editor from './replayEditor';
 
 function Replay({ currentUser, match }) {
   return (
@@ -12,7 +13,8 @@ function Replay({ currentUser, match }) {
         <div>
           <Route exact path={match.path} component={(props)=><ArticleList currentUser={currentUser} {...props}/>} />
           <Route path={`${match.path}/view/:id`} component={(props)=><Viewer currentUser={currentUser} {...props}/>}  />
-          <Route path={`${match.path}/make`} component={(props)=><Make currentUser={currentUser} {...props}/>}  />
+          <Route path={`${match.path}/make`} component={(props)=><Maker currentUser={currentUser} {...props}/>}  />
+          <Route path={`${match.path}/edit/:id`} component={(props)=><Editor currentUser={currentUser} {...props}/>}  />
         </div>
       </div>
   );

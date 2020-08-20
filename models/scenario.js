@@ -184,14 +184,19 @@ ScenarioSchema.set('toJSON', { virtuals: true,
         if(ret.versions != undefined){
             // ret.versions=
             ret.versions.map((version)=>{
-                version.backgroundTag=backgroundMasterTags.find(tag=>tag._id.equals(version.backgroundTag)).tag;
+                var findBackground= backgroundMasterTags.find(tags=>tags._id.equals(version.backgroundTag));
+                version.backgroundTag = findBackground!=undefined?findBackground.tag:"";
                 var subTags = [];
                 version.subTags.map((subTag)=>{
-                    subTags.push(subMasterTags.find(tag=>tag._id.equals(subTag)).tag); 
+                    var findResult = subMasterTags.find(tags=>tags._id.equals(subTag));
+                    subTags.push(findResult!=undefined?findResult.tag:""); 
                 });
                 version.subTags = subTags;
                 var genreTags = [];
-                version.genreTags.map((genreTag)=>{genreTags.push(genreMasterTags.find(tag=>tag._id.equals(genreTag)).tag);});
+                version.genreTags.map((genreTag)=>{
+                    var findResult = genreMasterTags.find(tags=>tags._id.equals(genreTag));
+                    genreTags.push(findResult!=undefined?findResult.tag:"");
+                });
                 version.genreTags = genreTags;
             })
             ret.lastVersion = ret.versions[ret.versions.length-1];

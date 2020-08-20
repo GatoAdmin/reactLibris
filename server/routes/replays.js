@@ -523,7 +523,7 @@ router.post("/search", function (req, res, next) {
 });
 
 
-router.get("/edit/:id", ensureAuthenticated, function (req, res, next) {
+router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {
   Replay.findOne({ $and:[{_id: toObjectId(req.param("id"))}, {author: req.user._id}] })
   .populate('author')
   .exec( function (err, result) {
@@ -532,11 +532,11 @@ router.get("/edit/:id", ensureAuthenticated, function (req, res, next) {
       req.flash("error", "잘못된 접속 방법입니다.");
       return res.redirect("/replays/" + req.param("id"));
     }
-    res.render("replay/editReplays", { result: result, masterTags: masterTags });
+    res.json({ result: result, masterTags: masterTags });
   });
 });
 
-router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {
+router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
   Replay.findOne({ $and:[{_id: toObjectId(req.param("id"))}, {author: req.user._id},{enabled: true}]}, function (err, result) {
     if (err) { return next(err); }
     if (!result) { return next(404); }

@@ -4,19 +4,18 @@ const e = React.createElement;
 class MakePlayPeople extends React.Component {
     constructor(props) {
         super(props);
-        if(window.peoples == null){
-            console.log(window.peoples)
+        if(props.peoples == null){
+            console.log(props.peoples)
             this.state = {
                 is_need_master: true,
                 players: [{ playerName: "", characters: [] }],        
                 master : "", 
             };
         }else{
-            console.log(window.peoples)
             this.state = {
-                is_need_master: window.peoples.master==null?false:true,
-                players: window.peoples.players == null?[{ playerName: "", characters: [] }]:window.peoples.players,
-                master : window.peoples.master==null?"":window.peoples.master,
+                is_need_master: props.peoples.master==null?false:true,
+                players: props.peoples.players == null?[{ playerName: "", characters: [] }]:props.peoples.players,
+                master : props.peoples.master==null?"":props.peoples.master,
             };
         }
     }

@@ -396,20 +396,20 @@ router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
   });
 });
 
-router.get("/edit/:id", ensureAuthenticated, function (req, res, next) {
+router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {
   Scenario.findOne({ _id: toObjectId(req.param("id")), author: req.user._id })
     .populate('author')
-    .exec(function (err, scenario) {
+    .exec(function (err, result) {
       if (err) { return next(err); }
-      if (!scenario) {
+      if (!result) {
         req.flash("error", "잘못된 접속 방법입니다.");
         return res.redirect("/scenarios/" + req.param("id"));
       }
-      res.render("scenario/editScenarios", { scenario: scenario, masterTags: masterTags });
+      res.json({ result: result, masterTags: masterTags });
     });
 });
 
-router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {
+router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
   Scenario.findOne({ _id: toObjectId(req.param("id")), author: req.user._id, enabled: true }, function (err, scenario) {
     if (err) { return next(err); }
     if (!scenario) { return next(404); }

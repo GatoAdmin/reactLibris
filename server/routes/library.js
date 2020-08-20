@@ -155,7 +155,7 @@ router.post("/bookmark/replays", ensureAuthenticated,function(req,res,next){
       return sortAfterResult(a,b,data.align_type, order);
     });
     req.session.current_url = req.originalUrl;
-   res.json({user:user, articles:results,masterTags : masterTags,  moment});
+   res.json({user:user, articles:results,masterTags : masterTags});
   });
 });
 
@@ -519,7 +519,7 @@ router.post("/block/replays", ensureAuthenticated,function(req,res,next){
       return sortAfterResult(a,b,data.align_type, order);
     });
     req.session.current_url = req.originalUrl;
-   res.json({user:user, articles:results,masterTags : masterTags,  moment});
+   res.json({user:user, articles:results, masterTags : masterTags,  moment});
   });
 });
 
