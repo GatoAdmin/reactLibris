@@ -5,20 +5,23 @@ import AuthRoute from '../AuthRoute';
 import LibraryHome from './home';
 import Bookmarks from './bookmarks';
 import Blocks from './blocks';
+import Comments from './comments';
+import Chronicles from './chronicles';
 
 function Library({ currentUser, match }) {
   return (
     <div>
       <nav className="sideMenu">
         <ul>
-          <Button.Group>
+          <Button.Group vertical>
             <Button as={Link} to='/library'>Home</Button>{/* <Link to='/'><li>Home</li></Link> */}
             <Button as={Link} to='/library/bookmark/scenarios'>BookmarkScenarios</Button>
             <Button as={Link} to='/library/bookmark/replays'>BookmarkReplays</Button>
             <Button as={Link} to='/library/block/scenarios'>BlockScenarios</Button>
             <Button as={Link} to='/library/block/replays'>BlockReplays</Button>
             <Button as={Link} to='/library/block/user'>BlockUsers</Button>
-             {/*<Button as={Link} to='/library/'>Scenario</Button> */}
+            <Button as={Link} to='/library/comments'>MyComments</Button>
+            <Button as={Link} to='/library/chronicles'>MyChronicles</Button>
             {/* {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/logout'>Logout</Button>:<Button as={Link} to='/login'>Login</Button>} */}
           </Button.Group>
         </ul>
@@ -37,6 +40,16 @@ function Library({ currentUser, match }) {
               path={[`${match.path}/block/scenarios`,`${match.path}/block/replays`,`${match.path}/block/user`]}
               render={(props)=><Blocks currentUser={currentUser}{...props}/>}
             />
+        <AuthRoute
+              currentUser={currentUser}
+              path={`${match.path}/comments`}
+              render={(props)=><Comments currentUser={currentUser}{...props}/>}
+          />
+          <AuthRoute
+                currentUser={currentUser}
+                path={`${match.path}/chronicles`}
+                render={(props)=><Chronicles currentUser={currentUser}{...props}/>}
+          />
       </div>
     </div>
   );

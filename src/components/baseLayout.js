@@ -4,16 +4,16 @@ import './Main/style.css';
 import {Switch, Route, Link,useHistory, Redirect } from 'react-router-dom';
 import { Button,Input, Menu } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.css';
+import AuthRoute from './AuthRoute';
 import Main from './Main';
 import About from './About';
 import NotFound from './NotFound';
 import Replay from './Replay';
-// import ReplayMake from './Replay/Make'
-// import ReplayViewer from './Replay/View';
-import AuthRoute from './AuthRoute';
 import Scenario from './Scenario';
 import User from './User';
 import Library from './Library';
+import Comment from './Comment';
+import Chronicle from './Chronicle';
 import Login from './Main/loginPage'
 import Logout from './Main/logoutPage';
 
@@ -54,7 +54,7 @@ class BaseLayout extends React.Component {
             <Button as={Link} to='/about'>about</Button>
             <Button as={Link} to='/replays'>Replay</Button>
             <Button as={Link} to='/scenarios'>Scenario</Button>
-            <Button as={Link} to='/library'>Library</Button>
+            {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/library'>Library</Button>:null}
             {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/logout'>Logout</Button>:<Button as={Link} to='/login'>Login</Button>}
             </Button.Group>
           </ul>
@@ -72,8 +72,10 @@ class BaseLayout extends React.Component {
                 path="/library"
                 render={(props)=><Library currentUser={this.state.currentUser}{...props}/>}
               />
+             <Route path="/comments" component={(props)=><Comment currentUser={this.state.currentUser}{...props}/>} />
+             <Route path="/chronicles" component={(props)=><Chronicle currentUser={this.state.currentUser}{...props}/>} />
              <Route path={'/login'} component={(props)=><Login login_process={this.login}/>} />
-              <Route path={'/logout'} component={(props)=><Logout currentUser={this.state.currentUser}{...props}/>} />
+             <Route path={'/logout'} component={(props)=><Logout currentUser={this.state.currentUser}{...props}/>} />
            <Route component={NotFound} />
 
         </Switch>

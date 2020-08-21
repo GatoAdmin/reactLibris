@@ -50,50 +50,28 @@ const bcrypt = require('bcryptjs');
 /* GET users listing. */
 router.get('/', ensureAuthenticated,function(req, res, next) {
   User.findOne({userEmail:req.user.userEmail},function(err,user){
-
-    res.render("library/index",{user:user.toJSON(),moment});
+    res.json({user:user});
   });
 });
   
-router.get("/chronicles", ensureAuthenticated,function(req,res,next){
+router.post("/chronicles", ensureAuthenticated,function(req,res,next){
   User.findOne({_id:req.user._id})
   .populate('chronicles')
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
     req.session.current_url = req.originalUrl;
-    res.render("library/myChronicles",{user:user.toJSON(),masterTags :masterTags,moment});
+    res.json({user:user,masterTags :masterTags});
   });
 });
   
-router.get("/comments", ensureAuthenticated,function(req,res,next){
-  Comment.find({user:req.user._id})
-  .exec(function(err,results){
-    if(err) {return next(err);}
-    if(!results){return next(404);}
-    req.session.current_url = req.originalUrl;
-    res.render("library/myComments",{user:req.user.toJSON(),moment});
-  });
-});
-
 router.post("/comments", ensureAuthenticated,function(req,res,next){
   Comment.find({user:req.user._id})
   .exec(function(err,results){
     if(err) {return next(err);}
     if(!results){return next(404);}
     req.session.current_url = req.originalUrl;
-   res.json({comments:results, moment});
-  });
-});
-
-router.get("/bookmark/replays", ensureAuthenticated,function(req,res,next){
-  User.findOne({userEmail:req.user.userEmail})
-  .populate('bookmarks.replayList.content')
-  .exec(function(err,user){
-    if(err) {return next(err);}
-    if(!user){return next(404);}
-    req.session.current_url = req.originalUrl;
-   res.render("library/bookmarkReplay",{user:user.toJSON(), moment});
+   res.json({user:req.user, comments:results});
   });
 });
 
@@ -251,18 +229,6 @@ router.post("/bookmark/replays/delete", ensureAuthenticated,function(req,res,nex
   });
 });
 
-
-router.get("/bookmark/scenarios", ensureAuthenticated,function(req,res,next){
-  User.findOne({userEmail:req.user.userEmail})
-  .populate('bookmarks.scenarioList.content')
-  .exec(function(err,user){
-    if(err) {return next(err);}
-    if(!user){return next(404);}
-    req.session.current_url = req.originalUrl;
-   res.render("library/bookmarkScenario",{user:user.toJSON(), moment});
-  });
-});
-
 router.post("/bookmark/scenarios", ensureAuthenticated,function(req,res,next){
   User.findOne({userEmail:req.user.userEmail})
   .populate('bookmarks.scenarioList.content')
@@ -417,11 +383,6 @@ router.post("/bookmark/scenarios/delete", ensureAuthenticated,function(req,res,n
   });
 });
 
-router.get("/block/user", ensureAuthenticated,function(req,res,next){
-    req.session.current_url = req.originalUrl;
-   res.render("library/blockUser",{user:req.user.toJSON(), moment});
-});
-
 router.post("/block/user", ensureAuthenticated,function(req,res,next){
   User.findOne({userEmail:req.user.userEmail})
   .populate('blockList.userList.content')
@@ -485,18 +446,6 @@ router.post("/block/user/:username", ensureAuthenticated,function(req,res,next){
   });
 });
 
-
-router.get("/block/replays", ensureAuthenticated,function(req,res,next){
-  User.findOne({userEmail:req.user.userEmail})
-  .populate('blockList.replayList.content')
-  .exec(function(err,user){
-    if(err) {return next(err);}
-    if(!user){return next(404);}
-    req.session.current_url = req.originalUrl;
-   res.render("library/blockReplay",{user:user.toJSON(), moment});
-  });
-});
-
 router.post("/block/replays", ensureAuthenticated,function(req,res,next){
   User.findOne({userEmail:req.user.userEmail})
   .populate('blockList.replayList.content')
@@ -551,18 +500,6 @@ router.post("/block/replays/delete", ensureAuthenticated,function(req,res,next){
     });
     req.session.current_url = req.originalUrl;
    res.json({user:user, articles:results,masterTags : masterTags,  moment});
-  });
-});
-
-
-router.get("/block/scenarios", ensureAuthenticated,function(req,res,next){
-  User.findOne({userEmail:req.user.userEmail})
-  .populate('blockList.scenarioList.content')
-  .exec(function(err,user){
-    if(err) {return next(err);}
-    if(!user){return next(404);}
-    req.session.current_url = req.originalUrl;
-   res.render("library/blockScenario",{user:user.toJSON(), moment});
   });
 });
 

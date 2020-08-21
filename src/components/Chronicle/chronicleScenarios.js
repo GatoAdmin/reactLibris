@@ -1,0 +1,152 @@
+import React from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import {Button} from 'semantic-ui-react';
+import Moment from 'react-moment';
+class ArticleBox extends React.Component{
+
+    constructor(props) {
+        super(props);
+        // this.setState({rows:array});
+        this.state = {
+            currentUser: props.currentUser,
+            chronicle:null,
+            master_tags: [],
+        };
+    }
+    componentDidMount() {
+        var urlStringLast  = window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
+        let getArticles = () => {
+            axios.post('/chronicles/'+urlStringLast, {
+                params: {
+                    align_order: this.state.align_order,
+                    align_type: this.state.align_type
+                }
+            })
+                .then(res => {
+                    console.log(res.data);
+                    this.setState({
+                        chronicle: res.data.chronicle
+                    });
+                })
+                .catch(function (err) {
+                    console.log(err);
+                })
+        }
+        getArticles();
+    }
+    removeBlock(id){
+        var check = window.confirm("차단한 작품을 다시 보시겠습니까?");
+        if(check){
+            axios.post("/user/block/scenarios/"+id)
+            .then(function (res){
+                if(res.data.err){
+                    alert(res.data.err);
+                }
+                window.location = res.data.redirect;
+            })
+            .catch(function (err) {
+                    console.log(err);
+                })
+        }
+    };
+
+    
+    getArticle(work,index){
+      return  <tr key={index}>
+            <td><Link to={`/scenarios/view/${work._id}`}>{ work.lastVersion.title }</Link></td>
+            <td>{ work.ruleTag }</td>
+            <td>{ work.view }</td>
+            <td>{ work.price }</td>
+            <td>
+                <ul>
+                    <li className="tag_item">
+                        #{ work.backgroundTag }
+                    </li>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    { work.genreTags.map(function(tag){
+                    return (<li className="tag_item">
+                                #{ tag }
+                            </li>)
+                    })}
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    { work.subTags.map(function(tag){
+                    return (<li className="tag_item">
+                                #{ tag }
+                            </li>)
+                    })}
+                </ul>
+            </td>
+            <td>
+                <Moment format='YYYY-MM-DD HH:mm'>{work.created}</Moment>
+            </td>
+        </tr>
+    }
+
+    render(){
+        var chronicle = this.state.chronicle;
+        var currentUser = this.state.currentUser;
+        var component = <div></div>;
+        if(chronicle){
+            component =( <div>
+                <div className="chronicle_header">
+                    <h2>{ chronicle.title}</h2>
+                    <span>{ chronicle.description}</span>
+                    <div className="author_box">
+                        <Link to={`/user/${chronicle.author.userName}`}>
+                            <div>이미지</div>
+                            <span className="author_name">{ chronicle.author.userName}</span>    
+                        </Link>
+                    </div>
+                </div>
+                시나리오
+            <Link to={`/scenarios/make/${chronicle._id }`}>새로 만들기</Link>
+            <div className="articles_box">
+                {chronicle.works.length > 0?
+                <table>
+                    <thead>
+                        <tr>
+                            <th>제목</th>
+                            <th>사용룰</th>
+                            <th>조회수</th>
+                            <th>가격</th>
+                            <th>배경</th>
+                            <th>장르</th>
+                            <th>태그</th>
+                            <th>발행일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        { chronicle.works.map(function(work,index){ 
+                            if(currentUser!=null){
+                                if(currentUser.blockList.scenarioList.some(article=>article.content===work._id)){
+                                    return(
+                                        <tr key={index}>
+                                            <td>차단된 작품입니다.</td>
+                                            <td>  <Button onClick={()=>this.removeBlock(work._id)}>해제하기</Button></td>
+                                        </tr>
+                                    );
+                                }else{
+                                     return this.getArticle(work, index);
+                                }
+                            }else{
+                                return this.getArticle(work, index);
+                            }
+                        })}
+                    </tbody>
+                </table>
+               :<span>새로운 리플레이를 작성해주세요!</span>
+            }
+            </div>
+            </div>);
+        }
+       return component;
+    }
+}
+export default ArticleBox;
