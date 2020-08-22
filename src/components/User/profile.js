@@ -14,6 +14,7 @@ class Profile extends Component {
         console.log(props.currentUser)
         this.state = {
             user: null,
+            href:window.location.href,
             currentUser: props.currentUser,
             masterTagRules: null,
             article:null,
@@ -32,11 +33,31 @@ class Profile extends Component {
         this.forceUpdate();
     }
 
+    componentDidUpdate(prevProps, prevState){
+        console.log(window.location.href);
+        if (window.location.href !== prevState.href) {    
+            let getArticles = () => {
+            axios.post(window.location.href)
+                .then(res => {
+                    console.log(res)
+                    this.setState({
+                        user: res.data.user,
+                        masterTagRules: res.data.masterTagRules
+                    });
+                  })
+                .catch(function (err) {
+                    console.log(err);
+                })
+        }
+        getArticles();
+        this.setState({href:window.location.href});
+        }
+    }
     convertQuill() {
         var quillContents = this.state.article;
         var about = document.querySelector('input[name=article]');
-        console.log(about)
         about.value = JSON.stringify(quillContents);
+        console.log(quillContents);
         return true;
       };
       changeQuill=(e)=>{
@@ -57,12 +78,12 @@ class Profile extends Component {
         if(user!=null){
             var introduction = (user.profile.introduction==undefined||user.profile.introduction=="")?null:user.profile.introduction;
             quillViewer = <QuillViewer setValue={introduction} />;
-            quillEdit = <QuillEditor setValue={introduction}/>;
+            quillEdit = <QuillEditor  changeQuill={this.changeQuill}  setValue={introduction}/>;
         }
         if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null&&user!=null) {
             if (currentUser.userEmail === user.userEmail) {
                 editIntro = (<div id="form-container" className="container">
-                    <form method="POST" action={"/user/" + user.userName + "/introudtion/save"} onsubmit={()=>this.convertQuill}>
+                    <form method="POST" action={"/user/" + user.userName + "/introudtion/save"} onSubmit={()=>this.convertQuill()}>
                         <input name="article" type="hidden" />
                         {quillEdit}
                         <Button>소개글 수정</Button>

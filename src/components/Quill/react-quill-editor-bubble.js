@@ -15,14 +15,9 @@ class Editor extends React.Component {
       this.handleChange = this.handleChange.bind(this)
     }
 
-    handleChange (html, delta, source, editor) {
-        this.setState({ value: editor.getContents() });
-        this.props.changeQuill(editor.getContents());
-    }
-
-    handleThemeChange (newTheme) {
-      if (newTheme === "core") newTheme = null;
-      this.setState({ theme: newTheme })
+    handleChange=(html, delta, source, editor)=>{
+        this.setState({ value:html });
+        this.props.changeQuill(html);
     }
 
     render () {
@@ -33,7 +28,7 @@ class Editor extends React.Component {
                         theme:this.state.theme,
                     onChange:this.handleChange,
                     value:this.state.value,
-                    defaultValue:JSON.parse(this.props.setValue),
+                    defaultValue:this.state.setValue,
                     modules:Editor.modules,
                     formats:Editor.formats,
                     bounds:'.editor-box',
