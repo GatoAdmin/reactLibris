@@ -1,6 +1,6 @@
 import React from 'react';
 import { Switch, Route, Link } from 'react-router-dom';
-import { Button,Input, Menu } from 'semantic-ui-react'
+import { Button,Input, Grid } from 'semantic-ui-react'
 import AuthRoute from '../AuthRoute';
 import LibraryHome from './home';
 import Bookmarks from './bookmarks';
@@ -10,9 +10,8 @@ import Chronicles from './chronicles';
 
 function Library({ currentUser, match }) {
   return (
-    <div>
-      <nav className="sideMenu">
-        <ul>
+    <Grid>
+      <Grid.Column width={3} className="sideMenu">
           <Button.Group vertical>
             <Button as={Link} to='/library'>Home</Button>{/* <Link to='/'><li>Home</li></Link> */}
             <Button as={Link} to='/library/bookmark/scenarios'>BookmarkScenarios</Button>
@@ -24,10 +23,8 @@ function Library({ currentUser, match }) {
             <Button as={Link} to='/library/chronicles'>MyChronicles</Button>
             {/* {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/logout'>Logout</Button>:<Button as={Link} to='/login'>Login</Button>} */}
           </Button.Group>
-        </ul>
-
-      </nav>
-      <div>
+      </Grid.Column>
+      <Grid.Column width={10} >
         {/* <Route exact path={match.path} component={ArticleList} /> */}
         <Route exact path={match.path} component={(props)=><LibraryHome currentUser={currentUser}{...props}/>}  />
         <AuthRoute
@@ -50,8 +47,8 @@ function Library({ currentUser, match }) {
                 path={`${match.path}/chronicles`}
                 render={(props)=><Chronicles currentUser={currentUser}{...props}/>}
           />
-      </div>
-    </div>
+      </Grid.Column>
+    </Grid>
   );
 }
 export default Library;

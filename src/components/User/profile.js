@@ -3,6 +3,7 @@ import axios from 'axios';
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css';
 import {Button, List}from 'semantic-ui-react';
+import { Link } from 'react-router-dom';
 import 'semantic-ui-css/semantic.css';
 import Moment from 'react-moment';
 import QuillViewer from '../Quill/react-quill-viewer';
@@ -10,22 +11,38 @@ import QuillEditor from '../Quill/react-quill-editor-bubble';
 class Profile extends Component {
     constructor(props) {
         super(props);
+        console.log(props.currentUser)
         this.state = {
             user: null,
-            currentUser: null,
+            currentUser: props.currentUser,
             masterTagRules: null,
+            article:null,
             date: new Date()
         };
     }
     componentDidMount() {
         axios.post(window.location.href)
-            .then(res => this.setState({ user: res.data.user, currentUser: res.data.currentUser, masterTagRules: res.data.masterTagRules }))
+            .then(res => this.setState({ 
+                user: res.data.user,
+                masterTagRules: res.data.masterTagRules }))
             .catch(function (error) {
                 console.log(error);
             });
 
         this.forceUpdate();
     }
+
+    convertQuill() {
+        var quillContents = this.state.article;
+        var about = document.querySelector('input[name=article]');
+        console.log(about)
+        about.value = JSON.stringify(quillContents);
+        return true;
+      };
+      changeQuill=(e)=>{
+          console.log(e);
+          this.setState({article:e});
+      }
 
     onDateClickChange = date => this.setState({ date })
 
@@ -42,13 +59,13 @@ class Profile extends Component {
             quillViewer = <QuillViewer setValue={introduction} />;
             quillEdit = <QuillEditor setValue={introduction}/>;
         }
-        if (currentUser != null) {
+        if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null&&user!=null) {
             if (currentUser.userEmail === user.userEmail) {
                 editIntro = (<div id="form-container" className="container">
-                    <form method="POST" action={"/user/" + user.userName + "/introudtion/save"} onsubmit={this.convertQuill()}>
+                    <form method="POST" action={"/user/" + user.userName + "/introudtion/save"} onsubmit={()=>this.convertQuill}>
                         <input name="article" type="hidden" />
                         {quillEdit}
-                        <button>소개글 수정</button>
+                        <Button>소개글 수정</Button>
                     </form>
                 </div>)
             } else {
@@ -56,7 +73,7 @@ class Profile extends Component {
             }
             
             if (currentUser.userEmail === user.userEmail) {
-                edit = <List.Content><button type="button" onclick={`location.href='/user/'${user.userName}'/edit/'`}>프로필 편집</button></List.Content>
+                edit = <List.Content><Button as={Link} to={`/user/${user.userName}/edit/`}>프로필 편집</Button></List.Content>
             }
         } else {
             editIntro = quillViewer
@@ -292,7 +309,7 @@ render() {
     let detail; //include('userProfileDetail',{user: user,currentUser:currentUser,moment:moment})
     let blockPage;
 
-    if (currentUser != null) {
+    if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser != null&&user!=null) {
         if (currentUser.blockList.userList.some(blockUser => blockUser.content === user._id)) {
             blockPage = <div>
                 <span>차단된 유저입니다.</span>

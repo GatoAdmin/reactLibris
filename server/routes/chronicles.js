@@ -21,7 +21,7 @@ function ensureAuthenticated(req, res, next) {
   router.post("/:id", function (req, res, next) {
     var findId = toObjectId(req.param("id"));
     Chronicle.findOne({_id:findId,enabled: true})
-    .populate({path:'works',populate:{path:'author',select:'userName userEmail -_id'},select:'isAgreeComment author enabled isOpened -_id'})
+    .populate({path:'works',populate:{path:'author',select:'userName userEmail -_id'},select:'isAgreeComment author versions rule price viewUsers enabled isOpened -_id'})
     .exec(function (err, result){
         if (err) { console.log(err); return next(err); }
         if (!result) { return next(404); }

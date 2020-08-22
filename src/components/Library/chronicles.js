@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import {Button} from 'semantic-ui-react';
+import {Button,Grid} from 'semantic-ui-react';
 
 function filterNan(item) {
     if (item == ""||item == undefined||item=="undefined"||item==null) {
@@ -58,47 +58,47 @@ class ChronicleBox extends React.Component {
         if (user.chronicles){
             chronicles_component =<div>
                 <h2>{user.userName}의 작품({user.chronicles.length})</h2>
-            <div class="articles_box">
+            <Grid class="articles_box">
                 {user.chronicles.map((value, index)=>{
                     if (value.onModel === 'Scenario'){
-                        return (<div class="row" key={index}> 
-                            <div class="td">
+                        return (<Grid.Row key={index}> 
+                            <Grid.Column width={3}>
                                 시나리오
-                            </div>
-                            <div class="td">   
+                            </Grid.Column>
+                            <Grid.Column width={2}>   
                                  {/* <!-- 완결/단편/연재중 상태 표시 필요 --> */}
                                  <h5>{value.works.length == 1?"단편":value.works.length}</h5>
-                            </div>
-                            <div class="td">
+                            </Grid.Column>
+                            <Grid.Column width={6}> 
                                 {value.works.length == 1?<Link to={`/scenarios/view/${value.works[0]}`}><h4>{value.title}</h4></Link>
                                 :<Link to={`/chronicles/scenarios/${value._id}`}><h4>{value.title}</h4></Link>
                                 }
-                              </div>
-                              <div class="td">
+                              </Grid.Column>
+                              <Grid.Column width={3}>
                                   <Link to={`/chronicles/scenarios/${value._id}`}><Button>관리</Button></Link>
-                              </div>
-                        </div>)
+                              </Grid.Column>
+                        </Grid.Row>)
                         }else if(value.onModel ===  'Replay'){
-                            return (<div class="row"> 
-                                <div class="td">
+                            return (<Grid.Row> 
+                                <Grid.Column width={3}>
                                     리플레이
-                                </div>
-                                <div class="td">
+                                </Grid.Column>
+                            <Grid.Column width={2}>   
                                     {/* <!-- 완결/단편/연재중 상태 표시 필요 --> */}
-                                    <h5>{value.works.length }</h5>
-                                </div>
-                                <div class="td">
+                                 <h5>{value.works.length == 1?"단편":value.works.length}</h5>
+                                </Grid.Column>
+                            <Grid.Column width={6}> 
                                     {value.works.length == 1?<Link to={`/replays/view/${value.works[0]}`}><h4>{value.title}</h4></Link>
                                     :<Link to={`/chronicles/replays/${value._id}`}><h4>{value.title}</h4></Link>
                                     }
-                                </div>
-                                <div class="td">
+                                </Grid.Column>
+                              <Grid.Column width={3}>
                                     <Link to={`/chronicles/replays/${value._id}`}><Button>관리</Button></Link>
-                                </div>
-                            </div>);
+                                </Grid.Column>
+                            </Grid.Row>);
                         }
                     })}    
-            </div>
+            </Grid>
             </div>
          }
         return chronicles_component;

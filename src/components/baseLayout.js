@@ -16,7 +16,7 @@ import Comment from './Comment';
 import Chronicle from './Chronicle';
 import Login from './Main/loginPage'
 import Logout from './Main/logoutPage';
-
+import Signup from './Main/signup';
 class BaseLayout extends React.Component {
   constructor(props) {
       super(props);
@@ -55,6 +55,7 @@ class BaseLayout extends React.Component {
             <Button as={Link} to='/replays'>Replay</Button>
             <Button as={Link} to='/scenarios'>Scenario</Button>
             {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/library'>Library</Button>:null}
+            {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to={`/user/${this.state.currentUser!=null?this.state.currentUser.userName:null}`}>Profile</Button>:null}
             {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/logout'>Logout</Button>:<Button as={Link} to='/login'>Login</Button>}
             </Button.Group>
           </ul>
@@ -74,8 +75,9 @@ class BaseLayout extends React.Component {
               />
              <Route path="/comments" component={(props)=><Comment currentUser={this.state.currentUser}{...props}/>} />
              <Route path="/chronicles" component={(props)=><Chronicle currentUser={this.state.currentUser}{...props}/>} />
-             <Route path={'/login'} component={(props)=><Login login_process={this.login}/>} />
-             <Route path={'/logout'} component={(props)=><Logout currentUser={this.state.currentUser}{...props}/>} />
+             <Route path='/login' component={(props)=><Login login_process={this.login}/>} />
+             <Route path='/logout' component={(props)=><Logout currentUser={this.state.currentUser}{...props}/>} />
+             <Route path='/signup' component={Signup } />
            <Route component={NotFound} />
 
         </Switch>

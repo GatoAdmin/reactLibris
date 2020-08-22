@@ -10,12 +10,14 @@ class Editor extends React.Component {
     
     constructor (props) {
       super(props)
-      this.state = {theme: 'bubble',value:'', setValue:'' }
+      var setValue = props.setValue===""?null:JSON.parse(props.setValue);
+      this.state = {theme: 'bubble',value:setValue, setValue:setValue }
       this.handleChange = this.handleChange.bind(this)
     }
 
-    handleChange (html) {
-        this.setState({ value: html });
+    handleChange (html, delta, source, editor) {
+        this.setState({ value: editor.getContents() });
+        this.props.changeQuill(editor.getContents());
     }
 
     handleThemeChange (newTheme) {

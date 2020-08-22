@@ -24,7 +24,6 @@ class ArticleBox extends React.Component{
                 }
             })
                 .then(res => {
-                    console(res);
                     this.setState({
                         chronicle: res.data.chronicle
                     });
@@ -60,13 +59,13 @@ class ArticleBox extends React.Component{
             <td>
                 <ul>
                     <li className="tag_item">
-                        #{ work.backgroundTag }
+                        #{ work.lastVersion.backgroundTag }
                     </li>
                 </ul>
             </td>
             <td>
                 <ul>
-                    { work.genreTags.map(function(tag){
+                { work.lastVersion.genreTags.map((tag)=>{
                     return (<li className="tag_item">
                                 #{ tag }
                             </li>)
@@ -75,7 +74,7 @@ class ArticleBox extends React.Component{
             </td>
             <td>
                 <ul>
-                    { work.subTags.map(function(tag){
+                    { work.lastVersion.subTags.map((tag)=>{
                     return (<li className="tag_item">
                                 #{ tag }
                             </li>)
@@ -92,22 +91,24 @@ class ArticleBox extends React.Component{
         var chronicle = this.state.chronicle;
         var currentUser = this.state.currentUser;
         var component = <div></div>;
+        var workTable = <table></table>;
+        var works;
         if(chronicle){
-            component =( <div>
-                <div className="chronicle_header">
-                    <h2>{ chronicle.title}</h2>
-                    <span>{ chronicle.description}</span>
-                    <div className="author_box">
-                        <Link to={`/user/${chronicle.author.userName}`}>
-                            <div>이미지</div>
-                            <span className="author_name">{ chronicle.author.userName}</span>    
-                        </Link>
-                    </div>
-                </div>
-                리플레이
-            <Link to={`/replays/make/${chronicle._id }`}>새로 만들기</Link>
-            <div className="articles_box">
-                {chronicle.works.length > 0?
+            if(chronicle.works.length > 0){
+                if(typeof(currentUser) == 'object'&&!Array.isArray(currentUser)){
+                    works = chronicle.works.map((work,index)=>{
+                        return  currentUser.blockList.replayList.some(article=>article.content===work._id)?
+                        (<tr key={index}>
+                            <td>차단된 작품입니다.</td>
+                            <td>  <Button onClick={()=>this.removeBlock(work._id)}>해제하기</Button></td>
+                        </tr>
+                    ): this.getArticle(work, index);
+                     })
+                }else{
+                    works = chronicle.works.map((work,index)=>( this.getArticle(work, index)))
+                }
+                
+                workTable =( 
                 <table>
                     <thead>
                         <tr>
@@ -122,26 +123,29 @@ class ArticleBox extends React.Component{
                         </tr>
                     </thead>
                     <tbody>
-                        { chronicle.works.map(function(work,index){ 
-                            if(currentUser!=null){
-                                if(currentUser.blockList.replayList.some(article=>article.content.equals(work._id))){
-                                    return(
-                                        <tr>
-                                            <td>차단된 작품입니다.</td>
-                                            <td>  <Button onClick={()=>this.removeBlock(work._id)}>해제하기</Button></td>
-                                        </tr>
-                                    );
-                                }else{
-                                    return this.getArticle(work, index);
-                                }
-                            }else{
-                                return this.getArticle(work, index);
-                            }
-                        })}
+                        {works}
                     </tbody>
                 </table>
-               :<span>새로운 리플레이를 작성해주세요!</span>
+                );
+            }else{
+                workTable = <span>새로운 리플레이를 작성해주세요!</span>
             }
+
+            component =( <div>
+                <div className="chronicle_header">
+                    <h2>{ chronicle.title}</h2>
+                    <span>{ chronicle.description}</span>
+                    <div className="author_box">
+                        <Link to={`/user/${chronicle.author.userName}`}>
+                            <div>이미지</div>
+                            <span className="author_name">{ chronicle.author.userName}</span>    
+                        </Link>
+                    </div>
+                </div>
+                리플레이
+            <Link to={`/replays/make/${chronicle._id }`}>새로 만들기</Link>
+            <div className="articles_box">
+                {workTable}
             </div>
             </div>);
         }
