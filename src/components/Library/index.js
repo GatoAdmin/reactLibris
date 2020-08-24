@@ -1,7 +1,7 @@
 import React from 'react';
 import { Switch, Route, Link } from 'react-router-dom';
 import { Button,Input, Grid } from 'semantic-ui-react'
-import AuthRoute from '../AuthRoute';
+import AuthRoute from '../Layout/AuthRoute';
 import LibraryHome from './home';
 import Bookmarks from './bookmarks';
 import Blocks from './blocks';

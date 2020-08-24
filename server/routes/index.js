@@ -4,7 +4,9 @@ var passport = require("passport");
 var mongoose = require('mongoose');
 var User = mongoose.model('UserInfo');
 const bcrypt = require('bcryptjs');
+var HashTag = mongoose.model('HashTag');
 var MasterTag = mongoose.model('MasterTag');
+// var Chronicle = mongoose.model('Chronicle');
 
 //템플릿용 변수 설정
 router.use(function(req,res,next){
@@ -14,19 +16,6 @@ router.use(function(req,res,next){
   res.locals.infos = req.flash("info");
   next();
 });
-
-// /* GET home page. */
-// router.get('/', function(req, res, next) {
-//   res.render('main/index', { title: 'Express' });
-// });
-
-// router.get('/login', function(req, res, next) {
-//   res.render('login/login', { title: 'Express' });
-// });
-
-// router.get('/regist', function(req, res, next) {
-//   res.render('account/registration', { title: 'Express' });
-// });
 
 //컬렉션을 쿼리하고, 가장 최근 사용자를 먼저 반환(descending)
 router.get("/",function(req,res,next){
@@ -43,27 +32,38 @@ router.get("/",function(req,res,next){
   });
 });
 
-router.get("/undefined",function(req,res,next){
-    res.redirect("/");
-  });
-  
-router.get("/signup",function(req,res){
-  res.render('account/signup');
-});
-
 router.post("/masterTags", function (req, res, next) {
-  //   MasterTag.aggregate().match({ enabled: true, })
-  // .project({
-  //   _id: 0,
-  //   name: 1,
-  //   tags: { _id: 1, tag: 1 },
-  // })
   MasterTag.find({enabled:true})
   .select('name tags')
   .exec((err, results) => {
     if(err)console.log(err)
     res.json({ masterTags: results });
   });
+});
+
+router.post("/hashTags", function (req, res, next) {
+  HashTag.find({enabled:true})
+  .select('name article onModel')
+  .exec((err, results) => {
+    if(err)console.log(err)
+    res.json({ hashTag: results });
+  });
+});
+
+router.post("/search", function (req, res, next) {
+  var formData = req.body;
+  HashTag.findOne({name:formData.searchWord})
+  .exec((err, result) => {
+    if(err)console.log(err)
+    if(result==null||result==undefined){
+      var newHash = new HashTag({
+        name : formData.searchWord
+      });
+      newHash.save();
+    }
+  });
+  // Chronicle.find({$or:[{}],enabled: true})
+    // res.json({ result: result });
 });
 
 router.post("/signup",function(req,res,next){  
@@ -163,17 +163,4 @@ function ensureAuthenticated(req,res,next){
     res.redirect("/login");
   }
 }
-// router.get("/edit",ensureAuthenticated,function(req,res){
-//   res.render("edit");
-// });
-// //put메서드는 현재 html에서 get post만 되니까 post로 일단 구현
-// router.post("/edit",ensureAuthenticated,function(req,res,next){
-//   req.user.displayName = req.body.displayname;
-//   req.user.bio = req.body.bio;
-//   req.user.save(function(err){
-//     if(err){next(err);return;}
-//     req.flash("info","Profile updated!");
-//     res.redirect("/edit");
-//   });
-// });
 module.exports = router;

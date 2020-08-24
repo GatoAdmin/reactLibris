@@ -2,9 +2,9 @@ import React from 'react';
 import axios from 'axios';
 import './Main/style.css';
 import {Switch, Route, Link,useHistory, Redirect } from 'react-router-dom';
-import { Button,Input, Menu } from 'semantic-ui-react'
+import { Button,Grid, Menu } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.css';
-import AuthRoute from './AuthRoute';
+import AuthRoute from './Layout/AuthRoute';
 import Main from './Main';
 import About from './About';
 import NotFound from './NotFound';
@@ -17,6 +17,7 @@ import Chronicle from './Chronicle';
 import Login from './Main/loginPage'
 import Logout from './Main/logoutPage';
 import Signup from './Main/signup';
+import Search from './Layout/Search';
 class BaseLayout extends React.Component {
   constructor(props) {
       super(props);
@@ -49,15 +50,27 @@ class BaseLayout extends React.Component {
     <header>
         <nav className='Menu-wrapper'>
           <ul>
-            <Button.Group>
-            <Button as={Link} to='/'>Home</Button>{/* <Link to='/'><li>Home</li></Link> */}
-            <Button as={Link} to='/about'>about</Button>
-            <Button as={Link} to='/replays'>Replay</Button>
-            <Button as={Link} to='/scenarios'>Scenario</Button>
-            {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/library'>Library</Button>:null}
-            {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to={`/user/${this.state.currentUser!=null?this.state.currentUser.userName:null}`}>Profile</Button>:null}
-            {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/logout'>Logout</Button>:<Button as={Link} to='/login'>Login</Button>}
-            </Button.Group>
+            <Grid>
+              <Grid.Column width={6}>
+                <Button.Group>
+                <Button as={Link} to='/'>Home</Button>{/* <Link to='/'><li>Home</li></Link> */}
+                <Button as={Link} to='/about'>About</Button>
+                <Button as={Link} to='/replays'>Replay</Button>
+                <Button as={Link} to='/scenarios'>Scenario</Button>            
+                </Button.Group>
+              </Grid.Column>
+              <Grid.Column width={4}>
+                  <Search/>
+              </Grid.Column>
+              
+              <Grid.Column width={6}>
+              <Button.Group>
+              {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/library'>Library</Button>:null}
+              {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to={`/user/${this.state.currentUser!=null?this.state.currentUser.userName:null}`}>Profile</Button>:null}
+              {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/logout'>Logout</Button>:<Button as={Link} to='/login'>Login</Button>}
+              </Button.Group>
+              </Grid.Column>
+            </Grid>
           </ul>
         </nav>
     </header>
@@ -78,7 +91,8 @@ class BaseLayout extends React.Component {
              <Route path='/login' component={(props)=><Login login_process={this.login}/>} />
              <Route path='/logout' component={(props)=><Logout currentUser={this.state.currentUser}{...props}/>} />
              <Route path='/signup' component={Signup } />
-           <Route component={NotFound} />
+            <Route component={NotFound} />
+             <Redirect path="/undefined" to="/" />
 
         </Switch>
         </div>
