@@ -6,6 +6,7 @@ var User = mongoose.model('UserInfo');
 var Chronicle = mongoose.model('Chronicle');
 var Replay = mongoose.model('Replay');
 var MasterTag = mongoose.model('MasterTag');
+var HashTag = mongoose.model('HashTag');
 var Comment = mongoose.model('Comment');
 const bcrypt = require('bcryptjs');
 var moment = require('moment');
@@ -42,127 +43,6 @@ router.use(function(req,res,next){
     }
   }
 
-  const agg_replay_project = {
-    id: 1,
-    price: 1,
-    view: 1,
-    ruleTag: {
-      $let: {
-        vars: {
-          rule_tags: { $arrayElemAt: ["$ruleTag", 0] },
-        },
-        in: {
-          $let: {
-            vars: {
-              rule_tag: {
-                $arrayElemAt:
-                  [{
-                    $filter: {
-                      input: "$$rule_tags.tags",
-                      as: "tag",
-                      cond: { $eq: ["$rule", "$$tag._id"] }
-                    }
-                  }, 0]
-              }
-            },
-            in: "$$rule_tag.tag"
-          }
-        }
-      }
-    },
-    created: 1,
-    version: {
-      $let: {
-        vars: {
-          last: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          title: "$$last.title",
-          peoples:"$$last.peoples"
-        }
-      }
-    },
-    author: {
-      $let: {
-        vars: {
-          user: {
-            $arrayElemAt: ["$author", 0]
-          }
-        },
-        in: {
-          userName: "$$user.userName",
-          userEmail: "$$user.userEmail"
-        }
-      }
-    },
-    subTags: {
-      $let: {
-        vars: {
-          subtag: { $arrayElemAt: ["$subTags", 0] },
-          version: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          $let: {
-            vars: {
-              subtags: {
-                $filter: {
-                  input: "$$subtag.tags",
-                  as: "tag",
-                  cond: { $in: ["$$tag._id", "$$version.subTags"] }
-                }
-              }
-            },
-            in: "$$subtags.tag"
-          }
-        }
-      }
-    },
-    genreTags: {
-      $let: {
-        vars: {
-          genretag: { $arrayElemAt: ["$genreTags", 0] },
-          version: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          $let: {
-            vars: {
-              genretags: {
-                $filter: {
-                  input: "$$genretag.tags",
-                  as: "tag",
-                  cond: { $in: ["$$tag._id", "$$version.genreTags"] }
-                }
-              }
-            },
-            in: "$$genretags.tag"
-          }
-        }
-      }
-    },
-    backgroundTag: {
-      $let: {
-        vars: {
-          background_tag: { $arrayElemAt: ["$backgroundTag", 0] },
-          version: { $arrayElemAt: ["$versions", -1] }
-        },
-        in: {
-          $let: {
-            vars: {
-              background: {
-                $filter: {
-                  input: "$$background_tag.tags",
-                  as: "tag",
-                  cond: { $eq: ["$$tag._id", "$$version.backgroundTag"] }
-                }
-              }
-            },
-            in: { $arrayElemAt: ["$$background.tag", 0] }
-          }
-        }
-      }
-    },
-    viewUsers:1
-  };
   const agg_lookup_user = {
     from: 'userinfos', localField: 'author', foreignField: '_id', as: 'author'
   };
@@ -248,15 +128,14 @@ router.get("/make", ensureAuthenticated, function (req, res, next) {
   
 router.post("/make", ensureAuthenticated, function (req, res, next) {
   var formData = req.body;
-  console.log(formData);
+
   var article = formData.article;
   var price = 0;
   var user = req.user;
   var aboutScenarioId = null;
-  console.log("여기0-1");
+
   var data_players = JSON.parse(formData.play_peoples);
 
-  console.log("여기0-2");
   if(isChecked(formData.is_base_scenario)){
     aboutScenarioId=formData.scenario_name; //추후 ID로 교체
   }
@@ -272,8 +151,16 @@ router.post("/make", ensureAuthenticated, function (req, res, next) {
       user.save();
     }
   }
+  var hashTag = null;
+  // HashTag.findOne({name:formData.shortWord})
+  //        .exec((err,result)=>{
+  //         if(err){next(err);}
+  //         if(result!=null){
+            
+  //         }
+  //        }
+  //        );
 
-  console.log("여기1");
   var newReplay = new Replay({
     author: user._id,
     isFree: isChecked(formData.is_paid) ? false : true,

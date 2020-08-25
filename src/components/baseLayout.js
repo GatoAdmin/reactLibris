@@ -18,6 +18,7 @@ import Login from './Main/loginPage'
 import Logout from './Main/logoutPage';
 import Signup from './Main/signup';
 import Search from './Layout/Search';
+import SearchResult from './Main/searchResult';
 class BaseLayout extends React.Component {
   constructor(props) {
       super(props);
@@ -86,6 +87,8 @@ class BaseLayout extends React.Component {
                 path="/library"
                 render={(props)=><Library currentUser={this.state.currentUser}{...props}/>}
               />
+              <Route path="/search" component={(props)=><SearchResult currentUser={this.state.currentUser}{...props}/>} /> 
+            
              <Route path="/comments" component={(props)=><Comment currentUser={this.state.currentUser}{...props}/>} />
              <Route path="/chronicles" component={(props)=><Chronicle currentUser={this.state.currentUser}{...props}/>} />
              <Route path='/login' component={(props)=><Login login_process={this.login}/>} />

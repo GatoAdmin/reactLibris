@@ -1,35 +1,37 @@
 import _ from 'lodash'
-import faker from 'faker'
 import axios from 'axios';
 import React from 'react'
-import { Search, Grid, Header, Segment, Label } from 'semantic-ui-react'
+import { Search, Grid, Form, Header, Segment, Label, Button } from 'semantic-ui-react'
 
-const source = _.times(5, () => ({
-  title: faker.company.companyName(),
-  description: faker.company.catchPhrase(),
-  image: faker.internet.avatar(),
-  price: faker.finance.amount(0, 100, 2, '$'),
-}))
-
+// const source = _.times(5, () => ({
+//   title: faker.company.companyName(),
+//   description: faker.company.catchPhrase(),
+//   image: faker.internet.avatar(),
+//   price: faker.finance.amount(0, 100, 2, '$'),
+// }))
 
 const initialState = {
   loading: false,
   results: [],
   value: '',
 }
-
-// const source = getHashTags();
-// function getHashTags(){
-//     var hashTags = null;//TODO:웹브라우저 캐싱 후 가져오는 것으로 바꿀것
-//     if(hashTags === null|| hashTags === undefined){
-//         axios.post('/hashTags')
-//         .then(res => hashTags= res.data.hashTags )
-//         .catch(function (err) {
-//             console.log(err);
-//         });
-//     }
-//     return hashTags;
-// }
+var source = getHashTags();
+function getHashTags(){
+    let hashTags = null;//TODO:웹브라우저 캐싱 후 가져오는 것으로 바꿀것
+    let getTags = ()=>{
+      axios.post('/hashTags')
+      .then(res =>{
+        source = res.data.hashTag
+      } )
+      .catch(function (err) {
+          console.log(err);
+      });
+    }
+    if(hashTags === null|| hashTags === undefined){
+      getTags();
+    }    
+    return hashTags;
+}
 
 function exampleReducer(state, action) {
   switch (action.type) {
@@ -65,7 +67,7 @@ function SearchInput() {
       }
 
       const re = new RegExp(_.escapeRegExp(data.value), 'i')
-      const isMatch = (result) => re.test(result.title)
+      const isMatch = (result) => re.test(result.name)
 
       dispatch({
         type: 'FINISH_SEARCH',
@@ -80,20 +82,27 @@ function SearchInput() {
   }, [])
 
   return (
-    <Grid>
-       <Grid.Column width={14}>
-        <Search
-          loading={loading}
-          onResultSelect={(e, data) =>
-            dispatch({ type: 'UPDATE_SELECTION', selection: data.result.title })
-          }
-          onSearchChange={handleSearchChange}
-          resultRenderer={resultRenderer}
-          results={results}
-          value={value}
-        />
-       </Grid.Column>
- {/* 
+        <Form action="/search" method="GET">
+          <Grid>
+           <Grid.Column width={11}>
+            <Search
+              input={{ icon: 'search', iconPosition: 'left', name:'sw' }}
+              loading={loading}
+              onResultSelect={(e, data) =>
+                dispatch({ type: 'UPDATE_SELECTION', selection: data.result.name })
+              }
+              onSearchChange={handleSearchChange}
+              resultRenderer={resultRenderer}
+              results={results}
+              value={value}
+            />
+          </Grid.Column>
+           <Grid.Column width={3}>
+          <Button type="submit">검색</Button>
+          </Grid.Column>
+          </Grid>
+        </Form>
+ 
 //       <Grid.Column width={10}>
 //         <Segment>
 //           <Header>State</Header>
@@ -106,7 +115,6 @@ function SearchInput() {
 //           </pre>
 //         </Segment>
 //       </Grid.Column> */}
-    </Grid>
   )
 }
 

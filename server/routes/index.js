@@ -6,7 +6,7 @@ var User = mongoose.model('UserInfo');
 const bcrypt = require('bcryptjs');
 var HashTag = mongoose.model('HashTag');
 var MasterTag = mongoose.model('MasterTag');
-// var Chronicle = mongoose.model('Chronicle');
+var Chronicle = mongoose.model('Chronicle');
 
 //템플릿용 변수 설정
 router.use(function(req,res,next){
@@ -51,18 +51,29 @@ router.post("/hashTags", function (req, res, next) {
 });
 
 router.post("/search", function (req, res, next) {
-  var formData = req.body;
-  HashTag.findOne({name:formData.searchWord})
+  var formData = req.query;
+  var hashTag = null;
+  HashTag.findOne({name:formData.sw})
   .exec((err, result) => {
     if(err)console.log(err)
     if(result==null||result==undefined){
       var newHash = new HashTag({
-        name : formData.searchWord
+        name : formData.sw
       });
       newHash.save();
+      hashTag = newHash;
+    }else{    
+      hashTag = result;
     }
+    Chronicle.find({enabled:true})//({$or:[{}],enabled: true})//,] },
+    .populate({path:'works', match:{$or:[{title:new RegExp(formData.sw,"i")},{'versions.content':new RegExp(formData.sw,"i")},{hashTag:hashTag._id}]}})
+    .exec((err,results)=>{
+      if(err)console.log(err)
+      results = results.filter(result=>result.works.length>0)
+      // res.redirect('/search/'+formData.sw,{results:results});
+      res.json({results:results});
+    });
   });
-  // Chronicle.find({$or:[{}],enabled: true})
     // res.json({ result: result });
 });
 
