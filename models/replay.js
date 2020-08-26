@@ -171,7 +171,20 @@ ReplaySchema.methods.findAuthorUserName = function(obj){
     }
     return false;
 }
-
+ReplaySchema.methods.filterSearchWord = function(searchWord){
+    if(this.lastVersion.title.includes(searchWord)){return true}
+        var delta = JSON.parse(this.lastVersion.content);
+        delta.ops = delta.ops.map((obj)=>{
+          if(typeof(obj.insert)!='string'){
+              delete obj.insert;
+            }
+            return obj;
+        });
+        delta.ops = delta.ops.filter((obj)=>obj.insert!=undefined?obj.insert.includes(searchWord):false);
+        if(delta.ops.length>0){ return  true}
+        // if(work.hashTags.includes())
+        return false;
+}
 ReplaySchema.set('toObject', { virtuals: true });
 ReplaySchema.set('toJSON', { virtuals: true,
     transform: function(doc,ret, options){

@@ -4,6 +4,7 @@ var passport = require("passport");
 var mongoose = require('mongoose');
 var User = mongoose.model('UserInfo');
 const bcrypt = require('bcryptjs');
+const chronicle = require('../../models/chronicle');
 var HashTag = mongoose.model('HashTag');
 var MasterTag = mongoose.model('MasterTag');
 var Chronicle = mongoose.model('Chronicle');
@@ -66,12 +67,26 @@ router.post("/search", function (req, res, next) {
       hashTag = result;
     }
     Chronicle.find({enabled:true})//({$or:[{}],enabled: true})//,] },
-    .populate({path:'works', match:{$or:[{title:new RegExp(formData.sw,"i")},{'versions.content':new RegExp(formData.sw,"i")},{hashTag:hashTag._id}]}})
+    .populate({path:'works', match:{enabled:true}})//,$or:[{'versions.title':new RegExp(formData.sw,"i")},{'versions.content':new RegExp(formData.sw,"i")},{hashTags:hashTag._id}]}})
     .exec((err,results)=>{
       if(err)console.log(err)
-      results = results.filter(result=>result.works.length>0)
+      results = results.filter(chronicle=>chronicle.works.length>0);
       // res.redirect('/search/'+formData.sw,{results:results});
-      res.json({results:results});
+      var replays = results.filter(chronicle=>chronicle.onModel==='Replay');
+      var scenarios= results.filter(chronicle=>chronicle.onModel==='Scenario');
+      replays = replays.map((chronicle)=>{
+           return chronicle.works.filter(work=>work.filterSearchWord(formData.sw));
+         });
+      scenarios = scenarios.map((chronicle)=>{
+        return chronicle.works.filter(work=>work.filterSearchWord(formData.sw));
+      });
+      scenarios = scenarios.filter(scenario=>scenario.length>0);
+      replays = replays.filter(replay=>replay.length>0);
+       var chronicles = results.filter((chronicle)=>{
+            if(chronicle.title.includes(formData.sw)){return true}
+            return false;
+        });
+      res.json({chronicles:chronicles, replays:replays,scenarios:scenarios });
     });
   });
     // res.json({ result: result });

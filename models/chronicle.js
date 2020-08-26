@@ -26,4 +26,22 @@ const ChronicleSchema = new Schema({
     updated: { type: Date, default: Date.now },
     enabled: { type: Boolean, default: true }
 });
+
+// ChronicleSchema.methods.filterSearchWord = function(searchWord){
+//     this.works.filter((work)=>{
+//         if(work.lastVersion.title.includes(searchWord)){return true}
+//         var delta = JSON.parse(work.lastVersion.content);
+//         delta.ops = delta.ops.map((obj)=>{
+//           if(typeof(obj.insert)!='string'){
+//               delete obj.insert;
+//             }
+//             return obj;
+//         });
+//         delta.ops = delta.ops.filter((obj)=>obj.insert!=undefined?obj.insert.includes(searchWord):false);
+//         if(delta.ops.length>0){ return true}
+//         // if(work.hashTags.includes())
+//         return false;
+//     })
+//     return this;
+// }
 module.exports = mongoose.model('Chronicle', ChronicleSchema);
