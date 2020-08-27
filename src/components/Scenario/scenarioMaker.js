@@ -162,6 +162,10 @@ class Maker extends React.Component {
                             <div className="form-group">
                                 <label htmlFor="title">제목</label>
                                 <input className="form-control" name="title" type="text" placeholder="제목을 입력해주세요" />
+                            </div>                    
+                            <div className="form-group">
+                                <label htmlFor="title_short">시나리오 줄임말</label>
+                                <input className="form-control" name="title_short" type="text" placeholder="줄임말을 스페이스바 없이 입력해주세요" />
                             </div>
                             {selectRule}
                             <div className="form-group">

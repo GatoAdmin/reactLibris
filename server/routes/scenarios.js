@@ -43,130 +43,6 @@ function ensureAuthenticated(req, res, next) {
     res.redirect("/login");
   }
 }
-const agg_scenraio_project = {
-  id: 1,
-  price: 1,
-  view: 1,
-  ruleTag: {
-    $let: {
-      vars: {
-        rule_tags: { $arrayElemAt: ["$ruleTag", 0] },
-      },
-      in: {
-        $let: {
-          vars: {
-            rule_tag: {
-              $arrayElemAt:
-                [{
-                  $filter: {
-                    input: "$$rule_tags.tags",
-                    as: "tag",
-                    cond: { $eq: ["$rule", "$$tag._id"] }
-                  }
-                }, 0]
-            }
-          },
-          in: "$$rule_tag.tag"
-        }
-      }
-    }
-  },
-  created: 1,
-  version: {
-    $let: {
-      vars: {
-        last: { $arrayElemAt: ["$versions", -1] }
-      },
-      in: {
-        title: "$$last.title",
-        capacity: "$$last.capacity",
-        masterDifficulty: "$$last.masterDifficulty",
-        playerDifficulty: "$$last.playerDifficulty",
-        orpgPredictingTime: "$$last.orpgPredictingTime",
-        trpgPredictingTime: "$$last.trpgPredictingTime",
-      }
-    }
-  },
-  author: {
-    $let: {
-      vars: {
-        user: {
-          $arrayElemAt: ["$author", 0]
-        }
-      },
-      in: {
-        userName: "$$user.userName",
-        userEmail: "$$user.userEmail"
-      }
-    }
-  },
-  subTags: {
-    $let: {
-      vars: {
-        subtag: { $arrayElemAt: ["$subTags", 0] },
-        version: { $arrayElemAt: ["$versions", -1] }
-      },
-      in: {
-        $let: {
-          vars: {
-            subtags: {
-              $filter: {
-                input: "$$subtag.tags",
-                as: "tag",
-                cond: { $in: ["$$tag._id", "$$version.subTags"] }
-              }
-            }
-          },
-          in: "$$subtags.tag"
-        }
-      }
-    }
-  },
-  genreTags: {
-    $let: {
-      vars: {
-        genretag: { $arrayElemAt: ["$genreTags", 0] },
-        version: { $arrayElemAt: ["$versions", -1] }
-      },
-      in: {
-        $let: {
-          vars: {
-            genretags: {
-              $filter: {
-                input: "$$genretag.tags",
-                as: "tag",
-                cond: { $in: ["$$tag._id", "$$version.genreTags"] }
-              }
-            }
-          },
-          in: "$$genretags.tag"
-        }
-      }
-    }
-  },
-  backgroundTag: {
-    $let: {
-      vars: {
-        background_tag: { $arrayElemAt: ["$backgroundTag", 0] },
-        version: { $arrayElemAt: ["$versions", -1] }
-      },
-      in: {
-        $let: {
-          vars: {
-            background: {
-              $filter: {
-                input: "$$background_tag.tags",
-                as: "tag",
-                cond: { $eq: ["$$tag._id", "$$version.backgroundTag"] }
-              }
-            }
-          },
-          in: { $arrayElemAt: ["$$background.tag", 0] }
-        }
-      }
-    }
-  }
-};
 const agg_lookup_user = {
   from: 'userinfos', localField: 'author', foreignField: '_id', as: 'author'
 };
@@ -198,16 +74,6 @@ const agg_lookup_subtags =
   foreignField: "tags._id",
   as: 'subTags'
 };
-router.get("/", function (req, res, next) {
-
-  Scenario.find().sort({ created: "descending" })
-    .populate('author')
-    .exec(function (err, scenarios) {
-      if (err) { return next(err); }
-      req.session.current_url = req.originalUrl;
-      res.render("scenario/scenarios", { articles: scenarios, masterTags: masterTags });
-    });
-});
 
 router.post("/", function (req, res, next) {
   var data = req.body.params;
@@ -228,7 +94,6 @@ router.post("/", function (req, res, next) {
         alignType = data.align_type.toString();
       }
     }
-    // var alignType = data.align_type;
   }
 
   var findSearch = {enabled: true,isOpened: true};
@@ -239,10 +104,6 @@ router.post("/", function (req, res, next) {
     results = filterBlockResult(req.user,results);
     return res.json({ articles: results, masterTags: masterTags });
   });
-});
-
-router.get("/make", ensureAuthenticated, function (req, res, next) {
-  res.render("scenario/makeScenarios", { chronicle_id: null, masterTags: masterTags });
 });
 
 router.post("/make", ensureAuthenticated, function (req, res, next) {
@@ -278,54 +139,63 @@ router.post("/make", ensureAuthenticated, function (req, res, next) {
     }
   }
 
-  var newScenario = new Scenario({
-    author: user._id,
-    isFree: isChecked(formData.is_paid) ? false : true,
-    isAgreeComment: isChecked(formData.is_agree_comment),
-    rule: toObjectId(formData.rule),
-    price: isChecked(formData.is_paid) ? 0 : price,
-    versions: {
-      title: formData.title,
-      capacity: { max: capacityMax, min: capacityMin },
-      rating: formData.rating,
-      masterDifficulty: formData.masterDifficulty,
-      playerDifficulty: formData.playerDifficulty,
-      content: article,
-      backgroundTag: toObjectId(formData.background_tag),
-      genreTags: toObjectId(formData.genre_tags),
-      subTags: toObjectId(formData.sub_tags),
-      orpgPredictingTime: orpgTime,
-      trpgPredictingTime: trpgTime,
-    }
-  });
-  newScenario.save()
-  // .then(scenario => {
-  //   req.flash("info", "성공적으로 발행되었습니다.");
-  //   res.redirect("/scenarios");
-  // });
-  var newChronicle = new Chronicle({
-    title: formData.title,
-    author: user._id,
-    onModel: 'Scenario',//TODO:ENUM 값으로 바꿀것
-    works: [newScenario._id]
-  });
-  newChronicle.save()
-    .then(chronicle => {
-      req.flash("info", "성공적으로 발행되었습니다.");
-      res.redirect("/scenarios");
-    });
+  HashTag.findOne({name:formData.title_short})
+         .exec((err,result)=>{
+          if(err){next(err);}
+          var hashTags = [];
 
-});
+          var newScenario = new Scenario({
+            author: user._id,
+            isFree: isChecked(formData.is_paid) ? false : true,
+            isAgreeComment: isChecked(formData.is_agree_comment),
+            rule: toObjectId(formData.rule),
+            price: isChecked(formData.is_paid) ? 0 : price,
+            versions: {
+              title: formData.title,
+              capacity: { max: capacityMax, min: capacityMin },
+              rating: formData.rating,
+              masterDifficulty: formData.masterDifficulty,
+              playerDifficulty: formData.playerDifficulty,
+              content: article,
+              backgroundTag: toObjectId(formData.background_tag),
+              genreTags: toObjectId(formData.genre_tags),
+              subTags: toObjectId(formData.sub_tags),
+              orpgPredictingTime: orpgTime,
+              trpgPredictingTime: trpgTime,
+            }
+          });
+          newScenario.save()
+          if(result==null||result==undefined){
+            var newHash = new HashTag({
+              name:formData.title_short,
+              article: newScenario._id,
+              onModel :'Replay'
+            })
+            newHash.save();
+            hashTags.push(newHash);
+          }else{
+            result.article = newScenario._id;
+            result.onModel = 'Replay';
+            result.save();
+            hashTags.push(result);
+          }
+          newScenario.hashTags = hashTags;
+          newScenario.save();
 
-router.get("/make/:id", ensureAuthenticated, function (req, res, next) {
-  Chronicle.findOne({ _id: toObjectId(req.param("id")), author: req.user._id }, function (err, chronicle) {
-    if (err) { return next(err); }
-    if (!chronicle) {
-      req.flash("error", "잘못된 접속 방법입니다.");
-      return res.redirect("/scenarios/chronicles/" + req.param("id"));
-    }
-    res.render("scenario/makeScenarios", { chronicle_id: chronicle._id, masterTags: masterTags });
-  });
+          var newChronicle = new Chronicle({
+            title: formData.title,
+            author: user._id,
+            onModel: 'Scenario',//TODO:ENUM 값으로 바꿀것
+            works: [newScenario._id]
+          });
+          newChronicle.save()
+            .then(chronicle => {
+              req.flash("info", "성공적으로 발행되었습니다.");
+              res.redirect("/scenarios");
+            })
+            .catch(err=>console.log(err));
+        });
+
 });
 
 router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
@@ -365,7 +235,12 @@ router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
       }
     }
 
-    var newScenario = new Scenario({
+    HashTag.findOne({name:formData.title_short})
+    .exec((err,result)=>{
+     if(err){next(err);}
+     var hashTags = [];
+
+     var newScenario = new Scenario({
       author: user._id,
       isFree: isChecked(formData.is_paid) ? false : true,
       isAgreeComment: isChecked(formData.is_agree_comment),
@@ -387,12 +262,31 @@ router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
     });
     newScenario.save();
 
-    chronicle.works.push(newScenario);
-    chronicle.save(err, chronicle => {
-      if (err) { console.error(err); return next(err); }
-      req.flash("info", "성공적으로 발행되었습니다.");
-      return res.redirect("/scenarios/chronicles/" + req.param("id"));
-    });
+     if(result==null||result==undefined){
+       var newHash = new HashTag({
+         name:formData.title_short,
+         article: newScenario._id,
+         onModel :'Replay'
+       })
+       newHash.save();
+       hashTags.push(newHash);
+     }else{
+       result.article = newScenario._id;
+       result.onModel = 'Replay';
+       result.save();
+       hashTags.push(result);
+     }
+     newScenario.hashTags = hashTags;
+     newScenario.save();
+
+     chronicle.works.push(newScenario);
+     chronicle.save(err, chronicle => {
+       if (err) { console.error(err); return next(err); }
+       req.flash("info", "성공적으로 발행되었습니다.");
+       return res.redirect("/scenarios/chronicles/" + req.param("id"));
+     });
+   });
+
   });
 });
 

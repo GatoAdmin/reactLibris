@@ -20,8 +20,8 @@ class Editor extends React.Component {
     }
 
     handleChange=(html, delta, source, editor)=>{ //(html) {
-      // console.log(editor.getContents());
-        this.setState({ value: editor.getContents() });
+      console.log(editor.getContents());
+        this.setState({ value: html });
         this.props.changeQuill(editor.getContents());
     }
 

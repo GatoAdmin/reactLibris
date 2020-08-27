@@ -54,20 +54,47 @@ router.post("/hashTags", function (req, res, next) {
 router.post("/search", function (req, res, next) {
   var formData = req.query;
   var hashTag = null;
-  HashTag.findOne({name:formData.sw})
-  .exec((err, result) => {
-    if(err)console.log(err)
-    if(result==null||result==undefined){
-      var newHash = new HashTag({
-        name : formData.sw
+  if(formData.sw!=null||formData.sw!="")
+  {
+    HashTag.findOne({name:formData.sw})
+    .exec((err, result) => {
+      if(err)console.log(err)
+      if(result==null||result==undefined){
+        var newHash = new HashTag({
+          name : formData.sw
+        });
+        newHash.save();
+        hashTag = newHash;
+      }else{    
+        hashTag = result;
+      }
+      Chronicle.find({enabled:true})//({$or:[{}],enabled: true})//,] },
+      .populate({path:'works', match:{enabled:true,$or:[{'versions.title':new RegExp(formData.sw,"i")},{'versions.content':new RegExp(formData.sw,"i")},{hashTags:hashTag._id}]}})
+      .exec((err,results)=>{
+        if(err)console.log(err)
+        results = results.filter(chronicle=>chronicle.works.length>0);
+        // res.redirect('/search/'+formData.sw,{results:results});
+        var replays = results.filter(chronicle=>chronicle.onModel==='Replay');
+        var scenarios= results.filter(chronicle=>chronicle.onModel==='Scenario');
+        replays = replays.map((chronicle)=>{
+             return chronicle.works.filter(work=>work.filterSearchWord(formData.sw));
+           });
+        scenarios = scenarios.map((chronicle)=>{
+          return chronicle.works.filter(work=>work.filterSearchWord(formData.sw));
+        });
+        scenarios = scenarios.filter(scenario=>scenario.length>0);
+        replays = replays.filter(replay=>replay.length>0);
+         var chronicles = results.filter((chronicle)=>{
+              if(chronicle.title.includes(formData.sw)){return true}
+              return false;
+          });
+        res.json({chronicles:chronicles, replays:replays,scenarios:scenarios });
       });
-      newHash.save();
-      hashTag = newHash;
-    }else{    
-      hashTag = result;
-    }
+    });
+  }else{
     Chronicle.find({enabled:true})//({$or:[{}],enabled: true})//,] },
-    .populate({path:'works', match:{enabled:true}})//,$or:[{'versions.title':new RegExp(formData.sw,"i")},{'versions.content':new RegExp(formData.sw,"i")},{hashTags:hashTag._id}]}})
+    .populate({path:'works', match:{enabled:true,$or:[{'versions.title':new RegExp(formData.sw,"i")},
+    {'versions.content':new RegExp(formData.sw,"i")},{hashTags:hashTag._id}]}})
     .exec((err,results)=>{
       if(err)console.log(err)
       results = results.filter(chronicle=>chronicle.works.length>0);
@@ -88,7 +115,7 @@ router.post("/search", function (req, res, next) {
         });
       res.json({chronicles:chronicles, replays:replays,scenarios:scenarios });
     });
-  });
+  }
     // res.json({ result: result });
 });
 

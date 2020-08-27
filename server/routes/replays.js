@@ -75,18 +75,6 @@ router.use(function(req,res,next){
     as: 'subTags'
   };
 
-  router.get("/",function(req,res,next){
-    Replay.find().sort({create:"descending"})
-    .populate('author')
-    // .populate('aboutScenario')
-    .exec(function(err,results){
-        if(err){return next(err);}  
-        req.session.current_url = req.originalUrl;
-        res.render("replay/replays",{replays:results});
-    });
-  });
-
-
   router.post("/", function (req, res, next) {
     var data = req.body.params;
     var alignType = "-created";
@@ -106,11 +94,8 @@ router.use(function(req,res,next){
           alignType = data.align_type.toString();
         }
       }
-      // var alignType = data.align_type;
     }
-  
-    var agg_match = { $and:[{enabled: true},{isOpened: true}]  };
-      
+        
     var findSearch = {enabled: true,isOpened: true}
     Replay.find(findSearch)
     .sort(alignType)
@@ -121,10 +106,6 @@ router.use(function(req,res,next){
     });
 
   });
-  
-router.get("/make", ensureAuthenticated, function (req, res, next) {
-  res.render("replay/makeReplays", { chronicle_id: null, masterTags: masterTags });
-});
   
 router.post("/make", ensureAuthenticated, function (req, res, next) {
   var formData = req.body;
@@ -151,66 +132,62 @@ router.post("/make", ensureAuthenticated, function (req, res, next) {
       user.save();
     }
   }
-  var hashTag = null;
-  // HashTag.findOne({name:formData.shortWord})
-  //        .exec((err,result)=>{
-  //         if(err){next(err);}
-  //         if(result!=null){
-            
-  //         }
-  //        }
-  //        );
-
-  var newReplay = new Replay({
-    author: user._id,
-    isFree: isChecked(formData.is_paid) ? false : true,
-    isAgreeComment: isChecked(formData.is_agree_comment),
-    rule: toObjectId(formData.rule),
-    price: isChecked(formData.is_paid) ? price: 0 ,
-    aboutScenario: isChecked(formData.is_base_scenario) ? aboutScenarioId : null,
-    versions: {
-      title: formData.title,
-      peoples:{
-        master: isMirrorChecked(formData.is_need_master)?formData.master_name:null,
-        players: data_players
-      },
-      rating: formData.rating,
-      content: article,
-      backgroundTag: toObjectId(formData.background_tag),
-      genreTags: toObjectId(formData.genre_tags),
-      subTags: toObjectId(formData.sub_tags),
-    }
-  });
-  console.log("여기2");
-
-  newReplay.save()
-  var newChronicle = new Chronicle({
-    title: formData.title,
-    author: user._id,
-    onModel: 'Replay',//TODO:ENUM 값으로 바꿀것
-    works: [newReplay._id]
-  });
-  
-  console.log("여기3");
-  newChronicle.save()
-    .then(chronicle => {
-      req.flash("info", "성공적으로 발행되었습니다.");
-      console.log("여기4");
-      res.redirect("/replays");
-    })
-    .catch(err=>console.log(err));
-});
-
-router.get("/make/:id", ensureAuthenticated, function (req, res, next) {
-  console.log("");
-  Chronicle.findOne({ _id: toObjectId(req.param("id")), author: req.user._id }, function (err, chronicle) {
-    if (err) { return next(err); }
-    if (!chronicle) {
-      req.flash("error", "잘못된 접속 방법입니다.");
-      return res.redirect("/replays/chronicles/" + req.param("id"));
-    }
-    res.render("replay/makeReplays", { chronicle_id: chronicle._id, masterTags: masterTags });
-  });
+  HashTag.findOne({name:formData.title_short})
+         .exec((err,result)=>{
+          if(err){next(err);}
+          var hashTags = [];
+          var newReplay = new Replay({
+            author: user._id,
+            isFree: isChecked(formData.is_paid) ? false : true,
+            isAgreeComment: isChecked(formData.is_agree_comment),
+            rule: toObjectId(formData.rule),
+            price: isChecked(formData.is_paid) ? price: 0 ,
+            aboutScenario: isChecked(formData.is_base_scenario) ? aboutScenarioId : null,
+            versions: {
+              title: formData.title,
+              peoples:{
+                master: isMirrorChecked(formData.is_need_master)?formData.master_name:null,
+                players: data_players
+              },
+              rating: formData.rating,
+              content: article,
+              backgroundTag: toObjectId(formData.background_tag),
+              genreTags: toObjectId(formData.genre_tags),
+              subTags: toObjectId(formData.sub_tags),
+            }
+          });
+          newReplay.save()
+          if(result==null||result==undefined){
+            var newHash = new HashTag({
+              name:formData.title_short,
+              article: newReplay._id,
+              onModel :'Replay'
+            })
+            newHash.save();
+            hashTags.push(newHash);
+          }else{
+            result.article = newReplay._id;
+            result.onModel = 'Replay';
+            result.save();
+            hashTags.push(result);
+          }
+          newReplay.hashTags = hashTags;
+          console.log(newReplay.hashTags);
+          newReplay.save();
+          var newChronicle = new Chronicle({
+            title: formData.title,
+            author: user._id,
+            onModel: 'Replay',//TODO:ENUM 값으로 바꿀것
+            works: [newReplay._id]
+          });
+          
+          newChronicle.save()
+            .then(chronicle => {
+              req.flash("info", "성공적으로 발행되었습니다.");
+              res.redirect("/replays");
+            })
+            .catch(err=>console.log(err));
+        });
 });
   
 router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
@@ -241,8 +218,12 @@ router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
       }
     }
 
+    HashTag.findOne({name:formData.title_short})
+    .exec((err,result)=>{
+     if(err){next(err);}
+     var hashTags = [];
 
-    var newReplay = new Replay({
+     var newReplay = new Replay({
       author: user._id,
       isFree: isChecked(formData.is_paid) ? false : true,
       isAgreeComment: isChecked(formData.is_agree_comment),
@@ -262,16 +243,32 @@ router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
         subTags: toObjectId(formData.sub_tags),
       }
     });
-    
-  
     newReplay.save()
+     if(result==null||result==undefined){
+       var newHash = new HashTag({
+         name:formData.title_short,
+         article: newReplay._id,
+         onModel :'Replay'
+       })
+       newHash.save();
+       hashTags.push(newHash);
+     }else{
+       result.article = newReplay._id;
+       result.onModel = 'Replay';
+       result.save();
+       hashTags.push(result);
+     }
+     newReplay.hashTags = hashTags;
+     console.log(newReplay.hashTags);
+     newReplay.save();
 
-    chronicle.works.push(newReplay);
-    chronicle.save(err, chronicle => {
-      if (err) { console.error(err); return next(err); }
-      req.flash("info", "성공적으로 발행되었습니다.");
-      return res.redirect("/replays/chronicles/" + req.param("id"));
-    });
+     chronicle.works.push(newReplay);
+     chronicle.save(err, chronicle => {
+       if (err) { console.error(err); return next(err); }
+       req.flash("info", "성공적으로 발행되었습니다.");
+       return res.redirect("/replays/chronicles/" + req.param("id"));
+     });
+   });
   });
 });
 

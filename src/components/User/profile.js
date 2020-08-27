@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css';
+import Calendar from './calendar'
 import {Button, List}from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import 'semantic-ui-css/semantic.css';
@@ -149,8 +148,7 @@ class Profile extends Component {
                                     <List.Content>
                                         <a href={`https://twitter.com/${value.contact}`} >
                                             <List.Icon name='twitter' />
-                                            {/* <img className="contact_type_icon twitter" sizes="192x192" width="30" src="https://abs.twimg.com/responsive-web/web/icon-ios.8ea219d4.png" /> */}
-                                            {value.contact}
+                                           {value.contact}
                                         </a>
                                     </List.Content>
                                 ) : (value.contactType == 'email' ? (
@@ -188,7 +186,6 @@ class Profile extends Component {
                                     (value.contactType == 'telegram' ? (<List.Content>
                                         <a href="https://telegram.me/{ value.contact ">
                                             <List.Icon name='telegram' />
-                                            {/* <img className="contact_type_icon telegram" sizes="30x30" width="30" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/600px-Telegram_logo.svg.png" /> */}
                                             {value.contact}
                                         </a>
                                     </List.Content>
@@ -196,8 +193,7 @@ class Profile extends Component {
                                         <List.Content>
                                             <a href="https://www.instagram.com/{ value.contact /?hl=ko">
                                             <List.Icon name='instagram' />
-                                                {/* <img className="contact_type_icon instagram" sizes="30x30" width="30" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png" /> */}
-                                                {value.contact}
+                                               {value.contact}
                                             </a>
                                         </List.Content>
                                     ) : null)))

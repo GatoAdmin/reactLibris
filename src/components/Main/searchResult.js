@@ -50,12 +50,6 @@ class SearchResult extends React.Component {
         return txt;
     }
     deltaCut(delta, len, lastTxt) {
-        // if (len == "" || len == null) { // 기본값
-        //     len = 20;
-        // }
-        // if (lastTxt == "" || lastTxt == null) { // 기본값
-        //     lastTxt = "...";
-        // }
         var deltaTest =null;
         deltaTest = delta.ops.map((obj)=>{
             delete obj.attributes;
@@ -64,9 +58,6 @@ class SearchResult extends React.Component {
             }
             return obj;
         });
-        // if (delta.length > len) {
-        //     delta = delta.substr(0, len) + lastTxt;
-        // })
         var ops= null;
         ops = deltaTest.filter((obj)=>{
                  return obj.insert!=undefined?obj.insert.includes(this.state.searchWord):false

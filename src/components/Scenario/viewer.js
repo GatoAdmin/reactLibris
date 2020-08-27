@@ -248,6 +248,9 @@ class ScenarioView extends React.Component {
     // <script src="/components/commentPart.js"></script>
 
   }
+  report(){
+      
+  }
   render() {
     var result = this.state.result;
     let blockContent;
@@ -255,6 +258,7 @@ class ScenarioView extends React.Component {
     var currentUser = this.props.currentUser;//this.state.currentUser;
     let content = <div></div>;
     var isBlock = this.state.isBlock;
+    var reportContent = <Button onClick={()=>this.report()}>신고하기</Button>;
     var isBookmark = this.state.isBookmark;
     if(result != null)
     {
