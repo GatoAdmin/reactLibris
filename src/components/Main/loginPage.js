@@ -2,6 +2,7 @@ import React from 'react'
 import axios from 'axios';
 import { Button, Divider, Form, Grid, Segment } from 'semantic-ui-react'
 import {Link} from 'react-router-dom';
+import GoogleLogin from 'react-google-login';
 
 class LoginPage extends React.Component{
     submitHandler = (event) => {
@@ -15,39 +16,77 @@ class LoginPage extends React.Component{
         // .then(res=>{console.log(res)});
     }
 
+    responseFailureGoogle = (response) => {
+      console.log(response);
+      axios.post('/login/google',response)
+      .then((res)=>{
+        console.log(res);
+      }).catch((err)=>{
+        console.log(err);
+      })
+    }
+    
+    responseSuccessGoogle = (response) => {
+      console.log("성공"+response);
+    }
+    
     render(){
         return (
             <Segment placeholder>
               <Grid columns={2} relaxed='very' stackable>
-                <Grid.Column>
-                  <Form onSubmit={this.submitHandler}> 
-                  {/* <Form action='/test' method="POST">  */}
-                  {/* <Form action="/login" method="POST"> */}
-                    <Form.Input
-                      icon='user'
-                      iconPosition='left'
-                      name='email'
-                      label='User Email'
-                      placeholder='email'
-                    />
-                    <Form.Input
-                      icon='lock'
-                      iconPosition='left'
-                      name='password'
-                      label='Password'
-                      type='password'
-                    />
-          
-                    <Button content='Login' primary />
-                  </Form>
-                </Grid.Column>
-          
+                <Grid.Row>
+                  <Grid.Column>
+                    <Form onSubmit={this.submitHandler}> 
+                    {/* <Form action='/test' method="POST">  */}
+                    {/* <Form action="/login" method="POST"> */}
+                      <Form.Input
+                        icon='user'
+                        iconPosition='left'
+                        name='email'
+                        label='User Email'
+                        placeholder='email'
+                      />
+                      <Form.Input
+                        icon='lock'
+                        iconPosition='left'
+                        name='password'
+                        label='Password'
+                        type='password'
+                      />
+            
+                      <Button content='Login' primary />
+                    </Form>
+                  </Grid.Column>
+                </Grid.Row>              
+                <Grid.Row>
+                  <Grid.Column>
+                    {/* <Form action='/login/google' method="POST"> 
+                      <Button type="submit" icon="google" content='Sign with Google' /> */}
+                      <GoogleLogin 
+                        clientId="376934500468-n23i56vurbm1eakqio5v3gmadhkmnfp2.apps.googleusercontent.com"
+                        buttonText="Goggle Login"
+                        onSuccess={(response)=>this.responseSuccessGoogle(response)}
+                        onFailure={(response)=>this.responseFailureGoogle(response)}
+                        uxMode="popup"
+                        cookiePolicy={'single_host_origin'}
+                       />
+                    {/* </Form> */}
+                  </Grid.Column>
+                </Grid.Row>   
+              <Divider vertical>Or</Divider>
                 <Grid.Column verticalAlign='middle'>
-                  <Button content='Sign up' icon='signup' size='big' as={Link} to="/signup" />
-                </Grid.Column>
+                    <Button content='Sign up' icon='signup' size='big' as={Link} to="/signup" />
+
+                {/* <Grid.Row>
+                  <Grid.Column>
+                    <Form action='/login/google' method="POST"> 
+                      <Button icon="google" content='Sign with Google' primary />
+                    </Form>
+                  </Grid.Column>
+                </Grid.Row>     */}
+                </Grid.Column> 
               </Grid>
           
-              <Divider vertical>Or</Divider>
             </Segment>
           )
     } 

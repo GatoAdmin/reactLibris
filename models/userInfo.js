@@ -14,6 +14,7 @@ const UserInfoSchema = new Schema({
     },
     userPasswd: { type: String, required: true },
     salt: { type: String,/*required:true*/ },
+    portrait : {type:String},
     coin: { type: Number, default: 0 },
     agreeList: {
         sendEmail: {
@@ -38,9 +39,9 @@ const UserInfoSchema = new Schema({
         },
     },
     connections: [{
-        connectType: Number,
+        connectType: {type:String, enum: [ 'Google']},
         email: String,
-        connectDate: { type: Date }
+        connectDate: { type: Date, default: Date.now }
     }],
     profile: {
         introduction: { type: String },

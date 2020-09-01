@@ -152,23 +152,32 @@ router.post("/signup",function(req,res,next){
 //   failureFlash:true
 // })
 );
+router.post("/signup/google",function(req,res,next){  
+  passport.authenticate('google', { scope: ['profile'] })
 
-// router.get("/users/:useremail",function(req,res,next){
-//   User.findOne({userEmail:req.params.useremail},function(err,user){
-//     if(err) {return next(err);}
-//     if(!user){return next(404);}
-//     res.render("profile",{user:user});
-//   });
-// });
-router.get("/login",function(req,res){
-  if(!req.user){
-    res.render("login/login");
-  }else{
-    req.flash("error","이미 로그인 되어있습니다.");
-    return res.redirect(req.session.current_url);          
-  }
+  User.findOne({ userEmail: email })
+      .then(user => {
+        if(user) {
+          req.flash("error","사용자가 이미 있습니다.");
+          return res.redirect("/signup");          
+          // return res.status(400).json({
+          //   userEmail: "해당 이메일을 가진 사용자가 존재합니다."
+          // })
+        } else {
+          var newUser = new User({
+            userEmail: email,
+            userPasswd: password
+          });
+          
+        newUser.save()
+          .then(user => res.json(user))
+          .catch(err => console.log(err));
+      }
+      req.flash("info","성공적인 회원가입을 축하드립니다!");
+      return res.redirect("/");
+    })
+    .catch(err => console.log(err));
 });
-
 router.post("/login",passport.authenticate("login",{
   // successRedirect: "/",
   failureRedirect: "/login",
@@ -184,10 +193,15 @@ router.post("/login",passport.authenticate("login",{
   }
 }
 );
-router.get('/login/google', function (req, res, next) {
+
+router.post('/login/google', function (req, res, next) {
   passport.authenticate('google', { scope: ['profile'] })
+    // var googleRes = req.body.response;
+    // console.log(googleRes)
+
 });
-router.get('/login/google/callback', passport.authenticate('google',  {
+
+router.post('/login/google/callback', passport.authenticate('google',  {
   failureRedirect: '/login',
   successRedirect: '/'
 }));
@@ -198,16 +212,12 @@ router.post("/test",function (req, res, next) {
   console.log(data);
 }
 );
-router.get("/logout",function(req,res){
-  req.logout();
-  res.json({currentUser:[], redirect:"/"});
-  // res.redirect("/");
-});
 
 router.post("/logout",function(req,res){
   req.logout();
   res.json({currentUser:[], redirect:"/"});
 });
+
 function ensureAuthenticated(req,res,next){
   if(req.isAuthenticated()){
     next();

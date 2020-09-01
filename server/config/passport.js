@@ -18,13 +18,36 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = keys;
 // opts.passReqToCallback = true;
 
-passport.use(new GoogleStrategy({
+passport.use('google',new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: "http://localhost:3000/login/google/callback"
+  callbackURL: "http://localhost/login/google/callback"
 },
-function(accessToken, refreshToken, profile, cb) {
-  return cb(null, profile);
+function (accessToken, refreshToken, profile, cb) {
+  console.log("들어감3");
+  try {
+    const user = User.findOne({'connections.connectType':'Google','connections.email':profile.email});
+    if (user) {
+      return cb(null, user);
+    } // 회원 정보가 있으면 로그인
+    console.log("들어감4");
+    const newUser = new User({
+      // 없으면 회원 생성
+      userName:profile.name,
+      userEmail:profile.email,
+      userPasswd:"",
+      portrait:profile.imageUrl,
+      connections:[{
+        connectType: 'Google',
+        email: profile.email,
+      }]
+    });
+    newUser.save(user => {
+      return cb(null, user); // 새로운 회원 생성 후 로그인
+    });
+  } catch (err) {
+    return cb(err, false);
+  }
 }
 ));
 
