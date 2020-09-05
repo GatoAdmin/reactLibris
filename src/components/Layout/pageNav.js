@@ -1,22 +1,33 @@
 import React from 'react';
-import App from './components/App';
-import About from './components/About';
-import NotFound from './components/NotFound';
-import Replay from './components/Replay';
-import Scenario from './components/Scenario';
-import Profile from './components/Profile';
+import { Button,Grid, Menu } from 'semantic-ui-react'
+import Search from './Search';
+import {Link } from 'react-router-dom';
 
-const BaseLayout = () => (
-    <div className="base">
-      <header>
-        <p>React Router v5 Browser Example</p>
-          <nav>
-            <ul>
-              <li><Link to='/'>Home</Link></li>
-              <li><Link to='/about'>About</Link></li>
-              <li>
-                  <Link to='/me'>Profile</Link>
-                  <Route path="/me" component={ProfileMenu} />
-              </li>
-              ...
-  )
+function Navbar (props){
+  return (<nav className='Menu-wrapper'>
+  <ul>
+    <Grid>
+      <Grid.Column width={6}>
+        <Button.Group>
+        <Button as={Link} to='/'>Home</Button>{/* <Link to='/'><li>Home</li></Link> */}
+        <Button as={Link} to='/about'>About</Button>
+        <Button as={Link} to='/replays'>Replay</Button>
+        <Button as={Link} to='/scenarios'>Scenario</Button>            
+        </Button.Group>
+      </Grid.Column>
+      <Grid.Column width={4}>
+          <Search/>
+      </Grid.Column>
+      
+      <Grid.Column width={6}>
+      <Button.Group>
+      {typeof(props.currentUser) == 'object'&&!Array.isArray(props.currentUser)?<Button as={Link} to='/library'>Library</Button>:null}
+      {typeof(props.currentUser) == 'object'&&!Array.isArray(props.currentUser)?<Button as={Link} to={`/user/${props.currentUser!=null?props.currentUser.userName:null}`}>Profile</Button>:null}
+      {typeof(props.currentUser) == 'object'&&!Array.isArray(props.currentUser)?<Button as={Link} to='/logout'>Logout</Button>:<Button as={Link} to='/login'>Login</Button>} 
+      </Button.Group>
+      </Grid.Column>
+    </Grid>
+  </ul>
+</nav>);
+}
+export default Navbar

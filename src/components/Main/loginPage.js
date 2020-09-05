@@ -16,20 +16,6 @@ class LoginPage extends React.Component{
         // .then(res=>{console.log(res)});
     }
 
-    responseFailureGoogle = (response) => {
-      console.log(response);
-      axios.post('/login/google',response)
-      .then((res)=>{
-        console.log(res);
-      }).catch((err)=>{
-        console.log(err);
-      })
-    }
-    
-    responseSuccessGoogle = (response) => {
-      console.log("성공"+response);
-    }
-    
     render(){
         return (
             <Segment placeholder>
@@ -65,8 +51,8 @@ class LoginPage extends React.Component{
                       <GoogleLogin 
                         clientId="376934500468-n23i56vurbm1eakqio5v3gmadhkmnfp2.apps.googleusercontent.com"
                         buttonText="Goggle Login"
-                        onSuccess={(response)=>this.responseSuccessGoogle(response)}
-                        onFailure={(response)=>this.responseFailureGoogle(response)}
+                        onSuccess={(response)=>this.props.responseSuccessGoogle(response)}
+                        onFailure={(response)=>this.props.responseFailureGoogle(response)}
                         uxMode="popup"
                         cookiePolicy={'single_host_origin'}
                        />

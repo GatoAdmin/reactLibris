@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import Calendar from './calendar'
-import {Button, List}from 'semantic-ui-react';
+import {Button, List,Image}from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import 'semantic-ui-css/semantic.css';
 import Moment from 'react-moment';
@@ -123,7 +123,7 @@ class Profile extends Component {
         let quillBoxStyle = {width: "80%", marginLeft: "10%"};
         detail = (
             <div>
-                <div className="profileImage">이미지</div>
+                <div className="profileImage"><Image src={user.portrait}/></div>
                 <List className="profile">
                     <List.Item>
                         <span>소개글 :

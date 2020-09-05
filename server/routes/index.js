@@ -2,9 +2,11 @@ var express = require('express');
 var router = express.Router();
 var passport = require("passport");
 var mongoose = require('mongoose');
+var {OAuth2Client} = require('google-auth-library');
 var User = mongoose.model('UserInfo');
 const bcrypt = require('bcryptjs');
-const chronicle = require('../../models/chronicle');
+const { response } = require('express');
+const client = new OAuth2Client("376934500468-n23i56vurbm1eakqio5v3gmadhkmnfp2.apps.googleusercontent.com");
 var HashTag = mongoose.model('HashTag');
 var MasterTag = mongoose.model('MasterTag');
 var Chronicle = mongoose.model('Chronicle');
@@ -178,11 +180,7 @@ router.post("/signup/google",function(req,res,next){
     })
     .catch(err => console.log(err));
 });
-router.post("/login",passport.authenticate("login",{
-  // successRedirect: "/",
-  failureRedirect: "/login",
-  failureFlash : true
-}),(req,res)=>{
+router.post("/login",passport.authenticate("login",{failureFlash: true }),(req,res)=>{
   if(req.session.current_url != "undefined"&&req.session.current_url != undefined){
     console.log(req.session.current_url)
     // res.redirect(req.session.current_url);
@@ -194,12 +192,52 @@ router.post("/login",passport.authenticate("login",{
 }
 );
 
-router.post('/login/google', function (req, res, next) {
-  passport.authenticate('google', { scope: ['profile'] })
-    // var googleRes = req.body.response;
-    // console.log(googleRes)
-
-});
+router.post('/login/google', passport.authenticate('google',{failureFlash: true }),(req,res)=>{
+  if(req.session.current_url != "undefined"&&req.session.current_url != undefined){
+    console.log(req.session.current_url)
+    res.json({redirect:req.session.current_url, currentUser:req.user})
+  }else{
+    res.json({redirect:"/", currentUser:req.user})
+  }
+}
+);
+// router.post('/login/google', function (req, res, next) {
+//   const tokenId = req.body.data;
+//   passport.authenticate('google');
+//   // client.verifyIdToken({idToken:tokenId, audience:"376934500468-n23i56vurbm1eakqio5v3gmadhkmnfp2.apps.googleusercontent.com"})
+//   // .then(response=>{
+//   //   const {email_verified, name, email,picture} = response.payload;
+//   //   console.log(response.payload)
+//   //   if(email_verified){
+//   //     User.findOne({'connections.connectType':'Google','connections.email':email})
+//   //     .exec((err, user)=>{
+//   //       if(err){
+//   //         return res.status(400).json({error:"무언가 문제가 있습니다.;ㅁ;"});
+//   //       }else{
+//   //         if (user) { // 회원 정보가 있으면 로그인
+//   //           console.log("들어감4");
+//   //           return cb(null, user);
+//   //         }else{
+//   //           const newUser = new User({
+//   //             // 없으면 회원 생성
+//   //             userName:name,
+//   //             userEmail:email,
+//   //             userPasswd:"",
+//   //             portrait:response.payload.picture,
+//   //             connections:[{
+//   //               connectType: 'Google',
+//   //               email: email,
+//   //             }]
+//   //           });
+//   //           newUser.save(user => {
+//   //             return cb(null, user); // 새로운 회원 생성 후 로그인
+//   //           });
+//   //         }
+//   //       }
+//   //     })
+//   //   }
+//   // })
+// });
 
 router.post('/login/google/callback', passport.authenticate('google',  {
   failureRedirect: '/login',
