@@ -3,11 +3,21 @@ const Schema = mongoose.Schema;
 
 const ChronicleSchema = new Schema({
     author: { type: Schema.Types.ObjectId, ref: 'UserInfo' },
+    adminAuthor: { type: Schema.Types.ObjectId, ref: 'AdminInfo' },
     title:{type:String, default:""},
+    banner:{
+        imageName :{type:String, default:"none",require:true}, //표기될 이미지
+        imageData:{type:String, require:true},
+    },
+    // image:{type:Image},
     description:{type:String, default:""},
     onModel: {type:String, required:true, enum: [ 'News','Scenario', 'Replay']},
     works: [{type: Schema.Types.ObjectId,refPath: 'onModel'}],
     isOpened: { type: Boolean, default: true },
+    bookingOpen:{
+        start:{ type: Date, default: Date.now },
+        end:{ type: Date}
+    },
     reported: [{
         isStopped: { type: Boolean, default: false },
         isCancelPaid: { type: Boolean, default: false },
