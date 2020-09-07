@@ -9,6 +9,7 @@ import About from './About';
 import NotFound from './NotFound';
 import Replay from './Replay';
 import Scenario from './Scenario';
+import News from './News';
 import User from './User';
 import Library from './Library';
 import Comment from './Comment';
@@ -72,6 +73,7 @@ class BaseLayout extends React.Component {
         <Switch>
               <Route exact path="/" component={(props)=><Main currentUser={this.state.currentUser}{...props}/>} />
               <Route path="/about" component={About} />
+              <Route path="/news" component={(props)=><News currentUser={this.state.currentUser}{...props}/>} />
               <Route path="/replays" component={(props)=><Replay currentUser={this.state.currentUser}{...props}/>} />
               <Route path="/scenarios" component={(props)=><Scenario  currentUser={this.state.currentUser}{...props}/>} /> 
               <Route path="/user" component={(props)=><User currentUser={this.state.currentUser}{...props}/>} />

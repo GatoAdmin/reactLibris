@@ -18,30 +18,12 @@ const AdminInfoSchema = new Schema({
     updated: { type: Date, default: Date.now },
     enabled: { type: Boolean, default: true }
 });
-AdminInfoSchema.pre("save", function (done) {
-    var user = this;
-    if (!user.isModified("passwd")) {
-        return done();
-    }
-    bcrypt.genSalt(SALT_FACTOR, function (err, salt) {
-        if (err) { return done(err); }
-        bcrypt.hash(user.passwd, salt, (err, hashedPassword) => {
-            if (err) { return done(err); }
-            user.passwd = hashedPassword;
-            user.salt = salt;
-            done();
-        });
-    });
-});
 
-AdminInfoSchema.methods.checkPassword = function (guess, done) {
-    bcrypt.compare(guess, this.passwd, function (err, isMatch) {
-        done(err, isMatch);
-    });
-};
 AdminInfoSchema.set('toObject', { virtuals: true });
 AdminInfoSchema.set('toJSON', { virtuals: true,
     transform: function(doc,ret, options){
+        delete ret.email;
+        delete ret.roles;
         delete ret.passwd;
         delete ret.salt;
         delete ret.enabled;

@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import Moment from 'react-moment';
 import {Switch, Route, Link} from 'react-router-dom';
+import { Card, Form, Icon,Image, Grid, Button, Table } from 'semantic-ui-react'
 
 const e = React.createElement;
 
@@ -22,6 +23,7 @@ class ArticleList extends React.Component {
             filter_rule: [],
             filter_sub_tags: [],
             master_tags: [],
+            viewType:'list'
         };
     }
 
@@ -137,7 +139,142 @@ class ArticleList extends React.Component {
         // if (this.state.searchs !== prevState.searchs ) {
         getArticles();
         // }
+    }    
+    
+    getAlignIcon(order){
+        if(this.state.align_type === order){
+            return this.state.align_order === "ascending" ?"sort down" : "sort up"
+        }else{
+            console.log(this.state.align_type)
+            return null;
+        }
     }
+    
+    onViewClick= (e) =>{
+        e.preventDefault();
+        var viewType = e.target.value;
+        console.log(viewType)
+        if(viewType !=null && viewType!=undefined){
+            this.setState(() => ({viewType: viewType}));
+        }
+    }
+    
+    getList(type){
+        if(type==="card"){
+            return (
+                <Card.Group>
+                    {this.state.rows.map((data, index) => {
+                                var date = new Date(data.created);
+                                var latest = data.lastVersion;
+                                return (
+                                    <Card key = {index.toString()} >
+                                        {/* <Link to={"/replays/view/"+data._id} ><Image src={data.banner}/></Link> */}
+                                        <Card.Content>
+                                            <Card.Header><Link to={"/replays/view/"+data._id} >{latest.title}</Link></Card.Header>
+                                        </Card.Content>
+                                        <Card.Content>
+                                            <Card.Meta>
+                                                <Grid>
+                                                    <Grid.Column className="tag_item">#{latest.backgroundTag}</Grid.Column>
+                                                </Grid>
+                                            </Card.Meta>
+                                            <Card.Meta>
+                                                <Grid columns="equal">
+                                                    {latest.genreTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
+                                                </Grid>
+                                            </Card.Meta>
+                                            <Card.Meta>
+                                                <Grid columns="equal">
+                                                    {latest.subTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
+                                                </Grid>
+                                            </Card.Meta>
+                                            <Card.Meta>
+                                                <Grid columns="equal">
+                                                    {data.hashTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag.name}</Grid.Column>}) }
+                                                </Grid>
+                                            </Card.Meta>
+                                        </Card.Content>
+                                        <Card.Content extra>
+                                            <Card.Meta>
+                                                <Grid columns="equal">
+                                                    <Grid.Column ><a  href={"/user/"+data.author.userName} ><Icon name="user"/>{data.author.userName}</a></Grid.Column>
+                                                    <Grid.Column ><Icon name="eye"/>{data.view}</Grid.Column>
+                                                    <Grid.Column ><Moment  format="YYYY-MM-DD HH:mm">{date}</Moment></Grid.Column>
+                                                </Grid>
+                                            </Card.Meta>
+                                        </Card.Content>
+                                    </Card>
+                                    );
+                            })
+                    }
+                </Card.Group>
+                );
+        }else if(type==="list"){
+            return(
+                <Table>
+                    <Table.Header>
+                        <Table.Row>
+                            <th><Button className= "btn align-btn" type="button" value="title" icon onClick= {this.onAlignClick}>제목<Icon name={this.getAlignIcon("title")}/></Button></th>
+                            <th><Button className= "btn align-btn" type="button" value="ruleTag" icon onClick= {this.onAlignClick}>기반룰<Icon name={this.getAlignIcon("ruleTag")}/></Button></th>
+                            <th><Button className= "btn align-btn" type="button"value='author' icon  onClick= {this.onAlignClick}>작성자<Icon name={this.getAlignIcon('author')}/></Button></th>
+                            <th><Button className= "btn align-btn" type="button" value='view' icon  onClick= {this.onAlignClick}>조회수<Icon name={this.getAlignIcon('view')}/></Button></th>
+                            <th><Button className= "btn align-btn" type="button" value='price' icon  onClick= {this.onAlignClick}>가격<Icon name={this.getAlignIcon('price')}/></Button></th>
+                            <th>배경</th>
+                            <th>장르</th>
+                            <th>태그</th>
+                            <th><Button className= "btn align-btn" type="button" value='created' icon  onClick= {this.onAlignClick}>발행<Icon name={this.getAlignIcon('created')}/></Button></th>
+                    
+                        </Table.Row>
+                    </Table.Header>
+                    <Table.Body id="data_tbody" basic>
+                        {this.state.rows.map((data, index) => {
+                            var date = new Date(data.created);
+                            var latest = data.lastVersion;
+                            return (
+                                <Table.Row key = {index.toString()} >
+                                    <Table.Cell>
+                                        <Link to={"/replays/view/"+data._id} >{latest.title}</Link>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {data.ruleTag}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <a  href={"/user/"+data.author.userName} >{data.author.userName}</a>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {data.view}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {data.price}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <ul>
+                                            <li className="tag_item">#{latest.backgroundTag}</li>
+                                        </ul>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <ul>
+                                            {latest.genreTags.map((tag, id) => { return <li className="tag_item" key={id.toString()}>#{tag}</li>}) }
+                                        </ul>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <ul>
+                                            {latest.subTags.map((tag, id) => { return <li className="tag_item" key={id.toString()}>#{tag}</li>}) }
+                                        </ul>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Moment  format="YYYY-MM-DD HH:mm">{date}</Moment>
+                                    </Table.Cell>
+                                </Table.Row>
+                                );
+                        })
+                }
+                    </Table.Body>
+                </Table>
+                );
+        }
+    }
+
     render() {
         var select_rule;
         var select_genre;
@@ -233,7 +370,7 @@ class ArticleList extends React.Component {
                 </form>
                 <ul id="tag-list"></ul>
             </div>
-            <div className="order">
+            {/* <div className="order">
                 <button className= "btn align-btn" type="button" value="title" onClick= {this.onAlignClick}>제목순</button>
                 <button className= "btn align-btn" type="button" value='ruleTag' onClick= {this.onAlignClick}>룰순</button>
                 <button className= "btn align-btn" type="button"value='author' onClick= {this.onAlignClick}>작가순</button>
@@ -241,66 +378,13 @@ class ArticleList extends React.Component {
                 <button className= "btn align-btn" type="button" value='price' onClick= {this.onAlignClick}>가격순</button>
                 <button className= "btn align-btn" type="button" value='created' onClick= {this.onAlignClick}>발행순</button>
                 {this.state.align_order === "ascending" ? <span className= "btn align-btn">내림차순</span> : <span className="btn align-btn">오름차순</span>}
+            </div> */}
+            
+            <div className="view_type">
+                <Button icon value="list" onClick={this.onViewClick}><Icon name="list layout"/></Button>
+                <Button icon value="card" onClick={this.onViewClick}><Icon name="grid layout"/></Button>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>제목</th>
-                        <th>기반룰</th>
-                        <th>작가</th>
-                        <th>조회수</th>
-                        <th>가격</th>
-                        <th>배경</th>
-                        <th>장르</th>
-                        <th>태그</th>
-                        <th>발행일</th>
-                    </tr>
-                </thead>
-                <tbody id="data_tbody">
-                {this.state.rows.map((data, index) => {
-                            var date = new Date(data.created);//.format('yyyy-MM-dd HH:mm');
-                            var latest = data.lastVersion;//.last();
-                            return (
-                                <tr key = {index.toString()} >
-                                    <td>
-                                        <Link to={"/replays/view/"+data._id} >{latest.title}</Link>
-                                    </td>
-                                    <td>
-                                        {data.ruleTag}
-                                    </td>
-                                    <td>
-                                        <a  href={"/user/"+data.author.userName} >{data.author.userName}</a>
-                                    </td>
-                                    <td>
-                                        {data.view}
-                                    </td>
-                                    <td>
-                                        {data.price}
-                                    </td>
-                                    <td>
-                                        <ul>
-                                            <li className="tag_item">#{latest.backgroundTag}</li>
-                                        </ul>
-                                    </td>
-                                    <td>
-                                        <ul>
-                                            {latest.genreTags.map((tag, id) => { return <li className="tag_item" key={id.toString()}>#{tag}</li>}) }
-                                        </ul>
-                                    </td>
-                                    <td>
-                                        <ul>
-                                            {latest.subTags.map((tag, id) => { return <li className="tag_item" key={id.toString()}>#{tag}</li>}) }
-                                        </ul>
-                                    </td>
-                                    <td>
-                                        <Moment  format="YYYY-MM-DD HH:mm">{date}</Moment>
-                                    </td>
-                                </tr>
-                                );
-                        })
-                }
-                </tbody>
-            </table>
+            {this.getList(this.state.viewType)}
         </div>
 
         return component;

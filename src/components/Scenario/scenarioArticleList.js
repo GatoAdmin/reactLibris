@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import Moment from 'react-moment';
 import {Link} from 'react-router-dom';
+import { Grid, Card, Icon, Image, Table, Button } from 'semantic-ui-react'
 
 const e = React.createElement;
 
@@ -27,6 +28,7 @@ class ArticleList extends React.Component {
             filter_rule: [],
             filter_sub_tags: [],
             master_tags: [],
+            viewType:'list'
         };
     }
 
@@ -156,6 +158,127 @@ class ArticleList extends React.Component {
         getArticles();
         // }
     }
+    getAlignIcon(order){
+        if(this.state.align_type === order){
+            return this.state.align_order === "ascending" ?"sort down" : "sort up"
+        }else{
+            return "";
+        }
+    }
+    
+    onViewClick= (e) =>{
+        e.preventDefault();
+        var viewType = e.target.value;
+        console.log(viewType)
+        if(viewType !=null && viewType!=undefined){
+            this.setState(() => ({viewType: viewType}));
+        }
+    }
+    
+    getList(type){
+        if(type==="card"){
+            return (
+                <Card.Group>
+                    {this.state.rows.map((data, index) => {
+                                var date = new Date(data.created);
+                                var latest = data.lastVersion;
+                                return (
+                                    <Card key = {index.toString()} >
+                                        {/* <Link to={"/replays/view/"+data._id} ><Image src={data.banner}/></Link> */}
+                                        <Card.Content>
+                                            <Card.Header><Link to={"/replays/view/"+data._id} >{latest.title}</Link></Card.Header>
+                                        </Card.Content>
+                                        <Card.Content>
+                                            <Card.Meta>
+                                                <Grid>
+                                                    <Grid.Column className="tag_item">#{latest.backgroundTag}</Grid.Column>
+                                                </Grid>
+                                            </Card.Meta>
+                                            <Card.Meta>
+                                                <Grid columns="equal">
+                                                    {latest.genreTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
+                                                </Grid>
+                                            </Card.Meta>
+                                            <Card.Meta>
+                                                <Grid columns="equal">
+                                                    {latest.subTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
+                                                </Grid>
+                                            </Card.Meta>
+                                            <Card.Meta>
+                                                <Grid columns="equal">
+                                                    {data.hashTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag.name}</Grid.Column>}) }
+                                                </Grid>
+                                            </Card.Meta>
+                                        </Card.Content>
+                                        <Card.Content extra>
+                                            <Card.Meta>
+                                                <Grid columns="equal">
+                                                    <Grid.Column ><a  href={"/user/"+data.author.userName} ><Icon name="user"/>{data.author.userName}</a></Grid.Column>
+                                                    <Grid.Column ><Icon name="eye"/>{data.view}</Grid.Column>
+                                                    <Grid.Column ><Moment  format="YYYY-MM-DD HH:mm">{date}</Moment></Grid.Column>
+                                                </Grid>
+                                            </Card.Meta>
+                                        </Card.Content>
+                                    </Card>
+                                    );
+                            })
+                    }
+                </Card.Group>
+                );
+        }else if(type==="list"){
+            return(
+                e(Table, null,
+                    e(Table.Header, null,
+                        e(Table.Row, null,
+                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"title" ,icon:true ,onClick:this.onAlignClick},"제목"  ,e(Icon,{name:this.getAlignIcon("title")})) ),
+                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"ruleTag" ,icon:true ,onClick:this.onAlignClick},"사용룰",e(Icon,{name:this.getAlignIcon("ruleTag")}))  ),
+                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"author" ,icon:true ,onClick:this.onAlignClick},"작가"  ,e(Icon,{name:this.getAlignIcon("author")}))  ),
+                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"view" ,icon:true ,onClick:this.onAlignClick},"조회수",e(Icon,{name:this.getAlignIcon( "view")}))    ),
+                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"price" ,icon:true ,onClick:this.onAlignClick},"가격"  ,e(Icon,{name:this.getAlignIcon( "price")}))  ),
+                            e("th",null,"배경"),
+                            e("th",null,"장르"),
+                            e("th",null,"태그"),
+                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"created" ,icon:true ,onClick:this.onAlignClick},"발행일",e(Icon,{name:this.getAlignIcon("created")}))   )
+                        )
+                    ),
+                    e(Table.Body, { id: "data_tbody" },
+                        this.state.rows.map((data, index) => {
+                            var date = new Date(data.created);//.format('yyyy-MM-dd HH:mm');
+                            var latest = data.lastVersion;//.last();
+                            return e(Table.Row, { key: index.toString() },
+                                e(Table.Cell, null,
+                                    e("a", { href: "/scenarios/view/" + data._id }, latest.title)),
+                                e(Table.Cell, null, data.ruleTag),
+                                e(Table.Cell, null, e("a", { href: "/user/" + data.author.userName }, data.author.userName)),
+                                e(Table.Cell, null, data.view),
+                                e(Table.Cell, null, data.price),
+                                e(Table.Cell, null,
+                                    e("ul", null,
+                                        e("li", { className: "tag_item" }, "#" + latest.backgroundTag)
+                                    )
+                                ),
+                                e(Table.Cell, null,
+                                    e("ul", null,
+                                    latest.genreTags.map((tag, id) => {
+                                            return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
+                                        })
+                                    )
+                                ),
+                                e(Table.Cell, null, e("ul", null,
+                                latest.subTags.map((tag, id) => {
+                                        return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
+                                    })
+                                )
+                                ),
+                                e(Table.Cell, null, e(Moment,{format:"YYYY-MM-DD HH:mm"},date))
+
+                            );
+                        })
+                    )
+                )
+                );
+        }
+    }
     render() {
         var select_rule;
         var select_genre;
@@ -191,7 +314,7 @@ class ArticleList extends React.Component {
                 })
             )
         }
-        var component =
+        var header =
             e("div", null,
                 e("span",null,"시나리오"), 
                 typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?e(Link, {to:'/scenarios/make'},"새로 만들기"):null,
@@ -268,117 +391,16 @@ class ArticleList extends React.Component {
                         }, "검색")
                     ),
                     e("ul", { id: "tag-list" }),
-                    // e("table",null,
-                    //     e("tr",null,
-                    //         e("td",null,
-                    //             e("input",{id:"search",type:"text"}),
-                    //             e("input",{type:"submit",value:"검색",
-                    //             onClick:()=>this.setState({search_tags: ["CoC",["사랑","죽어라"]]})
-                    //             })
-                    //         )
-                    //     )
-                    // )
                 ),
-                e("button", {
-                    className: "btn align-btn",
-                    type:"button",
-                    value:"title",
-                    onClick: this.onAlignClick,
-                }, "제목순"),
-                e("button", {
-                    className: "btn align-btn",
-                    type:"button",
-                    value:'ruleTag', 
-                    onClick: this.onAlignClick,
-                }, "룰순"),
-                e("button", {
-                    className: "btn align-btn",
-                    type:"button",
-                    value:'author', 
-                    onClick: this.onAlignClick,
-                }, "작가순"),
-                e("button", {
-                    className: "btn align-btn",
-                    type:"button",
-                    value:'view', 
-                    onClick: this.onAlignClick,
-                }, "조회수"),
-                e("button", {
-                    className: "btn align-btn",
-                    type:"button",
-                    value:'price',
-                    onClick: this.onAlignClick,
-                }, "가격순"),
-                e("button", {
-                    className: "btn align-btn",
-                    type:"button",
-                    value:'created',
-                    onClick: this.onAlignClick,
-                }, "발행순"),
-                this.state.align_order === "ascending" ? e("button", {
-                    className: "btn align-btn",
-                    onClick: () =>
-                        this.setState({
-                            align_order: 'descending'
-                        }),
-                }, "내림차순")
-                    : e("button", {
-                        className: "btn align-btn",
-                        onClick: () =>
-                            this.setState({
-                                align_order: 'ascending'
-                            }),
-                    }, "오름차순"),
-                e("table", null,
-                    e("thead", null,
-                        e("tr", null,
-                            e("th", null, "제목"),
-                            e("th", null, "사용룰"),
-                            e("th", null, "작가"),
-                            e("th", null, "조회수"),
-                            e("th", null, "가격"),
-                            e("th", null, "배경"),
-                            e("th", null, "장르"),
-                            e("th", null, "태그"),
-                            e("th", null, "발행일")
-                        )
-                    ),
-                    e('tbody', { id: "data_tbody" },
-                        this.state.rows.map((data, index) => {
-                            var date = new Date(data.created);//.format('yyyy-MM-dd HH:mm');
-                            var latest = data.lastVersion;//.last();
-                            return e("tr", { key: index.toString() },
-                                e("td", null,
-                                    e("a", { href: "/scenarios/view/" + data._id }, latest.title)),
-                                e("td", null, data.ruleTag),
-                                e("td", null, e("a", { href: "/user/" + data.author.userName }, data.author.userName)),
-                                e("td", null, data.view),
-                                e("td", null, data.price),
-                                e("td", null,
-                                    e("ul", null,
-                                        e("li", { className: "tag_item" }, "#" + latest.backgroundTag)
-                                    )
-                                ),
-                                e("td", null,
-                                    e("ul", null,
-                                    latest.genreTags.map((tag, id) => {
-                                            return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
-                                        })
-                                    )
-                                ),
-                                e("td", null, e("ul", null,
-                                latest.subTags.map((tag, id) => {
-                                        return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
-                                    })
-                                )
-                                ),
-                                e("td", null, e(Moment,{format:"YYYY-MM-DD HH:mm"},date))
-
-                            );
-                        })
-                    )
-                ));
-
+                e("div",{className:"view_type"},
+                    e(Button,{icon:true ,value:"list", onClick:this.onViewClick},e(Icon,{name:"list layout"})),
+                    e(Button,{icon:true ,value:"card", onClick:this.onViewClick},e(Icon,{name:"grid layout"}))
+                )
+            );
+        var component = <div>
+            {header}
+            {this.getList(this.state.viewType)}
+        </div>
         return component;
     }
 }

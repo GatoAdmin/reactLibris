@@ -11,6 +11,7 @@ function Navbar (props){
         <Button.Group>
         <Button as={Link} to='/'>Home</Button>{/* <Link to='/'><li>Home</li></Link> */}
         <Button as={Link} to='/about'>About</Button>
+        <Button as={Link} to='/news'>News</Button>
         <Button as={Link} to='/replays'>Replay</Button>
         <Button as={Link} to='/scenarios'>Scenario</Button>            
         </Button.Group>
