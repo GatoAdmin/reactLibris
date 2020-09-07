@@ -55,12 +55,11 @@ function SearchInput(props) {
   source = getHashTags(props);
   const [state, dispatch] = React.useReducer(exampleReducer, initialState)
   const { loading, results, value } = state
-
   const timeoutRef = React.useRef()
   const handleSearchChange = React.useCallback((e, data) => {
     clearTimeout(timeoutRef.current)
     dispatch({ type: 'START_SEARCH', query: data.value })
-
+    props.onChangeHashTags(e.target.value);
     timeoutRef.current = setTimeout(() => {
       if (data.value.length === 0) {
         dispatch({ type: 'CLEAN_QUERY' })

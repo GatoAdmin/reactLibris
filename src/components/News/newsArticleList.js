@@ -220,12 +220,18 @@ class NewsArticleList extends React.Component {
         }
     }
 
+    onChangeHashTags = (value)=>{
+        if(value!=undefined&&value!=null){
+            console.log(value);
+            this.setState(()=>({filter_hash_tags:value}))
+        }
+    }
 
     render() {
         var select_hash_tags;
         if (this.state.hash_tags.length > 0) {
             var hashTags = this.state.hash_tags;
-            select_hash_tags = e("select", { className: "is-select2-select", onChange: this.onNewsSearchSelected, multiple: "multiple", name: "filter_hash_tags", tabIndex: "-1", placeholder: "룰" },
+            select_hash_tags = e("select", { className: "is-select2-select", onChange: this.onNewsSearchSelected, multiple: "multiple", name: "filter_hash_tags", tabIndex: "-1", placeholder: "해쉬태그" },
                 e("option", { value: "", selectd: "selected" }, "-"),
                 hashTags.map((tag, id) => {
                     return e("option", { value: tag._id, key: id.toString() }, tag.name);
@@ -235,13 +241,12 @@ class NewsArticleList extends React.Component {
         var component = 
         <div>            
             <span>뉴스</span>
-            {typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?<Link to='/replays/make'>새로 만들기</Link>:null}
             <div className="search_window">
                 <Form id= "tag-form" action="/news/search" method= "POST">
                         <Form.Input  id= "rdTag" type= "hidden" value= "" name= "tag"/>
                     <Form.Group widths='equal' className = "search_ul" >
                         <div   className= "form-field" >
-                            <Form.Input  type= "text" label="뉴스 제목" name= "filter_title" onChange={this.onNewsSearchChange}  placeholder= "찾을 리플레이 제목"/>
+                            <Form.Input  type= "text" label="뉴스 제목" name= "filter_title" onChange={this.onNewsSearchChange}  placeholder= "찾을 뉴스 제목"/>
                         </div>
                         <div className= "form-field">                                
                             <Form.Input  type= "text" label="작가" name= "filter_author" onChange={this.onNewsSearchChange} placeholder= "찾을 작가"/>
@@ -250,7 +255,7 @@ class NewsArticleList extends React.Component {
                     
                     <div className= "form-field" >
                             {/* <label  htmlFor= "filter_hash_tags">태그</label> */}
-                            <HashTagsSearch tags={this.state.hash_tags}/>
+                            <HashTagsSearch tags={this.state.hash_tags} onChangeHashTags={this.onChangeHashTags}/>
                         </div>
                     <Button type="submit" onClick={this.onNewsSearchSubmit}>검색</Button>
                 </Form>
@@ -260,7 +265,7 @@ class NewsArticleList extends React.Component {
                 <Button icon value="list" onClick={this.onViewClick}><Icon name="list layout"/></Button>
                 <Button icon value="card" onClick={this.onViewClick}><Icon name="grid layout"/></Button>
             </div>
-            {this.getList(this.state.viewType)}
+            {this.state.rows.length>0?this.getList(this.state.viewType):<span>검색하신 결과를 찾지 못했어요 ;ㅂ;</span>}
         </div>
 
         return component;

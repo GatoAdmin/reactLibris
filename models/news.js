@@ -61,9 +61,9 @@ NewsSchema.virtual('view').get(function(){
     return this.viewUsers.length;
 });
 NewsSchema.methods.findAuthorUserName = function(obj){
-    if(obj.author!=undefined){
-        var search = new RegExp(obj.author.userName, "i");
-        return this.author.userName.match(search)!=""?true:false;
+    if(obj.staff!=undefined){
+        var search = new RegExp(obj.staff.username, "i");
+        return this.staff.username.match(search)!=""?true:false;
     }
     return false;
 }

@@ -89,42 +89,49 @@ HashTag.aggregate().match({ enabled: true, })
       var search = data.searchs;
   
       if(search.filter_author != ""){
-        after_searchs.author = {};
-        after_searchs.author.userName=search.filter_author;
+        after_searchs.staff = {};
+        after_searchs.staff.username=search.filter_author;
       }
-      
-      search.filter_title != "" ? before_searchs.versions.title = {$regex:search.filter_title } : "";
-   
-      // if (search.filter_sub_tags.length > 0) {
-      //   if (search.filter_sub_tags[0] != "") {
-      //     before_searchs.versions = {};
-      //     // before_searchs.push({ "versions.subTags": { $in: toObjectId(search.filter_sub_tags) } });
-      //     before_searchs.versions.subTags = { $in: toObjectId(search.filter_sub_tags) };
-      //   }
-      // }
+       
+      if(search.filter_title != "" ){
+        before_searchs = {'versions.title': {$regex:search.filter_title}};
+      }
+      if (!Array.isArray(search.filter_hash_tags)) {
+        // if (search.filter_sub_tags[0] != "") {
+          if(search.filter_hash_tags!=""){
+          before_searchs.hashTags = {};
+          var hashTag = hashTags.find(tag => tag.name.includes( search.filter_hash_tags) );
+          if(hashTag === undefined){
+            newHashTag = new HashTag({name:search.filter_hash_tags});
+            newHashTag.save();
+            hashTag = newHashTag;
+          } 
+          // before_searchs.push({ "versions.subTags": { $in: toObjectId(search.filter_sub_tags) } });
+          before_searchs.hashTags = { $in: toObjectId(hashTag._id) };
+        }
+      }
     }
-  
     var findSearch = before_searchs;
     findSearch.enabled = true;
     findSearch.isOpened= true;
-    
+    console.log(findSearch)
       News.find(findSearch)
-      .populate('staff')
+      .populate('staff hashTags')
       .sort(alignType)
       .exec(function (err, results) {
         if (err) { console.log(err); next(err); }
-        // if(results != undefined&& after_searchs.author != undefined){
-        //   results.filter(function(result){
-        //     result.findAuthorUserName(after_searchs);
-        //   });
-        // }
+        if(results != undefined&& after_searchs.author != undefined){
+          results.filter(function(result){
+            result.findAuthorUserName(after_searchs);
+          });
+        }
         if(results.length > 0 && checkAfterAlignType(alignType)){
           results = results.sort(function(a,b){
             return sortAfterResult(a,b,data.align_type, order);
           });
         }
         // results = filterBlockResult(req.user,results);
-        return res.json({ chronicle: results, hashTags: hashTags });
+        return res.json({ articles: results, hashTags: hashTags });
       });
   
   });
@@ -148,16 +155,16 @@ HashTag.aggregate().match({ enabled: true, })
     }else if(order =="ascending" && alignType =="view"){   
       return b[alignType]-a[alignType] ;
     }else if(order =="descending" && alignType =="author"){   
-      return a.author.userName<b.author.userName?-1:(a.author.userName>b.author.userName?1:0);
+      return a.staff.username<b.staff.username?-1:(a.staff.username>b.staff.username?1:0);
     }else if(order =="ascending" && alignType =="author"){   
-      return a.author.userName<b.author.userName?1:(a.author.userName>b.author.userName?-1:0);
+      return a.staff.username<b.staff.username?1:(a.staff.username>b.staff.username?-1:0);
     }
   }
   
   function checkAfterAlignType(alignType){
     if(alignType=="view"||alignType=="-view"){
       return true;
-    }else if(alignType=="author.userName"||alignType=="-author.userName"){
+    }else if(alignType=="staff.username"||alignType=="-staff.username"){
       return true;
     }
     return false;
