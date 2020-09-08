@@ -325,8 +325,9 @@ render() {
     var currentUser = this.state.currentUser;
     let detail; //include('userProfileDetail',{user: user,currentUser:currentUser,moment:moment})
     let blockPage;
-
+    let calendar_edit;
     if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser != null&&user!=null) {
+        
         if (currentUser.blockList.userList.some(blockUser => blockUser.content === user._id)) {
             blockPage = <div>
                 <span>차단된 유저입니다.</span>
@@ -338,6 +339,9 @@ render() {
                 blockPage = <button onclick="addBlockUser('{user.userName}')">차단하기</button>
             }
             detail = this.getProfielDetail(user, currentUser);
+        }
+        if( currentUser.userEmail === user.userEmail){
+            calendar_edit = <List.Content><Button as={Link} to={`/user/${user.userName}/calendar/edit/`}>일정 편집</Button></List.Content>
         }
     } else {
         detail = this.getProfielDetail(user, currentUser);
@@ -353,6 +357,7 @@ render() {
                 {/* <span>{user ? `Hello ${user}` : 'Hello World'}</span> */}
             </div>
             <div className="calendar_container">
+                {calendar_edit}
                 <Calendar onChange={this.onDateClickChange} value={this.state.date} />
             </div>
         </div>

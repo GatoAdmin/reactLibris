@@ -51,7 +51,7 @@ HashTag.aggregate().match({ enabled: true, })
     
     var findSearch = {isOpened:true,enabled: true}
     News.find(findSearch)
-    .populate('staff')
+    .populate('author')
     .sort(alignType)
     .exec(function (err, results) {
       if (err) { console.log(err); next(err); }
@@ -74,7 +74,7 @@ HashTag.aggregate().match({ enabled: true, })
         if (alignType == "title") {
           alignType = "-versions.title"
         }else if(alignType == "author"){
-          alignType = "-staff.username"
+          alignType = "-author.username"
         }else {
           alignType = "-" + alignType;
         }
@@ -82,15 +82,15 @@ HashTag.aggregate().match({ enabled: true, })
         if (alignType == "title") {
           alignType = "versions.title"
         }else if(alignType == "author"){
-          alignType = "staff.username"
+          alignType = "author.username"
         }
       }
       
       var search = data.searchs;
   
       if(search.filter_author != ""){
-        after_searchs.staff = {};
-        after_searchs.staff.username=search.filter_author;
+        after_searchs.author = {};
+        after_searchs.author.username=search.filter_author;
       }
        
       if(search.filter_title != "" ){
@@ -116,7 +116,7 @@ HashTag.aggregate().match({ enabled: true, })
     findSearch.isOpened= true;
     console.log(findSearch)
       News.find(findSearch)
-      .populate('staff hashTags')
+      .populate('author hashTags')
       .sort(alignType)
       .exec(function (err, results) {
         if (err) { console.log(err); next(err); }
@@ -148,23 +148,57 @@ HashTag.aggregate().match({ enabled: true, })
       });
   });
 
+  router.post("/view/:id", function (req, res, next) {
+    News.findOne({_id: toObjectId(req.param("id")), isOpened:true ,enabled: true})
+      .populate('author')
+      .exec(function (err, result) {
+        if (err) { console.log(err); return next(err); }
+        if (typeof (result) == undefined || typeof (result) == "undefined"||result === null) { return res.json({redirect:"/"}) }
 
+        req.session.current_url = req.originalUrl;
+        res.json({ result: result});
+    });
+  });
+
+  router.post("/bookmark/:id", function (req, res, next) {
+    User.findOne({_id:req.user._id, enabled: true})
+        .exec(function (err, user){
+          if (err) { console.log(err); return next(err); }
+          if (typeof (user) == undefined || typeof (user) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+          var userList = user.bookmarks.newsList;
+          if(userList.some(news=>news.content.equals(toObjectId(req.param("id"))))){
+                userList.splice(userList.findIndex(news=>news.content.equals(toObjectId(req.param("id")))),1);
+                user.bookmarks.newsList = userList;
+                user.save();
+                return res.json(true);
+          }
+          News.findOne({_id: toObjectId(req.param("id")), enabled: true})
+            .exec(function (err, result) {
+              if (err) { console.log(err); return next(err); }
+              if (typeof (result) == undefined || typeof (result) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+              user.bookmarks.newsList.push({content:result._id});
+              user.save();
+              return res.json(true);
+            });
+    });
+  });
+  
   function sortAfterResult(a, b, alignType,order){
     if(order =="descending" && alignType =="view"){   
       return a[alignType] - b[alignType];
     }else if(order =="ascending" && alignType =="view"){   
       return b[alignType]-a[alignType] ;
     }else if(order =="descending" && alignType =="author"){   
-      return a.staff.username<b.staff.username?-1:(a.staff.username>b.staff.username?1:0);
+      return a.author.username<b.author.username?-1:(a.author.username>b.author.username?1:0);
     }else if(order =="ascending" && alignType =="author"){   
-      return a.staff.username<b.staff.username?1:(a.staff.username>b.staff.username?-1:0);
+      return a.author.username<b.author.username?1:(a.author.username>b.author.username?-1:0);
     }
   }
   
   function checkAfterAlignType(alignType){
     if(alignType=="view"||alignType=="-view"){
       return true;
-    }else if(alignType=="staff.username"||alignType=="-staff.username"){
+    }else if(alignType=="author.username"||alignType=="-author.username"){
       return true;
     }
     return false;

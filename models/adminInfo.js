@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 var SALT_FACTOR = 10;
 const bcrypt = require('bcryptjs');
 const AdminInfoSchema = new Schema({
-    username: {type:String,unique : true }, //유저에게 밝혀지는 이름
+    userName: {type:String,unique : true }, //유저에게 밝혀지는 이름
     email: {
         type: String,
         // validate:{isEmail: true}, 

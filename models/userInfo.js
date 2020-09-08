@@ -149,6 +149,11 @@ const UserInfoSchema = new Schema({
             version: { type: Number, default: 0 },
             memo:{type:String},
             created: { type: Date, default: Date.now }
+        }],        
+        newsList: [{
+            content: { type: Schema.Types.ObjectId, ref: 'News' },
+            memo:{type:String},
+            created: { type: Date, default: Date.now }
         }]
     },
     userPaymentMethod: [{

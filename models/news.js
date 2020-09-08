@@ -1,8 +1,9 @@
 var mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+var HashTag = mongoose.model('HashTag');
  
 const NewsSchema = new Schema({
-    staff : {type: Schema.Types.ObjectId, ref:'AdminInfo'},
+    author : {type: Schema.Types.ObjectId, ref:'AdminInfo'},
     aboutFestival : {type: Schema.Types.ObjectId, ref:'Festival'},
     hashTags:[{type: Schema.Types.ObjectId, ref:'HashTag'}],
     viewUsers: [{
@@ -26,10 +27,16 @@ const NewsSchema = new Schema({
     updated: { type: Date, default: Date.now },
     enabled: { type: Boolean, default: true }
 });
-// NewsSchema.pre(/^find/, function(next) {
-//     this.populate('staff');
-//     this.populate('hashTags');
-// });
+
+var hashTags = null;
+NewsSchema.pre(/^find/, function(next) {
+    HashTag.find({enabled:true})
+    .exec((err,tags)=>{
+        if(err){console.log(err); return false};
+        hashTags = tags;
+        next();
+        });
+});
 NewsSchema.virtual('chronicle',{
     lookup:(doc)=>{
         return {
@@ -73,6 +80,14 @@ NewsSchema.set('toJSON', { virtuals: true,
         if(ret.versions != undefined){
             ret.lastVersion = ret.versions[ret.versions.length-1];
         }
+        var hash_tags = [];
+        if(ret.hashTags){
+            ret.hashTags.map(hashTag=>{
+                var findResult = hashTags.find(tag=>tag._id.equals(hashTag));
+                hash_tags.push(findResult!=undefined?findResult.name:""); 
+            })
+        }
+        ret.hashTags = hash_tags;
         return ret;
     }
  });

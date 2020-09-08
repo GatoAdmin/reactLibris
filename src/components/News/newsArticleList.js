@@ -146,7 +146,7 @@ class NewsArticleList extends React.Component {
                                 var latest = data.lastVersion;
                                 return (
                                     <Card key = {index.toString()} >
-                                        <Link to={"/news/view/"+data._id} ><Image src={data.banner}/></Link>
+                                        <Link to={"/news/view/"+data._id} ><Image src={data.banner.length>0?"/"+data.banner[0].imageData:null}/></Link>
                                         <Card.Content>
                                             <Card.Header><Link to={"/news/view/"+data._id} >{latest.title}</Link></Card.Header>
                                             <Card.Description><Link to={"/news/view/"+data._id} >내용</Link></Card.Description>
@@ -160,7 +160,7 @@ class NewsArticleList extends React.Component {
                                             </Card.Meta>
                                         </Card.Content>
                                         <Card.Content extra>
-                                                <a  href={"/user/"+data.staff.username} ><Icon name="user"/> {data.staff.username}</a>
+                                                <a  href={"/user/"+data.author.userName} ><Icon name="user"/> {data.author.userName}</a>
                                                 <Icon name="eye"/>{data.view}
                                         </Card.Content>
                                     </Card>
@@ -188,14 +188,14 @@ class NewsArticleList extends React.Component {
                                 return (
                                     <Table.Row key = {index.toString()} >
                                         <Table.Cell>
-                                            <Link to={"/news/view/"+data._id} ><Image src={data.banner}/></Link>
+                                            <Link to={"/news/view/"+data._id} ><Image src={data.banner.length>0?"/"+data.banner[0].imageData:null}/></Link>
                                         </Table.Cell>
                                         <Table.Cell>
                                             <Table.Row><Link to={"/news/view/"+data._id} >{latest.title}</Link></Table.Row>
                                             <Table.Row><Link to={"/news/view/"+data._id} >내용</Link></Table.Row>
                                             <Table.Row>
                                                 <Table.Cell>
-                                                <Icon name="user"/> <a  href={"/user/"+data.staff.username} >{data.staff.username}</a>
+                                                <Icon name="user"/> <a  href={"/user/"+data.author.userName} >{data.author.userName}</a>
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     <Icon name="eye"/>{data.view}

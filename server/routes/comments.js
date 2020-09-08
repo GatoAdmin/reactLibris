@@ -46,10 +46,6 @@ function ensureAuthenticated(req, res, next) {
     });
   });
 
-  router.get("/view/:id", function (req, res, next) {
-    return res.render('comment/viewComment',{currentUser:req.user!=null?req.user.userEmail:null});    
-  });
-
   router.post("/view/:id", function (req, res, next) {
     var findId = toObjectId(req.param("id"));
     var user = req.user;
