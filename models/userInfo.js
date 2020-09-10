@@ -89,7 +89,24 @@ const UserInfoSchema = new Schema({
             rule_tag:{ type: Schema.Types.ObjectId},
             rule_kind : { type:String, enum: [ 'MasterTag','ETC'] },
         }],
-        ngMaterials:[{type:String}]
+        ngMaterials:[{type:String}],
+        calendar:{
+            repeatSchedules:[{
+                title:{type:String},
+                repeat:{type:String},
+                startTime: [{ type: Number }],
+                endTime: [{ type: Number }],
+                color:{type:String},
+                desc: {type:String}, 
+            }],
+            schedules:[{
+                title: {type:String},
+                allDay: {type:Boolean},
+                start: { type: Date, default: Date.now },
+                end: { type: Date },
+                desc: {type:String},            
+            }]
+        }
     },
     favoriteList: {
         scenarioList: [{

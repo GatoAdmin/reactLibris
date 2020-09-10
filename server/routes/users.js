@@ -168,19 +168,6 @@ router.post("/:username",function(req,res,next){
    
   });
 });
-router.get("/:username/edit",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
-  .exec(function(err,user){
-    if(err) {return next(err);}
-    if(!user){return next(404);}
-    if(user._id.equals(req.user._id)){
-      res.render("userPage/userProfileEdit",{user:user.toJSON(), moment});
-    }else{
-      req.flash("error", "잘못된 접근방식입니다.");
-      res.redirect("/");
-    }
-  });
-});
 
 router.post("/:username/edit",ensureAuthenticated,function(req,res,next){
   User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
@@ -248,7 +235,51 @@ router.post("/:username/introudtion/save",ensureAuthenticated,function(req,res,n
   });
 });
 
+router.post("/:username/calendar",ensureAuthenticated,function(req,res,next){
+  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  .exec(function(err,user){
+    if(err) {return next(err);}
+    if(!user){return next(404);}
+    if(user._id.equals(req.user._id)){
+      res.json({calendar:user.profile.calendar});
+    }else{
+      req.flash("error", "잘못된 접근방식입니다.");
+      res.redirect("/");
+    }
+  });
+});
 
+router.post("/:username/calendar/repeat/save",ensureAuthenticated,function(req,res,next){
+  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  .exec(function(err,user){
+    if(err) {return next(err);}
+    if(!user){return next(404);}
+    if(user._id.equals(req.user._id)){
+      var formData = req.body.data;
+      
+      var startTime = formData.times[0].split(":");
+      var endTime= formData.times[1].split(":");
+      startTime = startTime.map(t=> Number(t));
+      endTime = endTime.map(t=> Number(t));
+      user.profile.calendar.repeatSchedules.push({
+          title:formData.title,
+          repeat:formData.rrule,
+          startTime:startTime,
+          endTime:endTime,
+          desc: formData.desc
+      });
+      
+      user.save(err, result =>{ 
+        if (err) { console.error(err); return next(err); }
+        req.flash("info", "성공적으로 수정되었습니다.");
+        return res.json({succes:true});
+      });
+    }else{
+      req.flash("error", "잘못된 접근방식입니다.");
+      res.redirect("/");
+    }
+  });
+});
 /*
 router.get("/comments", ensureAuthenticated,function(req,res,next){
   Comment.find({user:req.user._id})

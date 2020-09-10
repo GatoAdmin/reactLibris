@@ -1,10 +1,13 @@
 import React from 'react'
+import dates from 'react-big-calendar/lib/utils/dates';
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar'
 import moment from 'moment'
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import RepeatScheduleMaker from './repeatScheduleMaker'
 import { RRule, RRuleSet, rrulestr } from 'rrule';
+import axios from 'axios';
 
-const localizer = momentLocalizer(moment)
+
 let allViews = Object.keys(Views).map(k => Views[k])
 const ColoredDateCellWrapper = ({ children }) =>
   React.cloneElement(React.Children.only(children), {
@@ -12,17 +15,28 @@ const ColoredDateCellWrapper = ({ children }) =>
       backgroundColor: 'lightblue',
     },
   })
+  const localizer = momentLocalizer(moment);
 
-  class BigCalendar extends React.Component {
-    constructor(props) {
-      super(props);
+class EditCalendar extends React.Component {
+    constructor(props, context) {
+      super(props, context);
       this.state={
-          calendar:props.calendar,
+          calendar:null,
           events:[]
       }
     }
     componentDidMount(){
-        this.onNavigate(new Date(), "month");
+        axios.post(window.location.href)
+            .then(res => {
+                console.log(res.data)
+                this.setState({
+                    calendar: res.data.calendar,
+                });
+                this.onNavigate(new Date(), "month");
+                })
+            .catch(function (err) {
+                console.log(err);
+            })
     }
     onNavigate = (date, view) => {
         let start, end;
@@ -40,8 +54,7 @@ const ColoredDateCellWrapper = ({ children }) =>
         repeatSchedules.map(schedule=>{
             var rrules = rrulestr(schedule.repeat);
             rrules.between(startView.toDate(),endView.toDate()).map(rrule=>{
-                var start= rrule;
-                var end = rrule;
+                var start,end = new Date(rrule);
                 if(schedule.startTime[0]>schedule.endTime[0]){
                     end.setDate(end.getDate()+1);
                 }
@@ -62,28 +75,32 @@ const ColoredDateCellWrapper = ({ children }) =>
     getSchedules(calendar, startView, endView){
         var schedules = calendar.schedules;
         var newSchedules = schedules.concat(this.getRepeatSchedules(calendar.repeatSchedules,startView,endView));
-        this.setState({envets:newSchedules});
+        this.setState({envets:newSchedules}) ;
     }
 
-  render() {
-    console.log(this.state.envets);
-    return (
-      <div>
-        <Calendar
-          localizer={localizer}
-          events={this.state.events}
-          onNavigate={this.onNavigate}
-          views={["month"]}
-          step={60}
-          startAccessor="start"
-          endAccessor="end"
-          components={{
-            timeSlotWrapper: ColoredDateCellWrapper,
-          }}
-          style={{ height: 500, width:800 }}
-        />
-      </div>
-    );
+    getRepeatSchedulesMaker(){
+        return  <RepeatScheduleMaker setState={this.setState}/>
+    }
+    
+    render() {
+      return (
+        <div>
+            {this.getRepeatSchedulesMaker()}
+            <Calendar
+                localizer={localizer}
+                events={this.state.events}
+                onNavigate={this.onNavigate}
+                views={["month"]}
+                step={60}
+                startAccessor="start"
+                endAccessor="end"
+                components={{
+                    timeSlotWrapper: ColoredDateCellWrapper,
+                }}
+                style={{ height: 500, width:800 }}
+            />
+        </div>
+      );
+    }
   }
-}
-export default BigCalendar
+export default EditCalendar

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import Calendar from './calendar'
+import BigCalendar from './calendar'
 import {Button, List,Image}from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import 'semantic-ui-css/semantic.css';
@@ -341,7 +341,7 @@ render() {
             detail = this.getProfielDetail(user, currentUser);
         }
         if( currentUser.userEmail === user.userEmail){
-            calendar_edit = <List.Content><Button as={Link} to={`/user/${user.userName}/calendar/edit/`}>일정 편집</Button></List.Content>
+            calendar_edit = <List.Content><Button as={Link} to={`/user/${user.userName}/calendar/`}>일정 편집</Button></List.Content>
         }
     } else {
         detail = this.getProfielDetail(user, currentUser);
@@ -358,11 +358,10 @@ render() {
             </div>
             <div className="calendar_container">
                 {calendar_edit}
-                <Calendar onChange={this.onDateClickChange} value={this.state.date} />
+                {user!=null?<BigCalendar onChange={this.onDateClickChange} calendar={user.profile.calendar} value={this.state.date} />:null}
             </div>
         </div>
     );
-
 }
 }
 
