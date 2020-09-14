@@ -4,6 +4,7 @@ import RRuleGenerator from 'react-rrule-generator';
 import 'react-rrule-generator/build/styles.css';
 import {Form, Button,Input,TextArea} from 'semantic-ui-react';
 import axios from 'axios';
+import { TwitterPicker  } from 'react-color';
 
 class Maker extends React.Component {
     constructor(props, context) {
@@ -11,11 +12,19 @@ class Maker extends React.Component {
       this.state={
           rrule :null,
           title:"팀",
+          displayColorPicker :false,
+          color:'#3174ad',
           desc:"",
           times:['20:00','00:00']
       }
     }
-
+    setPickerView = () => {
+        this.setState({ displayColorPicker: !this.state.displayColorPicker })
+      };
+      setPickColor = (color) => {
+        console.log(color);
+        this.setState({ color: color.hex })
+      };
     onSubmit = (event) => {
         event.preventDefault();
         axios.post(window.location.href+"/repeat/save",{data:this.state})
@@ -34,7 +43,27 @@ render(){
             <form onSubmit={this.onSubmit}>
                 <div>
                 <Input name="title" type="text" label="반복 일정 이름" value={this.state.title} onChange={(e)=>this.setState({title:e.target.value})}/>
-                </div>
+                <Input type="hidden" name="color" value={this.state.color}/>
+                    <Input type="hidden" name="id" value={this.props.schedule!=null?this.props.schedule._id:null}/>
+                    <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '5px',
+                          backgroundColor:this.state.color,
+                      }} onClick={()=>this.setPickerView()}></div>
+                  </div>
+                  {
+                     this.state.displayColorPicker ?( 
+                     <div style={{left: '50px',position: 'fixed', top: '100px', zIndex: 1020,}}>
+                        <div style={{ position: 'fixed',
+                                    top: '0px',
+                                    right: '0px',
+                                    bottom: '0px',
+                                    left: '0px',
+                         } } onClick={()=>this.setPickerView() }/>
+                        <TwitterPicker onClose={()=>this.setPickerView(false)} triangle="hide" color={ this.state.color } onChange={(color)=>this.setPickColor(color)} onChangeComplete={(color, event)=>{this.setState({color:color.hex});this.setPickerView(false);}}colors={['#3174ad','#FF6900', '#FCB900', '#7BDCB5', '#00D084', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#9900EF']} />
+                    </div>):null
+                  }
                <div>
                <TextArea name="desc" type="text" label="일정 설명" value={this.state.desc} onChange={(e)=>this.setState({desc:e.target.value})}/>
                </div>

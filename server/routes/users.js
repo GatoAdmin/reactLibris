@@ -241,6 +241,7 @@ router.post("/:username/calendar",ensureAuthenticated,function(req,res,next){
     if(err) {return next(err);}
     if(!user){return next(404);}
     if(user._id.equals(req.user._id)){
+      req.session.current_url = req.originalUrl;
       res.json({calendar:user.profile.calendar});
     }else{
       req.flash("error", "잘못된 접근방식입니다.");
@@ -271,10 +272,187 @@ router.post("/:username/calendar/repeat/save",ensureAuthenticated,function(req,r
       
       user.save(err, result =>{ 
         if (err) { console.error(err); return next(err); }
-        req.flash("info", "성공적으로 수정되었습니다.");
-        return res.json({succes:true});
+        req.flash("info", "성공적으로 추가 되었습니다.");
+        return res.json({success:true});
       });
     }else{
+      req.flash("error", "잘못된 접근방식입니다.");
+      res.redirect("/");
+    }
+  });
+});
+
+
+router.post("/:username/calendar/save",ensureAuthenticated,function(req,res,next){
+  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  .exec(function(err,user){
+    if(err) {return next(err);}
+    if(!user){return next(404);}
+    if(user._id.equals(req.user._id)){
+      var formData = req.body;
+      var startTime = new Date(formData.dateTimes_from);
+      var endTime= new Date(formData.dateTimes_to);
+      if(formData.id !=null){
+        var  editSchedule = {
+            title:formData.title,
+            allDay:formData.allDay,
+            color:formData.color,
+            start:startTime,
+            end:endTime,
+            desc: formData.desc
+        };
+
+        var userList = user.profile.calendar.schedules;
+        if(userList.some(schedule=>schedule.equals(toObjectId(formData.id)))){
+              userList.splice(userList.findIndex(schedule=>schedule.equals(toObjectId(formData.id))),1,editSchedule);
+              user.profile.calendar.schedules = userList;
+        }      
+      }else{
+        user.profile.calendar.schedules.push({
+            title:formData.title,
+            allDay:formData.allDay,
+            color:formData.color,
+            start:startTime,
+            end:endTime,
+            desc: formData.desc
+        });
+        
+      }
+      user.save(err, result =>{ 
+        if (err) { console.error(err); return next(err); }
+        req.flash("info", "성공적으로 추가 되었습니다.");
+        // return res.json({success:true});
+        res.redirect(req.session.current_url);
+      });
+   }else{
+      req.flash("error", "잘못된 접근방식입니다.");
+      res.redirect("/");
+    }
+  });
+});
+
+
+router.post("/:username/calendar/repeat/:id/edit",ensureAuthenticated,function(req,res,next){
+  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  .exec(function(err,user){
+    if(err) {return next(err);}
+    if(!user){return next(404);}
+    if(user._id.equals(req.user._id)){
+      var formData = req.body.data;
+      var startTime = formData.times[0].split(":");
+      var endTime= formData.times[1].split(":");
+      startTime = startTime.map(t=> Number(t));
+      endTime = endTime.map(t=> Number(t));
+      editSchedule = {
+        title:formData.title,
+        repeat:formData.rrule,
+        startTime:startTime,
+        endTime:endTime,
+        desc: formData.desc
+    }
+
+      var userList = user.profile.calendar.repeatSchedules;
+      if(userList.some(schedule=>schedule.equals(toObjectId(req.param("id"))))){
+            userList.splice(userList.findIndex(schedule=>schedule.equals(toObjectId(req.param("id")))),1,editSchedule);
+            user.profile.calendar.repeatSchedules = userList;
+
+            user.save(err, result =>{ 
+              if (err) { console.error(err); return next(err); }
+              req.flash("info", "성공적으로 수정되었습니다.");
+              return res.json({success:true});
+            });
+      }      
+      
+    }else{
+      req.flash("error", "잘못된 접근방식입니다.");
+      res.redirect("/");
+    }
+  });
+});
+
+
+router.post("/:username/calendar/:id/edit",ensureAuthenticated,function(req,res,next){
+  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  .exec(function(err,user){
+    if(err) {return next(err);}
+    if(!user){return next(404);}
+    if(user._id.equals(req.user._id)){
+      var formData = req.body;
+      var startTime = new Date(formData.dateTimes_from);
+      var endTime= new Date(formData.dateTimes_to);
+      editSchedule = {
+          title:formData.title,
+          allDay:formData.allDay,
+          start:startTime,
+          end:endTime,
+          desc: formData.desc
+      };
+
+      var userList = user.profile.calendar.schedules;
+      if(userList.some(schedule=>schedule.equals(toObjectId(req.param("id"))))){
+            userList.splice(userList.findIndex(schedule=>schedule.equals(toObjectId(req.param("id")))),1,editSchedule);
+            user.profile.calendar.schedules = userList;
+
+            user.save(err, result =>{ 
+              if (err) { console.error(err); return next(err); }
+              req.flash("info", "성공적으로 수정되었습니다.");
+              // return res.json({success:true});
+              res.redirect(req.session.current_url);
+            });
+      }      
+   }else{
+      req.flash("error", "잘못된 접근방식입니다.");
+      res.redirect("/");
+    }
+  });
+});
+// router.post("/:username/calendar/repeat/:id/delete",ensureAuthenticated,function(req,res,next){
+//   User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+//   .exec(function(err,user){
+//     if(err) {return next(err);}
+//     if(!user){return next(404);}
+//     if(user._id.equals(req.user._id)){
+
+
+//     }else{
+//       req.flash("error", "잘못된 접근방식입니다.");
+//       res.redirect("/");
+//     }
+//   });
+// });
+
+
+router.post("/:username/calendar/delete",ensureAuthenticated,function(req,res,next){
+  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  .exec(function(err,user){
+    if(err) {return next(err);}
+    if(!user){return next(404);}
+    if(user._id.equals(req.user._id)){
+      var calendar = user.profile.calendar;
+      var schedulesId = req.body.data;
+      if(calendar.schedules.some(schedule=>schedule.equals(toObjectId(schedulesId)))){
+        var userList = calendar.schedules;
+            userList.splice(userList.findIndex(schedule=>schedule.equals(toObjectId(schedulesId))),1);
+            user.profile.calendar.schedules = userList;
+            console.log("들어옴");
+            user.save(err, result =>{ 
+              if (err) { console.error(err); return next(err); }
+              req.flash("info", "성공적으로 수정되었습니다.");
+              return res.json({success:true,calendar:user.profile.calendar});
+              // res.redirect(req.session.current_url);
+            });
+      }else if(calendar.repeatSchedules.some(schedule=>schedule.equals(toObjectId(schedulesId)))){
+          var userList = calendar.repeatSchedules;
+              userList.splice(userList.findIndex(schedule=>schedule.equals(toObjectId(schedulesId))),1);
+              user.profile.calendar.repeatSchedules = userList;
+  
+              user.save(err, result =>{ 
+                if (err) { console.error(err); return next(err); }
+                req.flash("info", "성공적으로 삭제되었습니다.");
+                return res.json({success:true,calendar:user.profile.calendar});
+              });
+      }
+   }else{
       req.flash("error", "잘못된 접근방식입니다.");
       res.redirect("/");
     }
@@ -721,5 +899,11 @@ function sortAfterResult(a, b, alignType,order){
 //         });
 //       })
 //  });
+function toObjectId(strings) {
+  if (Array.isArray(strings)) {
+    return strings.map(mongoose.Types.ObjectId);
+  }
+  return mongoose.Types.ObjectId(strings);
+}
 
 module.exports = router;

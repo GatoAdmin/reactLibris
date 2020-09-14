@@ -102,6 +102,7 @@ const UserInfoSchema = new Schema({
             schedules:[{
                 title: {type:String},
                 allDay: {type:Boolean},
+                color:{type:String},
                 start: { type: Date, default: Date.now },
                 end: { type: Date },
                 desc: {type:String},            
