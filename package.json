@@ -74,5 +74,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "connect-livereload": "^0.6.1",
+    "express-reload": "^1.2.0",
+    "livereload": "^0.9.1"
   }
 }

@@ -2,10 +2,11 @@ import React from 'react';
 import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
 import RRuleGenerator from 'react-rrule-generator';
 import 'react-rrule-generator/build/styles.css';
-import {Form, Button,Input,TextArea} from 'semantic-ui-react';
+import {Form, Icon, Modal, Button,Input,TextArea} from 'semantic-ui-react';
 import axios from 'axios';
 import { TwitterPicker  } from 'react-color';
-
+import moment from 'moment';
+import {rrulestr} from 'rrule';
 class Maker extends React.Component {
     constructor(props, context) {
       super(props, context);
@@ -15,8 +16,139 @@ class Maker extends React.Component {
           displayColorPicker :false,
           color:'#3174ad',
           desc:"",
-          times:['20:00','00:00']
+          times:['20:00','00:00'],
+          open:false,
       }
+    }
+
+    translationRRule(rruleStr){
+        if(rruleStr!=null){
+            var startStrings = rruleStr.split(/\r?\n/);
+            var middleStrings = startStrings.pop();
+            var endStrings = null;
+            middleStrings = middleStrings.split(';');
+            if(middleStrings.some(string=>string.includes("UNTIL"))){
+                endStrings = middleStrings.filter(string=>string.includes("UNTIL")).pop();
+            }
+            var strings = moment(startStrings[0].split(':').pop()).format('YYYY-MM-DD')+" 부터 "
+            var interval = 0;
+
+            if(endStrings!=null){
+                strings+= moment(endStrings.split('=').pop()).format('YYYY-MM-DD')+" 까지 \n"
+            }else{
+                strings+="영원히 \n"
+            }
+            strings += "매 ";
+            if(middleStrings.some(string=>string.includes("INTERVAL"))){
+                interval = middleStrings.filter(string=>string.includes("INTERVAL"))[0].split('=').pop();
+                strings += interval==="1"?"":interval;
+             }
+            if(middleStrings.some(string=>string.includes("RRULE"))){
+               var engStrings = middleStrings.filter(string=>string.includes("RRULE"))[0].split('=').pop();
+               strings += engStrings==="MONTHLY"?"달 ":engStrings==="WEEKLY"?"주 ":"";
+            }
+            if(middleStrings.some(string=>string.includes("BYMONTHDAY"))){
+                var number = middleStrings.filter(string=>string.includes("BYMONTHDAY"))[0].split('=').pop();
+                strings += number+"일";
+             }
+             if(middleStrings.some(string=>string.includes("BYSETPOS"))){
+                var engStrings = middleStrings.filter(string=>string.includes("BYSETPOS"))[0].split('=').pop();
+                strings += (engStrings==="1"?"첫째 주":engStrings==="2"?"두째 주":engStrings==="3"?"셋째 주":engStrings==="4"?"넷째 주":engStrings==="-1"?"마지막 주":"")+" ";
+             }
+             if(middleStrings.some(string=>string.includes("BYDAY"))){
+                var engStrings = middleStrings.filter(string=>string.includes("BYDAY"))[0].split('=').pop();
+                strings += engStrings==="MO"?"월요일":
+                           engStrings==="TU"?"화요일":
+                           engStrings==="WE"?"수요일":
+                           engStrings==="TH"?"목요일":
+                           engStrings==="FR"?"금요일":
+                           engStrings==="SA"?"토요일":
+                           engStrings==="SU"?"일요일": 
+                           engStrings==="MO,TU,WE,TH,FR"?"평일":
+                           engStrings==="SA,SU"?"주말":
+                           engStrings==="MO,TU,WE,TH,FR,SA,SU"?"매일":(
+                             engStrings.split(',').map(eng=>eng==="MO"?"월요일":
+                             eng==="TU"?"화요일":
+                             eng==="WE"?"수요일":
+                             eng==="TH"?"목요일":
+                             eng==="FR"?"금요일":
+                             eng==="SA"?"토요일":
+                             eng==="SU"?"일요일": "")
+                           );
+             }
+            strings += " 마다"
+            return strings;
+        }
+    }
+
+/*
+    translationRRule(rruleStr){
+        if(rruleStr!=null){
+            var rrule = rrulestr(rruleStr).origOptions;
+            console.log(rrule);
+            var startDate = rrule.dtstart;
+            var endDate = rrule.until;
+            
+            var strings = moment(startDate).format('YYYY-MM-DD')+" 부터 "
+
+
+            if(endDate!=undefined){
+                strings+= moment(endDate).format('YYYY-MM-DD')+" 까지"
+            }else{
+                strings+="영원히 "
+            }
+            strings += "매 ";
+            if(rrule.interval!=undefined){
+                strings += rrule.interval==="1"?"":rrule.interval;
+             }
+            if(rrule.freq!=undefined){
+               strings += rrule.freq===1?"달 ":rrule.freq===2?"주 ":"";
+            }
+            // if(middleStrings.some(string=>string.includes("BYMONTHDAY"))){
+            //     var number = middleStrings.filter(string=>string.includes("BYMONTHDAY"))[0].split('=').pop();
+            //     strings += number+"일";
+            //  }
+            //  if(middleStrings.some(string=>string.includes("BYSETPOS"))){
+            //     var engStrings = middleStrings.filter(string=>string.includes("BYSETPOS"))[0].split('=').pop();
+            //     strings += (engStrings==="1"?"첫째 주":engStrings==="2"?"두째 주":engStrings==="3"?"셋째 주":engStrings==="4"?"넷째 주":engStrings==="-1"?"마지막 주":"")+" ";
+            //  }
+            //  if(middleStrings.some(string=>string.includes("BYDAY"))){
+            //     var engStrings = middleStrings.filter(string=>string.includes("BYDAY"))[0].split('=').pop();
+            //     strings += engStrings==="MO"?"월요일":
+            //                engStrings==="TU"?"화요일":
+            //                engStrings==="WE"?"수요일":
+            //                engStrings==="TH"?"목요일":
+            //                engStrings==="FR"?"금요일":
+            //                engStrings==="SA"?"토요일":
+            //                engStrings==="SU"?"일요일": 
+            //                engStrings==="MO,TU,WE,TH,FR"?"평일":
+            //                engStrings==="SA,SU"?"주말":
+            //                engStrings==="MO,TU,WE,TH,FR,SA,SU"?"매일":(
+            //                  engStrings.split(',').map(eng=>eng==="MO"?"월요일":
+            //                  eng==="TU"?"화요일":
+            //                  eng==="WE"?"수요일":
+            //                  eng==="TH"?"목요일":
+            //                  eng==="FR"?"금요일":
+            //                  eng==="SA"?"토요일":
+            //                  eng==="SU"?"일요일": "")
+            //                );
+            //  }
+            strings += " 마다"
+            return strings;
+        }
+    }
+*/
+
+    onClose(){
+        this.setState({
+            rrule :null,
+            title:"팀",
+            displayColorPicker :false,
+            color:'#3174ad',
+            desc:"",
+            times:['20:00','00:00'],
+            open:false
+        })
     }
     setPickerView = () => {
         this.setState({ displayColorPicker: !this.state.displayColorPicker })
@@ -39,7 +171,9 @@ class Maker extends React.Component {
     }
 render(){
     return (
-        <div>
+        <Modal onClose={()=>this.setState({open:false})} onOpen={()=>this.setState({open:true})} open={this.state.open} trigger={<Button icon labelPosition='right'>반복 일정 추가하기<Icon name="calendar plus"/></Button>}>
+            <Modal.Content>
+
             <form onSubmit={this.onSubmit}>
                 <div>
                 <Input name="title" type="text" label="반복 일정 이름" value={this.state.title} onChange={(e)=>this.setState({title:e.target.value})}/>
@@ -123,9 +257,12 @@ render(){
                         'end.on_date':'몇일 까지'
                     }}
                 />
-                <Button type="submit">저장</Button>
+                <Button type="reset" onClick={()=>{this.onClose();}}>취소</Button>
+                <Button type="submit" positive>저장</Button>
             </form>
-          </div>
+            {this.translationRRule(this.state.rrule)}
+            </Modal.Content>
+          </Modal>
     );
 }
 }

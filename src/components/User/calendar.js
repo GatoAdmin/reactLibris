@@ -72,24 +72,28 @@ const ColoredDateCellWrapper = ({ children }) =>
       var schedules = [];
       const offset = new Date().getTimezoneOffset() * 60 * 1000; // get offset for local timezone (can modify here to support tzid)
         repeatSchedules.map(schedule=>{
-          var rrules = rrulestr(schedule.repeat);
-          rrules.between(startView.toDate(),endView.toDate()).map(rrule=>{
-              rrule =  rrule.setTime(rrule.getTime()+offset);
-              var start= new Date(rrule);
-              var end = new Date(rrule);
-              if(schedule.startTime[0]>schedule.endTime[0]){
-                  end.setDate(end.getDate()+1);
-              }
-              start.setHours(schedule.startTime[0],schedule.startTime[1]);
-              end.setHours(schedule.endTime[0],schedule.endTime[1]);
-
-              schedules.push({
-                  title: schedule.title,
-                  start: start,
-                  end: end,
-                  desc: schedule.desc
-              }) 
-          });
+          var rrules = null;
+          try{rrules = rrulestr(schedule.repeat);}catch(err){console.log(err);} ;
+          if(rrules!=null){
+            rrules.between(startView.toDate(),endView.toDate()).map(rrule=>{
+                rrule =  rrule.setTime(rrule.getTime()+offset);
+                var start= new Date(rrule);
+                var end = new Date(rrule);
+                if(schedule.startTime[0]>schedule.endTime[0]){
+                    end.setDate(end.getDate()+1);
+                }
+                start.setHours(schedule.startTime[0],schedule.startTime[1]);
+                end.setHours(schedule.endTime[0],schedule.endTime[1]);
+  
+                schedules.push({
+                    title: schedule.title,
+                    start: start,
+                    color:schedule.color,
+                    end: end,
+                    desc: schedule.desc
+                }) 
+            });
+          }
       })
         return schedules;
     }

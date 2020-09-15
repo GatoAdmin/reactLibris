@@ -8,10 +8,16 @@ var flash = require("connect-flash");
 const bodyParser = require('body-parser');
 var passport = require('passport');
 var mongoose = require('mongoose');
+var livereload = require('livereload');
+var livereloadMiddleware = require('connect-livereload');
 
 const join = require('path').join;
 
-
+const liveServer = livereload.createServer({
+  exts: ['js'],
+  debug: true
+});
+liveServer.watch(__dirname);
 // 모델파일 뭉치를 뭉쳐서 읽어와서 리콰이어해버림
 const fs = require('fs');
 const models_path = join(__dirname, '../models');
@@ -93,6 +99,8 @@ app.use(express.urlencoded({ extended: false }));
 
 var aboutRouter = require('./routes/about');
 app.use('/about', aboutRouter);
+
+app.use(livereloadMiddleware());
 
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '..', 'build', 'index.html')); 

@@ -257,24 +257,53 @@ router.post("/:username/calendar/repeat/save",ensureAuthenticated,function(req,r
     if(!user){return next(404);}
     if(user._id.equals(req.user._id)){
       var formData = req.body.data;
-      
-      var startTime = formData.times[0].split(":");
-      var endTime= formData.times[1].split(":");
-      startTime = startTime.map(t=> Number(t));
-      endTime = endTime.map(t=> Number(t));
-      user.profile.calendar.repeatSchedules.push({
-          title:formData.title,
-          repeat:formData.rrule,
-          startTime:startTime,
-          endTime:endTime,
-          desc: formData.desc
-      });
+
+      if(formData._id !=null){
+        var userList = user.profile.calendar.repeatSchedules;
+        if(userList.some(schedule=>schedule.equals(toObjectId(formData._id)))){
+            var startTime = formData.startTime.split(":");
+            var endTime= formData.endTime.split(":");
+            startTime = startTime.map(t=> Number(t));
+            endTime = endTime.map(t=> Number(t));
+            editSchedule = {
+              title:formData.title,
+              repeat:formData.repeat,
+              color:formData.color,
+              startTime:startTime,
+              endTime:endTime,
+              desc: formData.desc
+            }
+            userList.splice(userList.findIndex(schedule=>schedule.equals(toObjectId(formData._id))),1,editSchedule);
+            user.profile.calendar.repeatSchedules = userList;
+
+            user.save(err, result =>{ 
+              if (err) { console.error(err); return next(err); }
+              req.flash("info", "성공적으로 수정되었습니다.");
+              return res.json({success:true});
+            });
+            return true;
+      }
+    }else{
+        var startTime = formData.times[0].split(":");
+        var endTime= formData.times[1].split(":");
+        startTime = startTime.map(t=> Number(t));
+        endTime = endTime.map(t=> Number(t));
+        user.profile.calendar.repeatSchedules.push({
+            title:formData.title,
+            repeat:formData.rrule,
+            color:formData.color,
+            startTime:startTime,
+            endTime:endTime,
+            desc: formData.desc
+        });
+      }
       
       user.save(err, result =>{ 
         if (err) { console.error(err); return next(err); }
         req.flash("info", "성공적으로 추가 되었습니다.");
         return res.json({success:true});
       });
+      return true;
     }else{
       req.flash("error", "잘못된 접근방식입니다.");
       res.redirect("/");
@@ -332,7 +361,7 @@ router.post("/:username/calendar/save",ensureAuthenticated,function(req,res,next
 });
 
 
-router.post("/:username/calendar/repeat/:id/edit",ensureAuthenticated,function(req,res,next){
+router.post("/:username/calendar/repeat/edit",ensureAuthenticated,function(req,res,next){
   User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
@@ -434,7 +463,6 @@ router.post("/:username/calendar/delete",ensureAuthenticated,function(req,res,ne
         var userList = calendar.schedules;
             userList.splice(userList.findIndex(schedule=>schedule.equals(toObjectId(schedulesId))),1);
             user.profile.calendar.schedules = userList;
-            console.log("들어옴");
             user.save(err, result =>{ 
               if (err) { console.error(err); return next(err); }
               req.flash("info", "성공적으로 수정되었습니다.");
@@ -442,6 +470,8 @@ router.post("/:username/calendar/delete",ensureAuthenticated,function(req,res,ne
               // res.redirect(req.session.current_url);
             });
       }else if(calendar.repeatSchedules.some(schedule=>schedule.equals(toObjectId(schedulesId)))){
+        
+        console.log("들어옴");
           var userList = calendar.repeatSchedules;
               userList.splice(userList.findIndex(schedule=>schedule.equals(toObjectId(schedulesId))),1);
               user.profile.calendar.repeatSchedules = userList;
