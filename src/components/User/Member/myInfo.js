@@ -26,12 +26,12 @@ class MyInfo extends Component {
     getMyInfoList(){
         return(
             <Grid>
-                <Grid.Row><Grid.Column>이메일</Grid.Column><Grid.Column>{this.state.currentUser.userEmail}</Grid.Column></Grid.Row>
-                <Grid.Row><Grid.Column>별명</Grid.Column><Grid.Column>{this.state.currentUser.userName}</Grid.Column></Grid.Row>
-                <Grid.Row><Grid.Column>이름</Grid.Column><Grid.Column>userRealName</Grid.Column></Grid.Row>
-                <Grid.Row><Grid.Column>본인 인증</Grid.Column><Grid.Column>본인 인증</Grid.Column></Grid.Row>
-                <Grid.Row><Grid.Column>성인 인증</Grid.Column><Grid.Column>성인 인증</Grid.Column></Grid.Row>
-                <Grid.Row><Grid.Column>마케팅 정보 수신 관리</Grid.Column><Grid.Column></Grid.Column></Grid.Row>
+                <Grid.Row><Grid.Column width={5}>이메일</Grid.Column><Grid.Column width={9}>{this.state.currentUser.userEmail}</Grid.Column></Grid.Row>
+                <Grid.Row><Grid.Column width={5}>별명</Grid.Column><Grid.Column width={9}>{this.state.currentUser.userName}</Grid.Column></Grid.Row>
+                <Grid.Row><Grid.Column width={5}>이름</Grid.Column><Grid.Column width={9}>userRealName</Grid.Column></Grid.Row>
+                <Grid.Row><Grid.Column width={5}>본인 인증</Grid.Column><Grid.Column width={9}>본인 인증</Grid.Column></Grid.Row>
+                <Grid.Row><Grid.Column width={5}>성인 인증</Grid.Column><Grid.Column width={9}>성인 인증</Grid.Column></Grid.Row>
+                <Grid.Row><Grid.Column width={5}>마케팅 정보 수신 관리</Grid.Column><Grid.Column width={9}></Grid.Column></Grid.Row>
             </Grid>
             )
     }

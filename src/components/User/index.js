@@ -1,11 +1,10 @@
 import React from 'react';
 import {Switch, Route, Link} from 'react-router-dom';
 import AuthRoute from '../Layout/AuthRoute';
-import SideNav from '../Layout/userMainNav';
 import Profile from './Profile/profile';
 import ProfileEditor from './Profile/userProfileEdit';
 import CalrendarEditor from './Profile/calendarEdit';
-import MyInfo from './Member/myInfo';
+import Member from './Member';
 function User({currentUser, match })  {
   return (
       <div>
@@ -25,7 +24,7 @@ function User({currentUser, match })  {
           <AuthRoute 
               exact path={`${match.path}/`} 
               currentUser={currentUser}      
-              render={(props)=><MyInfo currentUser={currentUser}{...props}/>} 
+              render={(props)=><Member currentUser={currentUser}{...props}/>} 
           />
         </div>
       </div>
