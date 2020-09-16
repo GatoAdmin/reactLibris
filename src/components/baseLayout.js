@@ -2,7 +2,6 @@ import React from 'react';
 import axios from 'axios';
 import './Main/style.css';
 import {Switch, Route, Link,useHistory, Redirect } from 'react-router-dom';
-import 'semantic-ui-css/semantic.css';
 import AuthRoute from './Layout/AuthRoute';
 import Main from './Main';
 import About from './About';
@@ -87,7 +86,7 @@ class BaseLayout extends React.Component {
              <Route path="/comments" component={(props)=><Comment currentUser={this.state.currentUser}{...props}/>} />
              <Route path="/chronicles" component={(props)=><Chronicle currentUser={this.state.currentUser}{...props}/>} />
              <Route path='/login' component={(props)=><Login responseSuccessGoogle={this.responseSuccessGoogle} responseFailureGoogle={this.responseFailureGoogle} login_process={this.login}/>} />
-             <Route path='/logout' component={(props)=><Logout currentUser={this.state.currentUser}{...props}/>} />
+             <AuthRoute path='/logout' currentUser={this.state.currentUser} render={(props)=><Logout currentUser={this.state.currentUser}{...props}/>} />
              <Route path='/signup' component={Signup } />
             <Route component={NotFound} />
              <Redirect path="/undefined" to="/" />

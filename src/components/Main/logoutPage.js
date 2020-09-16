@@ -4,11 +4,13 @@ import { Button, List } from 'semantic-ui-react';
 
 class Logout extends React.Component {
     logout = () => {
-      axios.get('/logout')
+      axios.post('/logout')
       .then(res => {
         console.log("App.js login .then " , res.data);
-        this.setState({ currentUser : res.data.currentUser });
-        window.location.href = res.data.redirect;
+        if(res.data.success){
+          this.setState({ currentUser : res.data.currentUser });
+          window.location.href = "/";
+        }
       })
     }
     render() {

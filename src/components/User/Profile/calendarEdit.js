@@ -3,7 +3,6 @@ import dates from 'react-big-calendar/lib/utils/dates';
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar'
 import moment from 'moment'
 import Moment from 'react-moment';
-import "react-big-calendar/lib/css/react-big-calendar.css";
 import RepeatScheduleMaker from './repeatScheduleMaker'
 import { RRule, RRuleSet, rrulestr } from 'rrule';
 import axios from 'axios';
@@ -33,6 +32,7 @@ class EditCalendar extends React.Component {
           editRepeetSchedule:null,
           calendar:null,
           events:[],
+          repeat:[],
           showModal:false,
           dateTimes:null,
           messages : { // new
@@ -63,9 +63,9 @@ class EditCalendar extends React.Component {
     componentDidMount(){
         axios.post(window.location.href)
             .then(res => {
-                console.log(res.data)
                 this.setState({
                     calendar: res.data.calendar,
+                    repeat:res.data.calendar.repeatSchedules
                 });
                 this.onNavigate(new Date(), "month");
                 })
@@ -82,7 +82,6 @@ class EditCalendar extends React.Component {
         }
 
         this.getSchedules(this.state.calendar, start, end);
-        console.log(start, end);
     }
     // getRepeatSchedules(repeatSchedules,startView,endView){
     //     var schedules = [];
@@ -130,7 +129,7 @@ class EditCalendar extends React.Component {
                   end.setHours(schedule.endTime[0],schedule.endTime[1]);
     
                   schedules.push({
-                    id:schedule.id,
+                    _id:schedule._id,
                     title: schedule.title,
                     start: start,
                     end: end,
@@ -145,6 +144,11 @@ class EditCalendar extends React.Component {
       }
       getSchedules(calendar, startView, endView){
         var schedules = calendar.schedules;
+        schedules = schedules.map(schedule=>{
+          schedule.start= new Date(schedule.start);
+          schedule.end = new Date(schedule.end);
+          return schedule;
+        })
         var repeat = this.getRepeatSchedules(calendar.repeatSchedules,startView,endView);    
 
         var newSchedules = schedules.concat(repeat);
@@ -186,7 +190,8 @@ class EditCalendar extends React.Component {
       this.setState(()=>({openCreateSchedule:open}))
   }
   setOpenViewRepeatSchedule=(open)=>{
-    this.setState(()=>({openViewRepeatSchedule:open}))
+    if(open) this.setState(()=>({openViewRepeatSchedule:open}))
+    else  this.setState({editRepeetSchedule:null, openViewRepeatSchedule:open})
   }
     createSchedules=({ start, end })=>{
         this.setState({dateTimes:[start,end]})
@@ -256,15 +261,15 @@ class EditCalendar extends React.Component {
 
     getListRepeatSchedules(){
       var component = <div></div>;
-      var schedules = this.state.calendar!=null?this.state.calendar.repeatSchedules:[];
+      var schedules = this.state.repeat;
       if(schedules.length > 0){
         var cards = schedules.map((schedule,index)=>{
           return (
-            <Card onClick={()=>this.editRepeatSchedule(schedule)}>
+            <Card key={index} onClick={()=>this.editRepeatSchedule(schedule)}>
               <Card.Content>
                 <Card.Header>{schedule.title}<div style={{width:'36px',height:'36px',backgroundColor:schedule.color}}/></Card.Header>
                 <Card.Meta>{this.translationRRule(schedule.repeat)}</Card.Meta>
-                <Card.Meta><Moment format="hh:mm">{new Date().setHours(schedule.startTime[0],schedule.startTime[1])}</Moment>~ <Moment format="hh:mm">{new Date().setHours(schedule.endTime[0],schedule.endTime[1])}</Moment></Card.Meta>
+                <Card.Meta><Moment format="HH:mm">{new Date().setHours(schedule.startTime[0],schedule.startTime[1])}</Moment>~ <Moment format="HH:mm">{new Date().setHours(schedule.endTime[0],schedule.endTime[1])}</Moment></Card.Meta>
                 <Card.Description>
                   {schedule.desc}
                 </Card.Description>
@@ -402,7 +407,7 @@ class EditCalendar extends React.Component {
       };
     }
     render() {
-      console.log()
+      console.log(this.state.events)
       return (
         <div>
             <Calendar
@@ -421,15 +426,16 @@ class EditCalendar extends React.Component {
                 // onSelectEvent={event => alert(event.title)}
                 components={{
                   timeSlotWrapper: ColoredDateCellWrapper,
-                  event: EventComponent
+                  month:{event: EventComponent}
                 }}
                 style={{ height: 500, width:800 }}
-                // eventPropGetter={event => ({
-                //   style: {
-                //     backgroundColor: event.color,
-                //   },
-                // })}
-                eventPropGetter={(this.eventStyleGetter)}
+                popup={true}
+                eventPropGetter={event => ({
+                  style: {
+                    backgroundColor: event.color,
+                  },
+                })}
+                // eventPropGetter={(this.eventStyleGetter)}
             />
 
             <Modal onClose={()=>this.onCloseScheduleWindow()} onOpen={()=>this.setOpenCreateSchedule(true)} open={this.state.openCreateSchedule}>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
-import RRuleGenerator from 'react-rrule-generator';
+import RRuleGenerator from  'react-rrule-generator';
 import 'react-rrule-generator/build/styles.css';
 import {Form, Icon, Modal, Button,Input,TextArea} from 'semantic-ui-react';
 import axios from 'axios';
@@ -8,19 +8,30 @@ import { TwitterPicker  } from 'react-color';
 import moment from 'moment';
 import {rrulestr} from 'rrule';
 
-
+let pickColor=null;
 const Editor =({open, schedule, toggle, remove })=>{
-
-    // const [open, setOpen] = React.useState(true);
+    let data = {}
+    if(schedule !=null){
+        data ={
+            _id: schedule._id,
+            repeat :schedule.repeat,
+            title:schedule.title,
+            color:pickColor!=null?pickColor:schedule.color,
+            desc:schedule.desc,
+            startTime:schedule.startTime,
+            endTime:schedule.endTime
+        }
+    } 
     const [displayColorPicker, setPickerView] = React.useState(false);
     const setPickColor = (color) => {
-        schedule.color= color.hex ;
+        pickColor= color.hex ;
       };
     const onSubmit = (event) => {
         event.preventDefault();
-        axios.post(window.location.href+"/repeat/save",{data:schedule})
+        axios.post(window.location.href+"/repeat/save",{data:data})
         .then(res=>{
-            if(res.succes){
+            if(res.data.success){
+                toggle(false);
                 window.location.reload();
             }
         }).catch(function (err) {
@@ -29,22 +40,23 @@ const Editor =({open, schedule, toggle, remove })=>{
         return false;
     }
     if(open){
-        schedule.startTime = schedule.startTime[0]+":"+(schedule.startTime[1]==0?"00":schedule.startTime[1]);
-        console.log(schedule.startTime)
-        schedule.endTime = schedule.endTime[0]+":"+(schedule.endTime[1]==0?"00":schedule.endTime[1]);
+        if(Array.isArray(data.startTime)){
+            data.startTime = schedule.startTime[0]+":"+(schedule.startTime[1]==0?"00":schedule.startTime[1]);
+            data.endTime = schedule.endTime[0]+":"+(schedule.endTime[1]==0?"00":schedule.endTime[1]);
+        }
         return (
-            <Modal onClose={() => toggle(false)} onOpen={() => toggle(true)} open={open}>
+            <Modal onClose={() => {toggle(false);pickColor=null;}} onOpen={() => toggle(true)} open={open}>
                 <Modal.Content>
                 <form onSubmit={(event)=>onSubmit(event)}>
                     <div>
-                    <Input name="title" type="text" label="반복 일정 이름" value={schedule.title} onChange={(e)=>{schedule.title=e.target.value}}/>
-                    <Input type="hidden" name="color" value={schedule.color}/>
-                    <Input type="hidden" name="id" value={schedule!=null?schedule._id:null}/>
+                    <Input name="title" type="text" label="반복 일정 이름" value={data.title} onChange={(e)=>{data.title=e.target.value}}/>
+                    <Input type="hidden" name="color" value={data.color}/>
+                    <Input type="hidden" name="id" value={data!=null?data._id:null}/>
                         <div style={{
                               width: '36px',
                               height: '36px',
                               borderRadius: '5px',
-                              backgroundColor:schedule.color,
+                              backgroundColor:data.color,
                           }} onClick={()=>setPickerView(!displayColorPicker)}></div>
                       </div>
                       {displayColorPicker ?( 
@@ -55,21 +67,21 @@ const Editor =({open, schedule, toggle, remove })=>{
                                         bottom: '0px',
                                         left: '0px',
                              } } onClick={()=>setPickerView(!displayColorPicker) }/>
-                            <TwitterPicker onClose={()=>setPickerView(false)} triangle="hide" color={ schedule.color } onChange={(color)=>setPickColor(color)} onChangeComplete={(color, event)=>{setPickColor(color);setPickerView(false);}}colors={['#3174ad','#FF6900', '#FCB900', '#7BDCB5', '#00D084', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#9900EF']} />
+                            <TwitterPicker onClose={()=>setPickerView(false)} triangle="hide" color={ data.color } onChange={(color)=>setPickColor(color)} onChangeComplete={(color, event)=>{setPickColor(color);setPickerView(false);}}colors={['#3174ad','#FF6900', '#FCB900', '#7BDCB5', '#00D084', '#8ED1FC', '#0693E3', '#ABB8C3', '#EB144C', '#F78DA7', '#9900EF']} />
                         </div>):null}
                    <div>
-                   <TextArea name="desc" type="text" label="일정 설명" value={schedule.desc} onChange={(e)=>{schedule.desc=e.target.value}}/>
+                   <TextArea name="desc" type="text" label="일정 설명" value={data.desc} onChange={(e)=>{data.desc=e.target.value}}/>
                    </div>
                     
                     <div>
                         몇시부터 몇시까지 하나요?
                         <TimeRangePicker
-                            onChange={(value)=>{schedule.startTime=value[0];schedule.endTime=value[1];}}
-                            value={[schedule.startTime,schedule.endTime]}
+                            onChange={(value)=>{data.startTime=value[0];data.endTime=value[1];}}
+                            value={[data.startTime,data.endTime]}
                         />
                     </div>
                     <RRuleGenerator
-                        onChange={(rrule) =>{ schedule.repeat= rrule}}
+                        onChange={(rrule) =>{ data.repeat= rrule}}
                         config={{
                         repeat: ['Monthly', 'Weekly'],
                         end: ['Never', 'On date'],
@@ -77,7 +89,7 @@ const Editor =({open, schedule, toggle, remove })=>{
                         hideError: true,
                         hideStart:false,
                         }}
-                        value={schedule.repeat}
+                        value={data.repeat}
                         translations={{
                             'repeat.weekly.label':'주 마다',
                             'repeat.label':'반복 주기',
@@ -117,8 +129,8 @@ const Editor =({open, schedule, toggle, remove })=>{
                             'end.executions':''
                         }}
                     />
-                    <Button type="reset" onClick={()=>toggle(false)}>취소</Button>
-                    <Button type="reset" negative onClick={()=>remove(schedule._id)}>삭제</Button>
+                    <Button type="reset" onClick={()=>{toggle(false);pickColor=null}}>취소</Button>
+                    <Button type="reset" negative onClick={()=>remove(data._id)}>삭제</Button>
                     <Button type="submit" positive>저장</Button>
                 </form>
                 </Modal.Content>

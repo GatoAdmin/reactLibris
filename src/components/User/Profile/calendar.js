@@ -3,7 +3,6 @@ import { Calendar, momentLocalizer, Views } from 'react-big-calendar'
 import moment from 'moment'
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { RRule, RRuleSet, rrulestr } from 'rrule';
-import events from './events';
 import {Modal,Portal,Segment,Header, Button} from 'semantic-ui-react';
 import EventComponent from './eventComponent';
 import Moment from 'react-moment';
@@ -100,6 +99,11 @@ const ColoredDateCellWrapper = ({ children }) =>
 
     getSchedules(calendar, startView, endView){
         var schedules = calendar.schedules;
+        schedules = schedules.map(schedule=>{
+          schedule.start= new Date(schedule.start);
+          schedule.end = new Date(schedule.end);
+          return schedule;
+        })
         var repeat = this.getRepeatSchedules(calendar.repeatSchedules,startView,endView);    
 
         var newSchedules = schedules.concat(repeat);
@@ -178,10 +182,14 @@ const ColoredDateCellWrapper = ({ children }) =>
           // onSelectEvent={event => alert(event.title)}
           components={{
             timeSlotWrapper: ColoredDateCellWrapper,
-            event: EventComponent
+            month:{event: EventComponent}
           }}
           style={{ height: 500, width:800 }}
-          eventPropGetter={(this.eventStyleGetter)}
+          popup={true}
+          eventPropGetter={event => ({
+            style: {
+              backgroundColor: event.color,
+            },})}
         />   
         {this.viewSchedule()} 
       </div>

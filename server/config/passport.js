@@ -97,7 +97,7 @@ function (userEmail,tokenId,done) {
 }
 ));
 passport.use("login",new LocalStrategy({ 
-  usernameField: 'email',passwordField: 'password'},
+  usernameField: 'email',passwordField: 'password', session:true},
   function(userEmail,userPasswd,done){
     User.findOne({userEmail:userEmail}, function(err,user){
       if(err){return done(err);}
@@ -114,7 +114,23 @@ passport.use("login",new LocalStrategy({
       });
     });
   }));
-  
+  passport.use("password-check",new LocalStrategy({ passwordField: 'password', passReqToCallback:true},
+    function(req,userEmail,userPasswd,done){
+      User.findOne({userEmail:req.user.userEmail}, function(err,user){
+        if(err){return done(err);}
+        if(!user){
+          return done(null,false,{message:"잘못된 접근입니다"});
+        }
+        user.checkPassword(userPasswd,function(err,isMatch){
+          if(err){return done(err);}
+          if(isMatch){
+            return done(null,user);
+          }else{
+            return done(null,false,{message:"비밀번호를 확인해주세요"});
+          }
+        });
+      });
+    })); 
 module.exports = passport => {
     passport.use(new JwtStrategy(opts, (jwt_payload, done) =>{
         User.findById(jwt_payload.id)

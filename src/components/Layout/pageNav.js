@@ -24,6 +24,7 @@ function Navbar (props){
       <Button.Group>
       {typeof(props.currentUser) == 'object'&&!Array.isArray(props.currentUser)?<Button as={Link} to='/library'>Library</Button>:null}
       {typeof(props.currentUser) == 'object'&&!Array.isArray(props.currentUser)?<Button as={Link} to={`/user/${props.currentUser!=null?props.currentUser.userName:null}`}>Profile</Button>:null}
+      {typeof(props.currentUser) == 'object'&&!Array.isArray(props.currentUser)?<Button as={Link} to='/user'>MyInfo</Button>:null}
       {typeof(props.currentUser) == 'object'&&!Array.isArray(props.currentUser)?<Button as={Link} to='/logout'>Logout</Button>:<Button as={Link} to='/login'>Login</Button>} 
       </Button.Group>
       </Grid.Column>

@@ -1,6 +1,6 @@
 import React from 'react';
 import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
-import RRuleGenerator from 'react-rrule-generator';
+import RRuleGenerator from  'react-rrule-generator';
 import 'react-rrule-generator/build/styles.css';
 import {Form, Icon, Modal, Button,Input,TextArea} from 'semantic-ui-react';
 import axios from 'axios';
@@ -161,7 +161,7 @@ class Maker extends React.Component {
         event.preventDefault();
         axios.post(window.location.href+"/repeat/save",{data:this.state})
         .then(res=>{
-            if(res.succes){
+            if(res.data.success){
                 window.location.reload();
             }
         }).catch(function (err) {
@@ -260,7 +260,6 @@ render(){
                 <Button type="reset" onClick={()=>{this.onClose();}}>취소</Button>
                 <Button type="submit" positive>저장</Button>
             </form>
-            {this.translationRRule(this.state.rrule)}
             </Modal.Content>
           </Modal>
     );

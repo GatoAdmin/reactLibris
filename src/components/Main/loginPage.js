@@ -20,7 +20,8 @@ class LoginPage extends React.Component{
         return (
             <Segment placeholder>
               <Grid columns={2} relaxed='very' stackable>
-                <Grid.Row>
+                  <Grid.Column>
+                  <Grid.Row>
                   <Grid.Column>
                     <Form onSubmit={this.submitHandler}> 
                     {/* <Form action='/test' method="POST">  */}
@@ -43,23 +44,21 @@ class LoginPage extends React.Component{
                       <Button content='Login' primary />
                     </Form>
                   </Grid.Column>
-                </Grid.Row>              
-                <Grid.Row>
-                  <Grid.Column>
-                    {/* <Form action='/login/google' method="POST"> 
-                      <Button type="submit" icon="google" content='Sign with Google' /> */}
-                      <GoogleLogin 
-                        clientId="376934500468-n23i56vurbm1eakqio5v3gmadhkmnfp2.apps.googleusercontent.com"
-                        buttonText="Goggle Login"
-                        onSuccess={(response)=>this.props.responseSuccessGoogle(response)}
-                        onFailure={(response)=>this.props.responseFailureGoogle(response)}
-                        uxMode="popup"
-                        cookiePolicy={'single_host_origin'}
-                       />
-                    {/* </Form> */}
-                  </Grid.Column>
-                </Grid.Row>   
-              <Divider vertical>Or</Divider>
+                    <Grid.Column>
+                      {/* <Form action='/login/google' method="POST"> 
+                        <Button type="submit" icon="google" content='Sign with Google' /> */}
+                        <GoogleLogin 
+                          clientId="376934500468-n23i56vurbm1eakqio5v3gmadhkmnfp2.apps.googleusercontent.com"
+                          buttonText="Goggle Login"
+                          onSuccess={(response)=>this.props.responseSuccessGoogle(response)}
+                          onFailure={(response)=>this.props.responseFailureGoogle(response)}
+                          uxMode="popup"
+                          cookiePolicy={'single_host_origin'}
+                        />
+                      {/* </Form> */}
+                    </Grid.Column>
+                  </Grid.Row>   
+                </Grid.Column>
                 <Grid.Column verticalAlign='middle'>
                     <Button content='Sign up' icon='signup' size='big' as={Link} to="/signup" />
 
@@ -73,6 +72,7 @@ class LoginPage extends React.Component{
                 </Grid.Column> 
               </Grid>
           
+              <Divider vertical>Or</Divider>
             </Segment>
           )
     } 

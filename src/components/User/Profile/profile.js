@@ -5,8 +5,8 @@ import {Button, List,Image}from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import 'semantic-ui-css/semantic.css';
 import Moment from 'react-moment';
-import QuillViewer from '../Quill/react-quill-viewer';
-import QuillEditor from '../Quill/react-quill-editor-bubble';
+import QuillViewer from '../../Quill/react-quill-viewer';
+import QuillEditor from '../../Quill/react-quill-editor-bubble';
 class Profile extends Component {
     constructor(props) {
         super(props);

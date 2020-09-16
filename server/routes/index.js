@@ -244,7 +244,9 @@ router.post('/login/google/callback', passport.authenticate('google',  {
   successRedirect: '/'
 }));
 
-
+router.post("/passwd/check",passport.authenticate("password-check",{failureFlash: true }),(req,res)=>{
+    res.json({success:true, redirect:"/"})
+});
 router.post("/test",function (req, res, next) {
   var data = req.body;
   console.log(data);
@@ -253,7 +255,15 @@ router.post("/test",function (req, res, next) {
 
 router.post("/logout",function(req,res){
   req.logout();
-  res.json({currentUser:[], redirect:"/"});
+//   req.session.destroy((err)=>{
+//     if (err) {
+//         console.log(err);
+//         return next(err);
+//     }
+//     req.user = null;
+//     res.json({success:true, currentUser:[], redirect:"/"});
+// });
+  res.json({success:true, currentUser:[], redirect:"/"});
 });
 
 function ensureAuthenticated(req,res,next){
