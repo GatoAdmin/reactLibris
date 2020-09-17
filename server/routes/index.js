@@ -244,9 +244,9 @@ router.post('/login/google/callback', passport.authenticate('google',  {
   successRedirect: '/'
 }));
 
-router.post("/passwd/check",passport.authenticate("password-check",{failureFlash: true }),(req,res)=>{
-    res.json({success:true, redirect:"/"})
-});
+// router.post("/passwd/check",passport.authenticate("password-check",{failureFlash: true }),(req,res)=>{
+//     res.json({success:true, redirect:"/"})
+// });
 router.post("/test",function (req, res, next) {
   var data = req.body;
   console.log(data);
