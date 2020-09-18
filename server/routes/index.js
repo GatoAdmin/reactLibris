@@ -21,16 +21,16 @@ router.use(function(req,res,next){
 });
 
 //컬렉션을 쿼리하고, 가장 최근 사용자를 먼저 반환(descending)
-router.get("/",function(req,res,next){
-  User.find().sort({create:"descending"})
-  .exec(function(err,users){
+router.post("/",function(req,res,next){
+  Chronicle.find()
+  .populate('works works.author')
+  .sort({'works.updated':"descending"})
+  .exec(function(err,chronicles){
     if(err){return next(err);}
-    // res.render('main/index', { title: 'Express' });
     req.session.current_url = req.originalUrl;
     if(req.user){//TODO:나중에 처음 방문한 경우만 랜딩페이지를 띄워주는것으로 바꿀것
-      res.render("main/index",{users:users});
-    }else{
-      res.render("main/landing");
+      data = this.sortWorks(chronicles,req.user);
+      res.json({users:users});
     }
   });
 });
@@ -265,6 +265,47 @@ router.post("/logout",function(req,res){
 // });
   res.json({success:true, currentUser:[], redirect:"/"});
 });
+
+function sortWorks(chronicles, user){
+  var newsWorks =[]; 
+  var scenarioWorks =[]; 
+  var replayWorks =[]; 
+  chronicles.map(chronicle=>{
+    if(chronicle.onModel==='News'){
+      newsWorks.concat(chronicle.works);
+    }
+  })
+
+  var news;
+  var recommandScenarios;
+  var recommandReplays;
+  var monthScenarios;
+  var monthReplays;
+  var dayScenarios;
+  var dayReplays;
+  var weekScenarios;
+  var weekReplays;
+  var newScenarios;
+  var newReplays;
+
+  newsWorks.map(work=>{
+    
+  });
+
+
+
+  return {news: news, 
+    recommandScenarios:recommandScenarios,
+    recommandReplays:recommandReplays,
+    monthScenarios:monthScenarios,
+    monthReplays:monthReplays,
+    dayScenarios:dayScenarios,
+    dayReplays:dayReplays,
+    weekScenarios:weekScenarios,
+    weekReplays:weekReplays,
+    newScenarios:newScenarios,
+    newReplays:newReplays}
+}
 
 function ensureAuthenticated(req,res,next){
   if(req.isAuthenticated()){
