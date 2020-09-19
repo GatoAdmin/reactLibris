@@ -5,12 +5,14 @@ const src = 'https://react.semantic-ui.com/images/wireframe/image.png'
 class CradList extends React.Component {
     constructor(props) {
         super(props);
+        console.log(props);
         this.state = {
             type:props.type,
             cards: props.cards
         };
     }
     render() {
+        console.log(this.state.cards)
         return (
             <div className="card-list">
                 <Card.Group>
@@ -32,7 +34,7 @@ class CradList extends React.Component {
                         </Card>);
                     })}
                 </Card.Group>
-                <Button></Button>
+                <Button>더보기</Button>
             </div>
         );
     }

@@ -1,7 +1,7 @@
 import React from 'react';
+import axios from 'axios';
 import { Button, List, Grid } from 'semantic-ui-react';
 import CardList from './cardList';
-import axios from 'axios';
 
 class Home extends React.Component {
     constructor(props) {
@@ -22,12 +22,13 @@ class Home extends React.Component {
     }    
     componentDidMount() {
         axios.post('/')
-        .then(res => this.setState(res.data))
+        .then(res => {this.setState(res.data)})
         .catch(function (err) {
             console.log(err);
         });
       }
     render() {
+        console.log(this.state);
         return (
             <div className="App">
                 <h3>리브리스에 오신 것을 환영합니다!</h3>
@@ -39,11 +40,11 @@ class Home extends React.Component {
                                 뉴스
                             </Grid.Row>
                             <Grid.Row>
-                                <CardList cards={this.state.news} type="news"/>
+                                {this.state.news.length>0?<CardList cards={this.state.news} type="news"/>:null}
                             </Grid.Row>
                         </Grid.Column>
                     </Grid.Row>
-                    <Grid.Row className="recommand_scenarios">
+                    {/* <Grid.Row className="recommand_scenarios">
                         <Grid.Column>
                             <Grid.Row>
                                 추천 시나리오
@@ -102,7 +103,7 @@ class Home extends React.Component {
                                 <CardList cards={this.state.newReplays} type="replays"/>
                             </Grid.Row>
                         </Grid.Column>
-                    </Grid.Row>                                        
+                    </Grid.Row>                                         */}
                 </Grid>
             </div>
         );
