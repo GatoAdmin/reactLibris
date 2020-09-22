@@ -3,16 +3,17 @@ const Schema = mongoose.Schema;
  
 const ReportSchema = new Schema({
     user : {type: Schema.Types.ObjectId, ref:'UserInfo'},
-    reportObject:{    
+    reportObject:{   //유저신고, 아티클 신고, 댓글 신고 
         user :{type: Schema.Types.ObjectId, ref:'UserInfo' },
         work :{
-            content: {type: Schema.Types.ObjectId},            
-            article: {type: Number, default:0}
+            article: {type: Schema.Types.ObjectId},     
+            onModel: {type:String, enum:['Replay','Scenario']},       
+            version: {type: Number, default:0}
         },
         comment :{type: Schema.Types.ObjectId, ref:'Comment'}
     },
     reason : {
-        reasonKind:{type: Number},
+        reasonKind:{type: String},
         detail :{type:String}        
     },
     isChecked:{ type: Boolean, default: false },

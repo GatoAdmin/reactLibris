@@ -4,6 +4,7 @@ import {Button, List, Icon} from 'semantic-ui-react';
 import {Switch, Route, Link} from 'react-router-dom';
 import axios from 'axios';
 import Moment from 'react-moment';
+import ArticleReport from '../Report/articleReport'; 
 import QuillViewer from '../Quill/react-quill-viewer';
 import CommentBox from '../Comment/commentPart';
 
@@ -18,6 +19,7 @@ class ReplayView extends React.Component {
           isAuthor: false,
           isBookmark:false,
           isCanDelete :true,
+          isCanReport: true,
           comments:[],
           master_tags: [],
       };
@@ -35,6 +37,7 @@ class ReplayView extends React.Component {
                     // currentUser:res.data.currentUser,
                     isAuthor: res.data.isAuthor,
                     isCanDelete: res.data.isCanDelete,
+                    isCanReport: res.data.isCanReport
                     // comments:res.data.comments,
                     // master_tags: res.data.masterTags
                 });
@@ -152,7 +155,7 @@ class ReplayView extends React.Component {
 
   getViewPage(result){
       let content;
-
+      let version = result.versions[this.state.version-1];
       if(result != null){
         let quillBoxStyle = {width: "80%", marginLeft: "10%"};
           content = (
@@ -172,15 +175,15 @@ class ReplayView extends React.Component {
                         플레이 인원 :
                       </span>
                     <div>
-                        {result.lastVersion.peoples.master != null ? (
+                        {version.peoples.master != null ? (
                             <div><span>마스터 :</span>
-                            <span>{result.lastVersion.peoples.master}</span></div>) : null}
+                            <span>{version.peoples.master}</span></div>) : null}
                     </div>
                     <div>
-                        {result.lastVersion.peoples.players.length > 0 ? (
+                        {version.peoples.players.length > 0 ? (
                             <div>
                                 <span>플레이어 :</span>
-                              <span>{result.lastVersion.peoples.players.map((el, index) => (
+                              <span>{version.peoples.players.map((el, index) => (
                               <div key={index}>
                                 <span>{el.playerName} 님</span>
                                 <span>맡은 캐릭터</span>
@@ -195,7 +198,7 @@ class ReplayView extends React.Component {
                     </div>
                 </div>
                 <div>
-                    {result.lastVersion.rating != null ? <span>{result.lastVersion.rating} 금</span> : <span>전체 이용가</span>}
+                    {version.rating != null ? <span>{version.rating} 금</span> : <span>전체 이용가</span>}
                 </div>
                 <div><span>조회수 : </span>{result.view}</div>
                 <div>
@@ -208,7 +211,7 @@ class ReplayView extends React.Component {
                             <span>배경 : </span>
                         </li>
                         <li className="tag_item">
-                            #{result.lastVersion.backgroundTag}
+                            #{version.backgroundTag}
                         </li>
                     </ul>
                 </div>
@@ -217,7 +220,7 @@ class ReplayView extends React.Component {
                         <li>
                             <span>장르 : </span>
                         </li>
-                        {result.lastVersion.genreTags.map( (tag, index)=>(
+                        {version.genreTags.map( (tag, index)=>(
                             <li className="tag_item" key={index}>
                                 #{tag}
                             </li>
@@ -229,7 +232,7 @@ class ReplayView extends React.Component {
                         <li>
                             <span>태그 : </span>
                         </li>
-                        {result.lastVersion.subTags.map((tag, index)=>(
+                        {version.subTags.map((tag, index)=>(
                             <li className="tag_item" key={index}>
                                 #{tag}
                             </li>
@@ -240,7 +243,7 @@ class ReplayView extends React.Component {
                 <div className="quill-box" style={quillBoxStyle}>
                     <span>본문 </span>
                     <QuillViewer setValue={result.versions[this.state.version-1].content}/>
-                    {/* {- include('../quill-viewer',{context: result.lastVersion.content}) } */}
+                    {/* {- include('../quill-viewer',{context: version.content}) } */}
                 </div>
             </div>
 
@@ -257,17 +260,21 @@ class ReplayView extends React.Component {
   render() {
     var result = this.state.result;
     let blockContent;
+    let reportConetnt;
     // var masterTags = this.state.masterTags;
     var currentUser = this.props.currentUser;//this.state.currentUser;
     var isBlock = this.state.isBlock;
     var isBookmark = this.state.isBookmark;
+    var isCanReport = this.state.isCanReport;
     let content = <div></div>;
+    let version = null;
     if(result != null)
     {
+        version = result.versions[this.state.version-1];
         if(typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null){
             isBlock = currentUser.blockList.replayList.some(block=>block.content===result._id);
             isBookmark = currentUser.bookmarks.replayList.some(replay=>replay.content===result._id&&replay.version==this.state.version);
-
+            reportConetnt = (isCanReport?(<ArticleReport article={result._id} version={this.state.version}/>):'신고하신 글입니다.');
             blockContent = (this.state.isBlock?(
                 <div>
                     <span>차단된 작품입니다.</span>
@@ -279,7 +286,8 @@ class ReplayView extends React.Component {
     content=(
         <div>
             {blockContent}
-          <h2>{result.lastVersion.title}</h2>
+            {reportConetnt}
+          <h2>{version.title}</h2>
             {typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null?(
                 <Button onClick={()=>this.switchBookmark()}>
                     {isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}

@@ -36,6 +36,7 @@ fs.readdirSync(models_path)
   var adminRouter = require('./routes/admin');
   var libraryRouter = require('./routes/library');
   var chroniclesRouter = require('./routes/chronicles');
+  var reportRouter = require('./routes/reports');
 //=======================리콰이어 선언 부분=======================//
 
 const app = express();
@@ -82,6 +83,7 @@ app.use('/scenarios',scenariosRouter);
 app.use('/library',libraryRouter);
 app.use('/comments',commentsRouter);
 app.use('/chronicles',chroniclesRouter);
+app.use('/report',reportRouter);
 app.use('/news',newsRouter);
 app.use('/admin',adminRouter);
 

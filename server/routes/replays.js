@@ -520,7 +520,7 @@ console.log(req.param("id"));
     });
   });
 });
-router.get("/view/:id/:version", function (req, res, next) {
+router.post("/view/:id/:version", function (req, res, next) {
 
   User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.param("id"))]}},function(err,users)
   {
@@ -555,7 +555,7 @@ router.get("/view/:id/:version", function (req, res, next) {
         if(isUser&&!isAuthor){
             if(req.user.paidContentList.replayList.find(content=>content===results._id!=null))
             {
-              res.render("replay/viewReplay", { result: result,version: req.param("version"),isAuthor: isAuthor,isCanDelete:isCanDelete,moment });
+              res.json({ result: result,version: req.param("version"),isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:true });
             }
         }else if(!isUser){        
           req.session.current_url = req.originalUrl;
@@ -564,7 +564,7 @@ router.get("/view/:id/:version", function (req, res, next) {
         }
       }
       req.session.current_url = req.originalUrl;
-      res.render("replay/viewReplay", { result: result.toJSON(),version: req.param("version"),isAuthor: isAuthor,isCanDelete:isCanDelete,moment });
+      res.json({ result: result,version: req.param("version"),isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:true });
     });
   });
 });
@@ -603,7 +603,7 @@ router.post("/view/:id", function (req, res, next) {
           if(isUser&&!isAuthor){
               if(req.user.paidContentList.replayList.find(content=>content===results._id!=null))
               {
-                res.json( { result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete });
+                res.json( { result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:true  });
               }
           }else if(!isUser){        
             req.session.current_url = req.originalUrl;
@@ -612,7 +612,7 @@ router.post("/view/:id", function (req, res, next) {
           }
         }
         req.session.current_url = req.originalUrl;
-        res.json({ result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete });
+        res.json({ result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:true });
       });
     });
   });
@@ -843,26 +843,6 @@ router.post("/switchOpen/:id", function (req, res, next) {
     });
 });
 
-
-router.post("/report/:id", function (req, res, next) {
-  User.findOne({_id:req.user._id}).exec(function (err, user) {
-    if (err) { console.log(err); return next(err); }
-    if (typeof (user) == undefined || typeof (user) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
-     {
-       
-     }
-    Replay.findOne({_id: toObjectId(req.param("id")), isOpened:req.body.params.isOpened, enabled: true})
-      .exec(function (err, result) {
-        if (err) { console.log(err); return next(err); }
-        if (typeof (result) == undefined || typeof (result) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
-        
-        result.isOpened=result.isOpened ? false:true;
-        
-        result.save(); 
-        res.json(true);
-      });
-  });
-});
 
 
 router.post("/bookmark/:id/:version", function (req, res, next) {

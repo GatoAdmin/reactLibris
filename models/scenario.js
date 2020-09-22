@@ -12,6 +12,7 @@ const ScenarioSchema = new Schema({
     // view: { type: Number, default: 0 },
     rule: {type: Schema.Types.ObjectId, ref: 'MasterTag'},//String,
     hashTags:[{type: Schema.Types.ObjectId, ref:'HashTag'}],
+    summary:{type:String},
     versions: [{
         title: String,
         capacity: { max: { type: Number, default: 1 }, min: { type: Number, default: 1 } },//인원수

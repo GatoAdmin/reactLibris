@@ -24,7 +24,7 @@ router.use(function(req,res,next){
 //컬렉션을 쿼리하고, 가장 최근 사용자를 먼저 반환(descending)
 router.post("/",function(req,res,next){
   var news;
-  News.find().populate('author').sort('created').limit(5).exec(function(err, results){
+  News.find({enabled:true}).populate('author').sort('-created').limit(5).exec(function(err, results){
     news = results;
   })
 

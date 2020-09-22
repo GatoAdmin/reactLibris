@@ -146,7 +146,7 @@ class NewsArticleList extends React.Component {
                                 var latest = data.lastVersion;
                                 return (
                                     <Card key = {index.toString()} >
-                                        <Link to={"/news/view/"+data._id} ><Image src={data.banner.length>0?"/"+data.banner[0].imageData:null}/></Link>
+                                        <Link to={"/news/view/"+data._id} ><Image src={data.banner.length>0?"/assets/images/"+data.banner[0].imageData:null}/></Link>
                                         <Card.Content>
                                             <Card.Header><Link to={"/news/view/"+data._id} >{latest.title}</Link></Card.Header>
                                             <Card.Description><Link to={"/news/view/"+data._id} >내용</Link></Card.Description>
@@ -188,7 +188,7 @@ class NewsArticleList extends React.Component {
                                 return (
                                     <Table.Row key = {index.toString()} >
                                         <Table.Cell>
-                                            <Link to={"/news/view/"+data._id} ><Image src={data.banner.length>0?"/"+data.banner[0].imageData:null}/></Link>
+                                            <Link to={"/news/view/"+data._id} ><Image  style={{width:'300px'}} src={data.banner.length>0?"/assets/images/"+data.banner[0].imageData:null}/></Link>
                                         </Table.Cell>
                                         <Table.Cell>
                                             <Table.Row><Link to={"/news/view/"+data._id} >{latest.title}</Link></Table.Row>
