@@ -8,6 +8,7 @@ var Replay = mongoose.model('Replay');
 var MasterTag = mongoose.model('MasterTag');
 var HashTag = mongoose.model('HashTag');
 var Comment = mongoose.model('Comment');
+var Report =  mongoose.model('Report');
 const bcrypt = require('bcryptjs');
 var moment = require('moment');
 require('moment-timezone');
@@ -471,55 +472,6 @@ router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
   });
 });
 
-router.get("/view/:id", function (req, res, next) {
-console.log(req.param("id"));
-  var agg_match = { _id: toObjectId(req.param("id")), enabled: true};
-
-  User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.param("id"))]}},function(err,users)
-  {
-    var isCanDelete = true;
-    if(err){ console.log(err); return next(err);}
-    if(users.length>0){
-      isCanDelete = false;
-    }
-    Replay.findOne({_id: toObjectId(req.param("id")), enabled: true})
-    .populate('author')
-    .exec(function (err, result) {
-      if (err) { console.log(err); return next(err); }
-      if (typeof (result) == undefined || typeof (result) == "undefined"||result === null) { return res.redirect("/") }
-      var isUser = false;
-      var isAuthor = false;
-      if(req.user){
-        isUser= true;
-        if(req.user.userEmail == result.author.userEmail){
-          isAuthor = true;
-        }else{
-          if(!result.viewUsers.some(view=>view.user.equals(req.user._id))){
-            result.updateOne(
-              { _id: result._id, viewUsers:result.viewUsers},
-              { $set: { "viewUsers.$" : result.viewUsers.push({user:req.user._id}) } }
-              );
-              result.save();
-          }
-        }
-      }
-      if(!result.isFree ||!result.isOpened ){
-        if(isUser&&!isAuthor){
-            if(req.user.paidContentList.replayList.find(content=>content===results._id!=null))
-            {
-              res.render("replay/viewReplay", { result: result.toJSON(),version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,moment });
-            }
-        }else if(!isUser){        
-          req.session.current_url = req.originalUrl;
-          req.flash("info", "먼저 로그인해야 이 페이지를 볼 수 있습니다.");
-          return res.redirect("/login");
-        }
-      }
-      req.session.current_url = req.originalUrl;
-      res.render("replay/viewReplay", { result: result.toJSON(),version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,moment });
-    });
-  });
-});
 router.post("/view/:id/:version", function (req, res, next) {
 
   User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.param("id"))]}},function(err,users)
@@ -530,17 +482,20 @@ router.post("/view/:id/:version", function (req, res, next) {
       isCanDelete = false;
     }
 
-    Replay.findOne({_id: toObjectId(req.param("id")), enabled: true})
+    Replay.findOne({_id: toObjectId(req.params.id), enabled: true})
     .populate('author')
     .exec(function (err, result) {
       if (err) { console.log(err); return next(err); }
       if (typeof (result) == undefined || typeof (result) == "undefined"||result === null) { return res.redirect("/") }
       var isUser = false;
       var isAuthor = false;
+      var isCanReport = true;
+      var isPaid = false;
       if(req.user){
         isUser= true;
         if(req.user.userEmail == result.author.userEmail){
           isAuthor = true;
+          isCanReport = false;
         }else{
           if(!result.viewUsers.some(view=>view.user.equals(req.user._id))){
             result.updateOne(
@@ -549,46 +504,55 @@ router.post("/view/:id/:version", function (req, res, next) {
               );
               result.save();
           }
+          Report.find({user:req.user._id,'reportObject.work.article':toObjectId(req.params.id),enabled: true})
+          .exec(function (err, reports){
+            if (err) { console.log(err); return next(err); }
+            if(reports.length>0){
+              isCanReport = false;
+            }
+          })
         }
       }
       if(!result.isFree ||!result.isOpened ){
         if(isUser&&!isAuthor){
             if(req.user.paidContentList.replayList.find(content=>content===results._id!=null))
             {
-              res.json({ result: result,version: req.param("version"),isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:true });
+              isPaid = true;
+              res.json({ result: result,version: req.params.version,isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:isCanReport,isPaid:isPaid });
             }
         }else if(!isUser){        
           req.session.current_url = req.originalUrl;
-          req.flash("info", "먼저 로그인해야 이 페이지를 볼 수 있습니다.");
-          return res.redirect("/login");
+          return res.json({result: '로그인 필요'});
         }
       }
       req.session.current_url = req.originalUrl;
-      res.json({ result: result,version: req.param("version"),isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:true });
+      res.json({ result: result,version: req.params.version,isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:isCanReport,isPaid:isPaid });
     });
   });
 });
 
 router.post("/view/:id", function (req, res, next) {
-  console.log(req.param("id"));
-    User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.param("id"))]}},function(err,users)
+    User.find({"paidContentList.replayList.content":{$in:[toObjectId(req.params.id)]}},function(err,users)
     {
       var isCanDelete = true;
       if(err){ console.log(err); return next(err);}
       if(users.length>0){
         isCanDelete = false;
       }
-      Replay.findOne({_id: toObjectId(req.param("id")), enabled: true})
-      .populate('author')
+      Replay.findOne({_id: toObjectId(req.params.id), enabled: true})
+      .populate('author reported.reason')
       .exec(function (err, result) {
         if (err) { console.log(err); return next(err); }
         if (typeof (result) == undefined || typeof (result) == "undefined"||result === null) { return res.redirect("/") }
         var isUser = false;
         var isAuthor = false;
+        var isCanReport = true;
+        var isPaid = false;
         if(req.user){
           isUser= true;
           if(req.user.userEmail == result.author.userEmail){
             isAuthor = true;
+            isCanReport = false;
           }else{
             if(!result.viewUsers.some(view=>view.user.equals(req.user._id))){
               result.updateOne(
@@ -597,22 +561,29 @@ router.post("/view/:id", function (req, res, next) {
                 );
                 result.save();
             }
+            Report.find({user:req.user._id,'reportObject.work.article':toObjectId(req.params.id),enabled: true})
+            .exec(function (err, reports){
+              if (err) { console.log(err); return next(err); }
+              if(reports.length>0){
+                isCanReport = false;
+              }
+            })
           }
         }
         if(!result.isFree ||!result.isOpened ){
           if(isUser&&!isAuthor){
               if(req.user.paidContentList.replayList.find(content=>content===results._id!=null))
               {
-                res.json( { result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:true  });
+                isPaid = true;
+                res.json( { result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:isCanReport ,isPaid:isPaid  });
               }
           }else if(!isUser){        
             req.session.current_url = req.originalUrl;
-            req.flash("info", "먼저 로그인해야 이 페이지를 볼 수 있습니다.");
-            return res.redirect("/login");
+            return res.json({result: '로그인 필요'});
           }
         }
         req.session.current_url = req.originalUrl;
-        res.json({ result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:true });
+        res.json({ result: result,version: result.versions.length ,isAuthor: isAuthor,isCanDelete:isCanDelete,isCanReport:isCanReport,isPaid:isPaid  });
       });
     });
   });

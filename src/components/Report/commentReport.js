@@ -31,8 +31,7 @@ class Report extends React.Component  {
             console.log(pair[0]+ ', ' + pair[1]); 
         }
         
-        var urlStringFirst  = window.location.href.split("/")[3];
-        axios.post(`/report/${urlStringFirst}/${this.props.article}/${this.props.version}`,newObject)
+        axios.post(`/report/comment/${this.props.comment}`,newObject)
         .then(res=>{
             if(res.data.success){
                 this.setState({open:false, value:''});
@@ -48,22 +47,19 @@ class Report extends React.Component  {
 
     render() {
         const { value } = this.state;
-        return (//action={`/report/replays/${this.props.article}/${this.props.version}`} method="POST"
+        return (
             <div>
                 <Modal
                     closeIcon
                     onClose={() => this.setOpen(false)}
                     onOpen={() => this.setOpen(true)}
                     open={this.state.open}
-                    trigger={<Button>신고</Button>}
+                    trigger={<Button >신고</Button>}
                 >
                 <Modal.Header>신고 사유를 선택해 주세요</Modal.Header>
                 <Modal.Content>
                     <Modal.Description>
                     <Header>장난 또는 허위 신고시 불이익을 받으실 수 있습니다</Header>
-                    <p>
-                        작품 신고의 경우 저작권자에게 익명으로 신고 내용이 전달 될 수 있습니다.
-                    </p>
                     </Modal.Description>
                     <Form  onSubmit={(e)=>this.submitReport(e)}>
                     <Form.Group grouped>
@@ -95,14 +91,6 @@ class Report extends React.Component  {
                             checked={value === '게시판규정'}
                             onChange={this.handleChange}
                         />
-                        {this.props.paid?
-                        <Form.Radio
-                            label='유료화 게시물 규정 위반'
-                            value='유료게시물'
-                            name="reasonKind"
-                            checked={value === '유료게시물'}
-                            onChange={this.handleChange}
-                        />:null}
                         <Form.Radio
                             label='기타(직접작성: 최대 1,000자)'
                             value='기타'

@@ -6,6 +6,7 @@ import axios from 'axios';
 import Moment from 'react-moment';
 import QuillViewer from '../Quill/react-quill-viewer';
 import CommentBox from '../Comment/commentPart';
+import ArticleReport from '../Report/articleReport'; 
 
 class ScenarioView extends React.Component {
   constructor(props) {
@@ -18,6 +19,8 @@ class ScenarioView extends React.Component {
           isAuthor: false,
           isBookmark:false,
           isCanDelete :true,
+          isCanReport: true,
+          isPaid:false,
           comments:[],
           master_tags: [],
       };
@@ -34,6 +37,8 @@ class ScenarioView extends React.Component {
                     // currentUser:res.data.currentUser,
                     isAuthor: res.data.isAuthor,
                     isCanDelete: res.data.isCanDelete,
+                    isCanReport: res.data.isCanReport,
+                    isPaid: res.data.isPaid,
                     // comments:res.data.comments,
                     // master_tags: res.data.masterTags
                 });
@@ -154,7 +159,7 @@ class ScenarioView extends React.Component {
     }
   getViewPage(result){
       let content;
-      
+      let version = result.versions[this.state.version-1];
       if(result != null){
         let quillBoxStyle = {width: "80%", marginLeft: "10%"};
           content = (
@@ -173,23 +178,23 @@ class ScenarioView extends React.Component {
                     <span>
                         플레이 인원 :
                       </span>
-                    <span>{result.lastVersion.capacity.min}</span>
-                    {(result.lastVersion.capacity.min != result.lastVersion.capacity.max)?(<span><span>~</span>         
-                        <span>{result.lastVersion.capacity.max}</span></span>):null}
+                    <span>{version.capacity.min}</span>
+                    {(version.capacity.min != version.capacity.max)?(<span><span>~</span>         
+                        <span>{version.capacity.max}</span></span>):null}
                     <span> 인</span>
                 </div>
                 <div>
                     <span>플레이 시간: </span>
                     <span className="predictingTime">
-                        {result.lastVersion.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
+                        {version.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
                     </span>
                     <span>
-                        {result.lastVersion.orpgPredictingTime==null?result.lastVersion.trpgPredictingTime:result.lastVersion.orpgPredictingTime}
+                        {version.orpgPredictingTime==null?version.trpgPredictingTime:version.orpgPredictingTime}
                     </span>
                     <span> 시간</span>
                 </div>
                 <div>
-                    {result.lastVersion.rating != null ? <span>{result.lastVersion.rating} 금</span> : <span>전체 이용가</span>}
+                    {version.rating != null ? <span>{version.rating} 금</span> : <span>전체 이용가</span>}
                 </div>
                 <div><span>조회수 : </span>{result.view}</div>
                 <div>
@@ -202,7 +207,7 @@ class ScenarioView extends React.Component {
                             <span>배경 : </span>
                         </li>
                         <li className="tag_item">
-                            #{result.lastVersion.backgroundTag}
+                            #{version.backgroundTag}
                         </li>
                     </ul>
                 </div>
@@ -211,7 +216,7 @@ class ScenarioView extends React.Component {
                         <li>
                             <span>장르 : </span>
                         </li>
-                        {result.lastVersion.genreTags.map( (tag, index)=>(
+                        {version.genreTags.map( (tag, index)=>(
                             <li className="tag_item" key={index}>
                                 #{tag}
                             </li>
@@ -223,7 +228,7 @@ class ScenarioView extends React.Component {
                         <li>
                             <span>태그 : </span>
                         </li>
-                        {result.lastVersion.subTags.map((tag, index)=>(
+                        {version.subTags.map((tag, index)=>(
                             <li className="tag_item" key={index}> 
                                 #{tag}
                             </li>
@@ -233,8 +238,12 @@ class ScenarioView extends React.Component {
   
                 <div className="quill-box" style={quillBoxStyle}>
                     <span>본문 </span>
-                    <QuillViewer setValue={result.versions[this.state.version-1].content}/>
-                    {/* {- include('../quill-viewer',{context: result.lastVersion.content}) } */}
+                    
+                    {result.isFree?<QuillViewer setValue={result.versions[this.state.version-1].content}/>:
+                    this.state.isPaid?<QuillViewer setValue={result.versions[this.state.version-1].content}/>:
+                    <div>구매하지 않으면 볼 수 없는 컨텐츠 입니다.</div>
+                    }
+                    {/* {- include('../quill-viewer',{context: version.content}) } */}
                 </div>
             </div>
   
@@ -248,23 +257,24 @@ class ScenarioView extends React.Component {
     // <script src="/components/commentPart.js"></script>
 
   }
-  report(){
-      
-  }
+  
   render() {
     var result = this.state.result;
     let blockContent;
-    // var masterTags = this.state.masterTags;
+    let reportConetnt;
     var currentUser = this.props.currentUser;//this.state.currentUser;
     let content = <div></div>;
     var isBlock = this.state.isBlock;
-    var reportContent = <Button onClick={()=>this.report()}>신고하기</Button>;
     var isBookmark = this.state.isBookmark;
-    if(result != null)
+    var isCanReport = this.state.isCanReport;
+    let version = null;
+    if(result != null&& typeof(result)!=='string')
     {
+        version = result.versions[this.state.version-1];
         if(typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null){
             isBlock = currentUser.blockList.scenarioList.some(block=>block.content===result._id);
             isBookmark = currentUser.bookmarks.scenarioList.some(scenario=>scenario.content===result._id&&scenario.version==this.state.version);
+            reportConetnt = (isCanReport?(<ArticleReport article={result._id} version={this.state.version} paid={!result.isFree}/>):'신고하신 글입니다.');
             blockContent =(isBlock?(
                 <div>
                     <span>차단된 작품입니다.</span> 
@@ -275,8 +285,9 @@ class ScenarioView extends React.Component {
         }
         content=(
             <div>
-            <h2>{result.lastVersion.title}</h2>
+            <h2>{version.title}</h2>
                 {blockContent}
+                {reportConetnt}
                 {typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null?(
                     <Button onClick={()=>this.switchBookmark()}>
                         {isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}
@@ -294,6 +305,10 @@ class ScenarioView extends React.Component {
             <CommentBox/>
             </div>
         );
+    }else if(typeof(result)==='string'&&result==="로그인 필요"){
+        content = <div>로그인이 필요한 컨텐츠입니다</div>;
+    }else{
+        content = <div><h1>비공개 이거나 무언가 잘못된것 같아요 ;w;</h1></div>
     }
   return content;
  }

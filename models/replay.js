@@ -60,7 +60,7 @@ const ReplaySchema = new Schema({
     reported: [{
         isStopped: { type: Boolean, default: false },
         isCancelPaid: { type: Boolean, default: false },
-        reason: { type: Schema.Types.ObjectId, ref:'Report' },
+        reason: {type:String},
         created: { type: Date, default: Date.now },
         solvedReport: { isSolved: { type: Boolean, default: false }, date: { type: Date } },
         //true인 경우 모든 조치가 없는걸로 처리한다.

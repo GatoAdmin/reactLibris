@@ -7,7 +7,7 @@ var Chronicle = mongoose.model('Chronicle');
 var Replay = mongoose.model('Replay');
 var Scenario = mongoose.model('Scenario');
 var Comment = mongoose.model('Comment');
-
+var Report = mongoose.model('Report');
 
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
@@ -19,16 +19,16 @@ function ensureAuthenticated(req, res, next) {
   }
 
   router.post("/:id", function (req, res, next) {
-    var findId = toObjectId(req.param("id"));
+    var findId = toObjectId(req.params.id);
     Chronicle.findOne({works:findId,enabled: true, isOpened: true})
-    .populate({path:'works',match:{'_id':req.param("id")},populate:{path:'author',select:'userName userEmail -_id'},select:'isAgreeComment author -_id'})
+    .populate({path:'works',match:{'_id':findId},populate:{path:'author',select:'userName userEmail -_id'},select:'isAgreeComment author -_id'})
     .exec(function (err, result){
         if (err) { return next(err); }
         if (!result) { return next(404); }
 
         var formData = req.body;
         var user = req.user;
-        var work = result.works.find(value => value.id === req.param("id"));
+        var work = result.works.find(value => value.id === findId);
     Comment.find({article:findId, enabled: true, replyOrigin:null})
     .populate({path:'user',select:'userName userEmail -_id'})
     .populate({path:'recomments', populate:{path:'user',select:'userName userEmail -_id'}})
@@ -36,12 +36,19 @@ function ensureAuthenticated(req, res, next) {
         if (err) { return next(err); }
         if (!comments) { return next(404); }
         if(req.user != null){
-          comments.map(function(comment){
-            comment.is_recommend = comment.recommendUsers.findIndex(element=>element.user.equals(user._id))>-1?true:false;
-            comment.is_decommend = comment.decommendUsers.findIndex(element=>element.user.equals(user._id))>-1?true:false;
+          Report.find({user:req.user._id, enabled:true}).exec(function(err, reports){
+            if(err){console.log(err);next(err);}
+            comments= comments.map(function(comment){
+              comment.isRecommend = comment.recommendUsers.findIndex(element=>element.user.equals(user._id))>-1?true:false;
+              comment.isDecommend = comment.decommendUsers.findIndex(element=>element.user.equals(user._id))>-1?true:false;
+              if(reports!=undefined)comment.isReported = reports.findIndex(element=>comment._id.equals(element.reportObject.comment))>-1?true:false;
+              return comment;
+            });
+            return res.json({comments: comments,article:result.works[0],currentUser:req.user!=null?req.user.userEmail:null});
           });
+        }else{
+          return res.json({comments: comments,article:result.works[0],currentUser:req.user!=null?req.user.userEmail:null});
         }
-        return res.json({comments: comments,article:result.works[0],currentUser:req.user!=null?req.user.userEmail:null});
       });
     });
   });

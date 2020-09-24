@@ -1,0 +1,22 @@
+.comment-input.recomment{
+  width: 87%;
+}
+.comment-input.comment{
+  width: 90%;
+}
+.comment-input .input{
+  width: 100% !important
+}
+.comment-container {
+  width: 80%;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.comment-list {
+  background-color:  #dddddd;
+}
+.recomment-list {
+  background-color:  #b9b9b9;
+  margin-left: 50px;
+}

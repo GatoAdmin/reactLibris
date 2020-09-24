@@ -22,11 +22,13 @@ const CommentSchema = new Schema({
 });
 
 CommentSchema.post(/^find/, async function(docs, next) {
-    for (let doc of docs) {
-        if (doc.replyOrigin!= null) {
-          await doc.populate({path:'replyOrigin', populate:{path:'user',select:'userName userEmail -_id'}}).execPopulate();
-        }
-      }
+    if(Array.isArray(docs)){
+        for (let doc of docs) {
+            if (doc.replyOrigin!= null) {
+              await doc.populate({path:'replyOrigin', populate:{path:'user',select:'userName userEmail -_id'}}).execPopulate();
+            }
+          }
+    }
 });
 
 CommentSchema.virtual('recomments',{
@@ -45,17 +47,22 @@ CommentSchema.virtual('decommends').get(function(){
     return this.decommendUsers.length;
 });
 
-CommentSchema.virtual('is_recommend').get(function(){
-    return this._is_recommend;
-}).set(function(data) { this._is_recommend = data; });
+CommentSchema.virtual('isRecommend').get(function(){
+    return this._isRecommend;
+}).set(function(data) {return  this._isRecommend = data; });
 
 
-CommentSchema.virtual('is_decommend').get(function(){
-    return this._is_decommend;
-}).set(function(data) { this._is_decommend = data; });
+CommentSchema.virtual('isDecommend').get(function(){
+    return this._isDecommend;
+}).set(function(data) {return  this._isDecommend = data; });
+
+CommentSchema.virtual('isReported').get(function(){
+    return this._isReported;
+}).set(function(data) {return  this._isReported = data; });
+
 
 CommentSchema.set('toObject', { virtuals: true });
-CommentSchema.set('toJSON', { virtuals: true,
+CommentSchema.set('toJSON', { getters: true, virtuals: true,
     transform: function(doc,ret, options){
         delete ret.recommendUsers;
         delete ret.decommendUsers;
