@@ -34,7 +34,7 @@ function ensureAuthenticated(req, res, next) {
             user : req.user._id,
             reportObject:{
               work:{
-                article: toObjectId(req.params.id),
+                article: result._id,
                 onModel:'Replay',
                 version: req.params.version
               }
@@ -66,7 +66,7 @@ function ensureAuthenticated(req, res, next) {
             user : req.user._id,
             reportObject:{
               work:{
-                article: toObjectId(req.params.id),
+                article: result._id,
                 onModel:'Scenario',
                 version: req.params.version
               }
@@ -96,7 +96,35 @@ function ensureAuthenticated(req, res, next) {
           newReport = new Report({
             user : req.user._id,
             reportObject:{
-              comment: toObjectId(req.params.id)
+              comment: result._id
+            },
+            reason:{
+              reasonKind :formData.reasonKind,
+              detail:formData.detail
+            }
+          });
+  
+          newReport.save();
+
+          res.json({success:true});
+        });
+    });
+  });
+  
+  router.post("/user/:id",ensureAuthenticated, function (req, res, next) {
+    User.findOne({_id:req.user._id}).exec(function (err, user) {
+      if (err) { console.log(err); return next(err); }
+      if (typeof (user) == undefined || typeof (user) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+      User.findOne({_id: toObjectId(req.params.id), 'stopped.isStopped':false, enabled: true})
+        .exec(function (err, result) {
+          if (err) { console.log(err); return next(err); }
+          if (typeof (result) == undefined || typeof (result) == "undefined") { req.flash("error", "잘못된 접근입니다."); return res.redirect("/") }
+          var formData = req.body;
+          
+          newReport = new Report({
+            user : req.user._id,
+            reportObject:{
+              user: result._id
             },
             reason:{
               reasonKind :formData.reasonKind,

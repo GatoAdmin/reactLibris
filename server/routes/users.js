@@ -8,6 +8,7 @@ var User = mongoose.model('UserInfo');
 var Scenario = mongoose.model('Scenario');
 var Replay = mongoose.model('Replay');
 var Comment = mongoose.model('Comment');
+var Report = mongoose.model('Report');
 var moment = require('moment');
 require('moment-timezone');
 moment.tz.setDefault('Asia/Seoul');
@@ -48,14 +49,8 @@ var User = mongoose.model('UserInfo');
 
 const bcrypt = require('bcryptjs');
 
-/* GET users listing. */
-router.get('/', ensureAuthenticated,function(req, res, next) {
-  User.findOne({userEmail:req.user.userEmail},function(err,user){
 
-    res.render("userPage/user",{user:user.toJSON(),moment});
-  });
-});
-/* GET users listing. */
+/* POST users listing. */
 router.post('/', function(req, res, next) {
   var currentUser = null;
   if(!req.user){
@@ -67,12 +62,12 @@ router.post('/', function(req, res, next) {
 });
 
 router.post("/block/user/:username",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
     if(!user._id.equals(req.user._id)){
-      var redirectStr = "/user/" + req.param("username");
+      var redirectStr = "/user/" + req.params.username;
       var findIndex=req.user.blockList.userList.findIndex(blockUser=>blockUser.content.equals(user._id));
       if(findIndex>-1){
         req.user.blockList.userList.splice(findIndex,1);
@@ -146,31 +141,30 @@ router.post("/block/replays/:id",ensureAuthenticated,function(req,res,next){
   });
 });
 
-router.get("/:username",function(req,res,next){
-  User.findOne({userName:req.param("username")})
-  .populate('chronicles')
-  .exec(function(err,user){
-    if(err) {return next(err);}
-    if(!user){return next(404);}
-    req.session.current_url = req.originalUrl;
-   res.render("userPage/userProfile",{user:user, masterTagRules:masterTags.find(tags=>tags.name=="rule").tags,  moment});
-   
-  });
-});
 router.post("/:username",function(req,res,next){
-  User.findOne({userName:req.param("username")})
+  User.findOne({userName:req.params.username})
   .populate('chronicles')
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
+    var isReported = false;
     req.session.current_url = req.originalUrl;
-   res.json({user:user, masterTagRules:masterTags.find(tags=>tags.name=="rule").tags});
-   
+    if(req.user!=null){
+      Report.find({user:req.user._id, enabled:true}).exec(function(err,results){
+        if(err) {return next(err);}
+        if(results!==undefined&&results!==null){
+          isReported = true;
+          return res.json({user:user, isReported:isReported,masterTagRules:masterTags.find(tags=>tags.name=="rule").tags})
+        }
+      });
+    }else{ 
+      return res.json({user:user, isReported:isReported, masterTagRules:masterTags.find(tags=>tags.name=="rule").tags});
+    }
   });
 });
 
 router.post("/:username/edit",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
@@ -184,7 +178,7 @@ router.post("/:username/edit",ensureAuthenticated,function(req,res,next){
 });
 
 router.post("/:username/save",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
@@ -204,7 +198,7 @@ router.post("/:username/save",ensureAuthenticated,function(req,res,next){
       user.save(err, result =>{ 
         if (err) { console.error(err); return next(err); }
         req.flash("info", "성공적으로 수정되었습니다.");
-        return res.redirect("/user/" + req.param("username"));
+        return res.redirect("/user/" + req.params.username);
       });
 
     }else{
@@ -214,7 +208,7 @@ router.post("/:username/save",ensureAuthenticated,function(req,res,next){
   });
 });
 router.post("/:username/introudtion/save",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
@@ -226,7 +220,7 @@ router.post("/:username/introudtion/save",ensureAuthenticated,function(req,res,n
       user.save(err, result =>{ 
         if (err) { console.error(err); return next(err); }
         req.flash("info", "성공적으로 수정되었습니다.");
-        return res.redirect("/user/" + req.param("username"));
+        return res.redirect("/user/" + req.params.username);
       });
     }else{
       req.flash("error", "잘못된 접근방식입니다.");
@@ -236,7 +230,7 @@ router.post("/:username/introudtion/save",ensureAuthenticated,function(req,res,n
 });
 
 router.post("/:username/calendar",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
@@ -251,7 +245,7 @@ router.post("/:username/calendar",ensureAuthenticated,function(req,res,next){
 });
 
 router.post("/:username/calendar/repeat/save",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
@@ -313,7 +307,7 @@ router.post("/:username/calendar/repeat/save",ensureAuthenticated,function(req,r
 
 
 router.post("/:username/calendar/save",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
@@ -321,7 +315,7 @@ router.post("/:username/calendar/save",ensureAuthenticated,function(req,res,next
       var formData = req.body;
       var startTime = new Date(formData.dateTimes_from);
       var endTime= new Date(formData.dateTimes_to);
-      if(formData.id !=null){
+      if(formData.id !=null&&formData.id !=''){
         var  editSchedule = {
             title:formData.title,
             allDay:formData.allDay,
@@ -362,7 +356,7 @@ router.post("/:username/calendar/save",ensureAuthenticated,function(req,res,next
 
 
 router.post("/:username/calendar/repeat/edit",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
@@ -401,7 +395,7 @@ router.post("/:username/calendar/repeat/edit",ensureAuthenticated,function(req,r
 
 
 router.post("/:username/calendar/:id/edit",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}
@@ -436,7 +430,7 @@ router.post("/:username/calendar/:id/edit",ensureAuthenticated,function(req,res,
   });
 });
 // router.post("/:username/calendar/repeat/:id/delete",ensureAuthenticated,function(req,res,next){
-//   User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+//   User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
 //   .exec(function(err,user){
 //     if(err) {return next(err);}
 //     if(!user){return next(404);}
@@ -452,7 +446,7 @@ router.post("/:username/calendar/:id/edit",ensureAuthenticated,function(req,res,
 
 
 router.post("/:username/calendar/delete",ensureAuthenticated,function(req,res,next){
-  User.findOne({$and:[{userName:req.param("username")},{enabled: true}]})
+  User.findOne({$and:[{userName:req.params.username},{enabled: true}]})
   .exec(function(err,user){
     if(err) {return next(err);}
     if(!user){return next(404);}

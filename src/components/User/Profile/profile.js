@@ -7,6 +7,7 @@ import 'semantic-ui-css/semantic.css';
 import Moment from 'react-moment';
 import QuillViewer from '../../Quill/react-quill-viewer';
 import QuillEditor from '../../Quill/react-quill-editor-bubble';
+import UserReport from '../../Report/userReport';
 class Profile extends Component {
     constructor(props) {
         super(props);
@@ -17,6 +18,7 @@ class Profile extends Component {
             currentUser: props.currentUser,
             masterTagRules: null,
             article:null,
+            isReported:false,
             date: new Date()
         };
     }
@@ -24,6 +26,7 @@ class Profile extends Component {
         axios.post(window.location.href)
             .then(res => this.setState({ 
                 user: res.data.user,
+                isReported: res.data.isReported,
                 masterTagRules: res.data.masterTagRules }))
             .catch(function (error) {
                 console.log(error);
@@ -41,6 +44,7 @@ class Profile extends Component {
                     console.log(res)
                     this.setState({
                         user: res.data.user,
+                        isReported: res.data.isReported,
                         masterTagRules: res.data.masterTagRules
                     });
                   })
@@ -65,7 +69,36 @@ class Profile extends Component {
       }
 
     onDateClickChange = date => this.setState({ date })
-
+    addBlockUser(userName){
+        var check = window.confirm("해당 유저를 차단하면, 앞으로 유저와 관련된 모든 작품을 볼 수 없습니다. 차단하시겠습니까?");
+        if(check){
+            axios.post("/user/block/user/"+userName)
+            .then(function (res){
+                if(res.data.err){
+                    alert(res.data.err);
+                }
+                window.location = res.data.redirect;
+            })
+            .catch(function (err) {
+                    console.log(err);
+                })
+        }
+    };
+    removeBlockUser(userName){
+        var check = window.confirm("차단한 유저를 다시 보시겠습니까?");
+        if(check){
+            axios.post("/user/block/user/"+userName)
+            .then(function (res){
+                if(res.data.err){
+                    alert(res.data.err);
+                }
+                window.location = res.data.redirect;
+            })
+            .catch(function (err) {
+                    console.log(err);
+                })
+        }
+    };
     getProfielDetail(user, currentUser) {
         var masterTagRules = this.state.masterTagRules;
         let quillViewer;//include('../quill-viewer',{context: user.profile.introduction})
@@ -75,11 +108,11 @@ class Profile extends Component {
         let detail;
         var masterCanRules;
         if(user!=null){
-            var introduction = (user.profile.introduction==undefined||user.profile.introduction=="")?null:user.profile.introduction;
+            var introduction = (user.profile.introduction===undefined||user.profile.introduction==="")?null:user.profile.introduction;
             quillViewer = <QuillViewer setValue={introduction} />;
             quillEdit = <QuillEditor  changeQuill={this.changeQuill}  setValue={introduction}/>;
         }
-        if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null&&user!=null) {
+        if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!==null&&user!==null) {
             if (currentUser.userEmail === user.userEmail) {
                 editIntro = (<div id="form-container" className="container">
                     <form method="POST" action={"/user/" + user.userName + "/introudtion/save"} onSubmit={()=>this.convertQuill()}>
@@ -162,9 +195,9 @@ class Profile extends Component {
                                     /* }else if(value.contactType=='디스코드'){
                                         <List.Item>
                                             <List.Icon name='discord' />
-                                            <a href="https://twitter.com/{ value.contact ">
+                                            <a href="https://twitter.com/{ value.contact }">
                                                 <img className="contact_type_icon twitter" sizes="30x30" width="30" src="https://wikis.krsocsci.org/images/d/de/%EB%94%94%EC%8A%A4%EC%BD%94%EB%93%9C%EC%95%84%EC%9D%B4%EC%BD%98.png" />
-                                                { value.contact
+                                                { value.contact}
                                             </a>
                                         </List.Item>
                                     } else if(value.contactType=='카카오톡 톡방') {
@@ -184,14 +217,14 @@ class Profile extends Component {
                                             <!-- </a> -->
                                         </List.Item>*/
                                     (value.contactType == 'telegram' ? (<List.Content>
-                                        <a href="https://telegram.me/{ value.contact ">
+                                        <a href={`https://telegram.me/${value.contact}`}>
                                             <List.Icon name='telegram' />
                                             {value.contact}
                                         </a>
                                     </List.Content>
                                     ) : (value.contactType == 'instagram' ? (
                                         <List.Content>
-                                            <a href="https://www.instagram.com/{ value.contact /?hl=ko">
+                                            <a href={`https://www.instagram.com/${value.contact}/?hl=ko`}>
                                             <List.Icon name='instagram' />
                                                {value.contact}
                                             </a>
@@ -316,7 +349,7 @@ class Profile extends Component {
             </div>
         )
         }else{
-            detail = <button>없는 유저입니다.</button>
+            detail = <Button>없는 유저입니다.</Button>
         }
         return detail;
     }
@@ -325,24 +358,33 @@ render() {
     var currentUser = this.state.currentUser;
     let detail; //include('userProfileDetail',{user: user,currentUser:currentUser,moment:moment})
     let blockPage;
+    let reportedConent;
     let calendar_edit;
-    if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser != null&&user!=null) {
-        
-        if (currentUser.blockList.userList.some(blockUser => blockUser.content === user._id)) {
-            blockPage = <div>
-                <span>차단된 유저입니다.</span>
-                <button onclick="removeBlockUser('{user.userName}')">해제하기</button>
-            </div>
-            detail = null;
-        } else {
-            if (currentUser.userEmail != user.userEmail) {
-                blockPage = <button onclick="addBlockUser('{user.userName}')">차단하기</button>
+    let calendar = user!=null?<BigCalendar onChange={this.onDateClickChange} calendar={user.profile.calendar} value={this.state.date} />:null
+    if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser !== null&&user!==null) {
+            reportedConent =<UserReport user={user._id}/>;
+            if(this.state.isReported){
+                reportedConent =<div>
+                    <span>신고하신 유저입니다.</span>
+                </div>
             }
-            detail = this.getProfielDetail(user, currentUser);
-        }
-        if( currentUser.userEmail === user.userEmail){
-            calendar_edit = <List.Content><Button as={Link} to={`/user/${user.userName}/calendar/`}>일정 편집</Button></List.Content>
-        }
+            if (currentUser.blockList.userList.some(blockUser => blockUser.content === user._id)) {
+                blockPage = <div>
+                    <span>차단된 유저입니다.</span>
+                    <Button onClick={()=> this.removeBlockUser(user.userName)}>해제하기</Button>
+                </div>
+                detail = null;
+                calendar = null;
+            } else {
+                if (currentUser.userEmail !== user.userEmail) {
+                    blockPage = <Button onClick={()=> this.addBlockUser(user.userName)}>차단하기</Button>
+                }
+                detail = this.getProfielDetail(user, currentUser);
+            }
+            if( currentUser.userEmail === user.userEmail){
+                reportedConent = null;
+                calendar_edit = <List.Content><Button as={Link} to={`/user/${user.userName}/calendar/`}>일정 편집</Button></List.Content>
+            }
     } else {
         detail = this.getProfielDetail(user, currentUser);
     }
@@ -350,6 +392,7 @@ render() {
         <div>
             <h1>{user != null ? user.userName : ""}의 마이페이지</h1>
             <div>
+                {reportedConent}
                 {blockPage}
             </div>
             <div>
@@ -358,7 +401,7 @@ render() {
             </div>
             <div className="calendar_container">
                 {calendar_edit}
-                {user!=null?<BigCalendar onChange={this.onDateClickChange} calendar={user.profile.calendar} value={this.state.date} />:null}
+                {calendar}
             </div>
         </div>
     );
