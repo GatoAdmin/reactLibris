@@ -213,18 +213,15 @@ class ArticleList extends React.Component {
             return(
                 <Table>
                     <Table.Header>
-                        <Table.Row>
-                            <th><Button className= "btn align-btn" type="button" value="title" icon onClick= {this.onAlignClick}>제목<Icon name={this.getAlignIcon("title")}/></Button></th>
-                            <th><Button className= "btn align-btn" type="button" value="ruleTag" icon onClick= {this.onAlignClick}>기반룰<Icon name={this.getAlignIcon("ruleTag")}/></Button></th>
-                            <th><Button className= "btn align-btn" type="button"value='author' icon  onClick= {this.onAlignClick}>작성자<Icon name={this.getAlignIcon('author')}/></Button></th>
-                            <th><Button className= "btn align-btn" type="button" value='view' icon  onClick= {this.onAlignClick}>조회수<Icon name={this.getAlignIcon('view')}/></Button></th>
-                            <th><Button className= "btn align-btn" type="button" value='price' icon  onClick= {this.onAlignClick}>가격<Icon name={this.getAlignIcon('price')}/></Button></th>
-                            <th>배경</th>
-                            <th>장르</th>
-                            <th>태그</th>
-                            <th><Button className= "btn align-btn" type="button" value='created' icon  onClick= {this.onAlignClick}>발행<Icon name={this.getAlignIcon('created')}/></Button></th>
-                    
-                        </Table.Row>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value="title" icon onClick= {this.onAlignClick}>제목<Icon name={this.getAlignIcon("title")}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value="ruleTag" icon onClick= {this.onAlignClick}>기반룰<Icon name={this.getAlignIcon("ruleTag")}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button"value='author' icon  onClick= {this.onAlignClick}>작성자<Icon name={this.getAlignIcon('author')}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='view' icon  onClick= {this.onAlignClick}>조회수<Icon name={this.getAlignIcon('view')}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='price' icon  onClick= {this.onAlignClick}>가격<Icon name={this.getAlignIcon('price')}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell>배경</Table.HeaderCell>
+                            <Table.HeaderCell>장르</Table.HeaderCell>
+                            <Table.HeaderCell>태그</Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='created' icon  onClick= {this.onAlignClick}>발행<Icon name={this.getAlignIcon('created')}/></Button></Table.HeaderCell>
                     </Table.Header>
                     <Table.Body id="data_tbody" basic>
                         {this.state.rows.map((data, index) => {
