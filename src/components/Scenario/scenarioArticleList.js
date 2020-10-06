@@ -227,55 +227,119 @@ class ArticleList extends React.Component {
                 );
         }else if(type==="list"){
             return(
-                e(Table, null,
-                    e(Table.Header, null,
-                        e(Table.Row, null,
-                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"title" ,icon:true ,onClick:this.onAlignClick},"제목"  ,e(Icon,{name:this.getAlignIcon("title")})) ),
-                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"ruleTag" ,icon:true ,onClick:this.onAlignClick},"사용룰",e(Icon,{name:this.getAlignIcon("ruleTag")}))  ),
-                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"author" ,icon:true ,onClick:this.onAlignClick},"작가"  ,e(Icon,{name:this.getAlignIcon("author")}))  ),
-                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"view" ,icon:true ,onClick:this.onAlignClick},"조회수",e(Icon,{name:this.getAlignIcon( "view")}))    ),
-                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"price" ,icon:true ,onClick:this.onAlignClick},"가격"  ,e(Icon,{name:this.getAlignIcon( "price")}))  ),
-                            e("th",null,"배경"),
-                            e("th",null,"장르"),
-                            e("th",null,"태그"),
-                            e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"created" ,icon:true ,onClick:this.onAlignClick},"발행일",e(Icon,{name:this.getAlignIcon("created")}))   )
-                        )
-                    ),
-                    e(Table.Body, { id: "data_tbody" },
-                        this.state.rows.map((data, index) => {
-                            var date = new Date(data.created);//.format('yyyy-MM-dd HH:mm');
-                            var latest = data.lastVersion;//.last();
-                            return e(Table.Row, { key: index.toString() },
-                                e(Table.Cell, null,
-                                    e("a", { href: "/scenarios/view/" + data._id }, latest.title)),
-                                e(Table.Cell, null, data.ruleTag),
-                                e(Table.Cell, null, e("a", { href: "/user/" + data.author.userName }, data.author.userName)),
-                                e(Table.Cell, null, data.view),
-                                e(Table.Cell, null, data.price),
-                                e(Table.Cell, null,
-                                    e("ul", null,
-                                        e("li", { className: "tag_item" }, "#" + latest.backgroundTag)
-                                    )
-                                ),
-                                e(Table.Cell, null,
-                                    e("ul", null,
-                                    latest.genreTags.map((tag, id) => {
-                                            return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
-                                        })
-                                    )
-                                ),
-                                e(Table.Cell, null, e("ul", null,
-                                latest.subTags.map((tag, id) => {
-                                        return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
-                                    })
-                                )
-                                ),
-                                e(Table.Cell, null, e(Moment,{format:"YYYY-MM-DD HH:mm"},date))
+                <Table>
+                    <Table.Header>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value="title" icon onClick= {this.onAlignClick}>제목<Icon name={this.getAlignIcon("title")}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value="ruleTag" icon onClick= {this.onAlignClick}>기반룰<Icon name={this.getAlignIcon("ruleTag")}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button"value='author' icon  onClick= {this.onAlignClick}>작성자<Icon name={this.getAlignIcon('author')}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='view' icon  onClick= {this.onAlignClick}>조회수<Icon name={this.getAlignIcon('view')}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='price' icon  onClick= {this.onAlignClick}>가격<Icon name={this.getAlignIcon('price')}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell>배경</Table.HeaderCell>
+                            <Table.HeaderCell>장르</Table.HeaderCell>
+                            <Table.HeaderCell>태그</Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='created' icon  onClick= {this.onAlignClick}>발행<Icon name={this.getAlignIcon('created')}/></Button></Table.HeaderCell>
+                   </Table.Header>
 
-                            );
+                    <Table.Body id="data_tbody" basic>
+                        {this.state.rows.map((data, index) => {
+                            var date = new Date(data.created);
+                            var latest = data.lastVersion;
+                            return (
+                                <Table.Row key = {index.toString()} >
+                                    <Table.Cell>
+                                        <Link to={"/scenarios/view/"+data._id} >{latest.title}</Link>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {data.ruleTag}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <a  href={"/user/"+data.author.userName} >{data.author.userName}</a>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {data.view}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {data.price}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Grid>
+                                            <Grid.Row>
+                                                <Grid.Column className="tag_item">#{latest.backgroundTag}</Grid.Column>
+                                            </Grid.Row>
+                                        </Grid>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Grid>
+                                            <Grid.Row>
+                                                {latest.genreTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
+                                            </Grid.Row>
+                                        </Grid>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Grid>
+                                            <Grid.Row>
+                                                {latest.subTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
+                                            </Grid.Row>
+                                        </Grid>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Moment  format="YYYY-MM-DD HH:mm">{date}</Moment>
+                                    </Table.Cell>
+                                </Table.Row>
+                                );
                         })
-                    )
-                )
+                }
+                    </Table.Body>                    
+                </Table>
+                // e(Table, null,
+                //     e(Table.Header, null,
+                //         e(Table.Row, null,
+                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"title" ,icon:true ,onClick:this.onAlignClick},"제목"  ,e(Icon,{name:this.getAlignIcon("title")})) ),
+                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"ruleTag" ,icon:true ,onClick:this.onAlignClick},"사용룰",e(Icon,{name:this.getAlignIcon("ruleTag")}))  ),
+                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"author" ,icon:true ,onClick:this.onAlignClick},"작가"  ,e(Icon,{name:this.getAlignIcon("author")}))  ),
+                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"view" ,icon:true ,onClick:this.onAlignClick},"조회수",e(Icon,{name:this.getAlignIcon( "view")}))    ),
+                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"price" ,icon:true ,onClick:this.onAlignClick},"가격"  ,e(Icon,{name:this.getAlignIcon( "price")}))  ),
+                //             e("th",null,"배경"),
+                //             e("th",null,"장르"),
+                //             e("th",null,"태그"),
+                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"created" ,icon:true ,onClick:this.onAlignClick},"발행일",e(Icon,{name:this.getAlignIcon("created")}))   )
+                //         )
+                //     ),
+                //     e(Table.Body, { id: "data_tbody" },
+                //         this.state.rows.map((data, index) => {
+                //             var date = new Date(data.created);//.format('yyyy-MM-dd HH:mm');
+                //             var latest = data.lastVersion;//.last();
+                //             return e(Table.Row, { key: index.toString() },
+                //                 e(Table.Cell, null,
+                //                     e("a", { href: "/scenarios/view/" + data._id }, latest.title)),
+                //                 e(Table.Cell, null, data.ruleTag),
+                //                 e(Table.Cell, null, e("a", { href: "/user/" + data.author.userName }, data.author.userName)),
+                //                 e(Table.Cell, null, data.view),
+                //                 e(Table.Cell, null, data.price),
+                //                 e(Table.Cell, null,
+                //                     e("ul", null,
+                //                         e("li", { className: "tag_item" }, "#" + latest.backgroundTag)
+                //                     )
+                //                 ),
+                //                 e(Table.Cell, null,
+                //                     e("ul", null,
+                //                     latest.genreTags.map((tag, id) => {
+                //                             return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
+                //                         })
+                //                     )
+                //                 ),
+                //                 e(Table.Cell, null, e("ul", null,
+                //                 latest.subTags.map((tag, id) => {
+                //                         return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
+                //                     })
+                //                 )
+                //                 ),
+                //                 e(Table.Cell, null, e(Moment,{format:"YYYY-MM-DD HH:mm"},date))
+
+                //             );
+                //         })
+                //     )
+                // )
                 );
         }
     }

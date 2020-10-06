@@ -37,6 +37,10 @@ const ChronicleSchema = new Schema({
     enabled: { type: Boolean, default: true }
 });
 
+// ChronicleSchema.pre(/^find/, function(next) {
+//     this.populate('works');
+// });
+
 // ChronicleSchema.methods.filterSearchWord = function(searchWord){
 //     this.works.filter((work)=>{
 //         if(work.lastVersion.title.includes(searchWord)){return true}

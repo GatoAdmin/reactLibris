@@ -64,6 +64,19 @@ router.post("/chronicles", ensureAuthenticated,function(req,res,next){
     res.json({user:user,masterTags :masterTags});
   });
 });
+    
+router.post("/sanctions", ensureAuthenticated,function(req,res,next){
+  console.log("들어옴");//'works.reported.solvedReport.isSolved':false
+  Chronicle.find({author:req.user._id})
+  .populate({path:'works', match:{'reported.solvedReport.isSolved':false}})
+  .exec(function(err,results){
+    if(err) {return next(err);}
+    if(!results){return next(404);}
+    req.session.current_url = req.originalUrl;
+    console.log(results);
+    res.json({articles:results});
+  });
+});
   
 router.post("/comments", ensureAuthenticated,function(req,res,next){
   Comment.find({user:req.user._id})
@@ -589,4 +602,10 @@ function sortAfterResult(a, b, alignType,order){
   return 0;
 }
 
+function toObjectId(strings) {
+  if (Array.isArray(strings)) {
+    return strings.map(mongoose.Types.ObjectId);
+  }
+  return mongoose.Types.ObjectId(strings);
+}
 module.exports = router;

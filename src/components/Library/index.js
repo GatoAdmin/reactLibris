@@ -7,6 +7,7 @@ import Bookmarks from './bookmarks';
 import Blocks from './blocks';
 import Comments from './comments';
 import Chronicles from './chronicles';
+import ReportAritcle from './reportAritcle';
 
 function Library({ currentUser, match }) {
   return (
@@ -21,6 +22,7 @@ function Library({ currentUser, match }) {
             <Button as={Link} to='/library/block/user'>BlockUsers</Button>
             <Button as={Link} to='/library/comments'>MyComments</Button>
             <Button as={Link} to='/library/chronicles'>MyChronicles</Button>
+            <Button as={Link} to='/library/sanctions'>제한 사항</Button>
             {/* {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)?<Button as={Link} to='/logout'>Logout</Button>:<Button as={Link} to='/login'>Login</Button>} */}
           </Button.Group>
       </Grid.Column>
@@ -46,6 +48,11 @@ function Library({ currentUser, match }) {
                 currentUser={currentUser}
                 path={`${match.path}/chronicles`}
                 render={(props)=><Chronicles currentUser={currentUser}{...props}/>}
+          />
+          <AuthRoute
+                currentUser={currentUser}
+                path={`${match.path}/sanctions`}
+                render={(props)=><ReportAritcle currentUser={currentUser}{...props}/>}
           />
       </Grid.Column>
     </Grid>
