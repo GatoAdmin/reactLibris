@@ -29,6 +29,13 @@ class Home extends React.Component {
         });
       }
     render() {        //
+        var imageSrc = null;
+        if(this.state.news.length>0){
+            if(this.state.news[0].banner!=undefined&&this.state.news[0].banner.length>0){
+                imageSrc = this.state.news[0].banner[0].imageData.replace('\\','/')
+                console.log(imageSrc)
+            }
+        }
         return (
             <div className="App">
                 <h3>리브리스에 오신 것을 환영합니다!</h3>
@@ -36,7 +43,7 @@ class Home extends React.Component {
                     {console.log(this.state.news[0])}
                 {this.state.news.length>0?
                 <Grid.Row className="news-latest">
-                        <Grid.Column style={{backgroundImage:`url(${this.state.news[0].banner!=undefined&&this.state.news[0].banner.length>0?'/assets/images/'+this.state.news[0].banner[0].imageData:src})`,backgroundSize: 'cover',height:'400px'}}>
+                        <Grid.Column style={{backgroundImage:`url(${this.state.news[0].banner!=undefined&&this.state.news[0].banner.length>0?'/assets/images/'+imageSrc:src})`,backgroundSize: 'cover',height:'400px'}}>
                             
                         </Grid.Column>
                     </Grid.Row>:null}
