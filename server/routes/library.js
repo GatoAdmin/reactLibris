@@ -7,6 +7,8 @@ var mongoose = require('mongoose');
 var User = mongoose.model('UserInfo');
 var Comment = mongoose.model('Comment');
 var Chronicle = mongoose.model('Chronicle');
+var Scenario = mongoose.model('Scenario');
+var Replay = mongoose.model('Replay');
 var moment = require('moment');
 require('moment-timezone');
 moment.tz.setDefault('Asia/Seoul');
@@ -66,15 +68,20 @@ router.post("/chronicles", ensureAuthenticated,function(req,res,next){
 });
     
 router.post("/sanctions", ensureAuthenticated,function(req,res,next){
-  console.log("들어옴");//'works.reported.solvedReport.isSolved':false
-  Chronicle.find({author:req.user._id})
-  .populate({path:'works', match:{'reported.solvedReport.isSolved':false}})
-  .exec(function(err,results){
+  Scenario.find({author:req.user._id,'reported.solvedReport.isSolved':false})
+  .exec(function(err,scenarios){
     if(err) {return next(err);}
-    if(!results){return next(404);}
-    req.session.current_url = req.originalUrl;
-    console.log(results);
-    res.json({articles:results});
+    Replay.find({author:req.user._id,'reported.solvedReport.isSolved':false})
+    .exec(function(err,replays){
+      if(err) {return next(err);}
+      var results = scenarios.concat(replays);
+      results.sort(function(a, b){
+        return new Date(b.reported[b.reported.length-1].created)-new Date(a.reported[a.reported.length-1].created);
+      })
+      req.session.current_url = req.originalUrl;
+      console.log(results);
+      res.json({articles:results});
+    })
   });
 });
   

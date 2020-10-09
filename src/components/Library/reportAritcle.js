@@ -1,6 +1,8 @@
 import React from 'react';
 import axios from 'axios';
 import Moment from 'react-moment';
+import {Button, Table, Icon} from 'semantic-ui-react';
+import {Link} from 'react-router-dom';
 const e = React.createElement;
 
 class ArticleList extends React.Component {
@@ -49,7 +51,6 @@ class ArticleList extends React.Component {
                     console.log(res)
                     this.setState({
                         rows: res.data.articles,
-                        master_tags: res.data.masterTags
                     });
                   })
                 .catch(function (err) {
@@ -223,7 +224,56 @@ class ArticleList extends React.Component {
         var urlStringLast  = window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
 
         var saveButton = e("button",{type:"button", onClick:this.onSubmitMemo},"저장");
-        var component =
+        var component = <div>
+            <Table>
+                <Table.Header>
+                    <Table.HeaderCell>
+                        <Button className="align-btn" type='button' value="title" onClick={(e)=>this.onAlignClick(e)} >
+                            제목</Button>
+                    </Table.HeaderCell>
+                    <Table.HeaderCell>
+                        <Button className="align-btn" type='button' value="title" onClick={(e)=>this.onAlignClick(e)} >
+                            상태</Button>
+                    </Table.HeaderCell>
+                    <Table.HeaderCell>
+                        <Button className="align-btn" type='button' value="title" onClick={(e)=>this.onAlignClick(e)} >
+                            제한 이유</Button>
+                    </Table.HeaderCell>
+                    <Table.HeaderCell>
+                        <Button className="align-btn" type='button' value="title" onClick={(e)=>this.onAlignClick(e)} >
+                            이의제기</Button>
+                    </Table.HeaderCell>
+                </Table.Header>
+                <Table.Body>
+                    {
+                        this.state.rows.map((data, index)=>{
+                            this.state.rows.map((data, index) => {
+                                var date = new Date(data.created);
+                                console.log(data);
+                                var version = data.lastVersion;
+                                return( <Table.Row key={index}>
+                                        <Table.Cell>
+                                            <Link to={"/"+urlStringLast+"/view/" + data._id+"/"+data.version}></Link>
+                                        </Table.Cell>
+                                    </Table.Row>)
+                                // return e("tr", { key: index.toString(), 'data-memo':index, "data-bookmark":data._id},
+                                //     e("td", null,
+                                //         e("a", { href:  }, version.title)),
+                                //     e("td", null, data.ruleTag),
+                                //     e("td", null, e("a", { href: "/user/" + data.author.userName }, data.author.userName)), 
+                                //     e("td", {className:"bookmarkMemo"}, this.state.editMemo == index?e('span',null,e('input',{type:'text',value:this.state.memo,onChange:this.onChangeMemo}),saveButton) :e('span',null,data.memo)
+                                //     ),
+                                //     e("td", null, e(Moment,{format:"YYYY-MM-DD HH:mm"},date)),
+                                //     e("td",null,e("button",{type:"button", onClick:this.editMemoMode},"수정")),
+                                //     e("td",null,e("button",{type:"button", onClick:this.bookmarkRemove},"해제"))
+                                // );
+                            })
+
+                        })
+                    }
+                </Table.Body>
+            </Table>
+        </div>
             e("div", null,
                 e("button", {
                     className: "btn align-btn",
@@ -276,13 +326,13 @@ class ArticleList extends React.Component {
                     e('tbody', { id: "data_tbody" },
                         this.state.rows.map((data, index) => {
                             var date = new Date(data.created);//new Date(data.created).format('yyyy-MM-dd HH:mm');
-                            var content =  data.content;
-                            var version = content.versions[data.version-1];
-                            return e("tr", { key: index.toString(), 'data-memo':index, "data-bookmark":content._id,"data-version":data.version},
+                            console.log(data);
+                            var version = data.lastVersion;
+                            return e("tr", { key: index.toString(), 'data-memo':index, "data-bookmark":data._id},
                                 e("td", null,
-                                    e("a", { href: "/"+urlStringLast+"/view/" + content._id+"/"+data.version }, version.title)),
-                                e("td", null, content.ruleTag),
-                                e("td", null, e("a", { href: "/user/" + content.author.userName }, content.author.userName)), 
+                                    e("a", { href: "/"+urlStringLast+"/view/" + data._id+"/"+data.version }, version.title)),
+                                e("td", null, data.ruleTag),
+                                e("td", null, e("a", { href: "/user/" + data.author.userName }, data.author.userName)), 
                                 e("td", {className:"bookmarkMemo"}, this.state.editMemo == index?e('span',null,e('input',{type:'text',value:this.state.memo,onChange:this.onChangeMemo}),saveButton) :e('span',null,data.memo)
                                 ),
                                 e("td", null, e(Moment,{format:"YYYY-MM-DD HH:mm"},date)),
