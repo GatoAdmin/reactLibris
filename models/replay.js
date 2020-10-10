@@ -12,8 +12,8 @@ const ReplaySchema = new Schema({
     isAgreeComment: { type: Boolean, default: false },
     hashTags:[{type: Schema.Types.ObjectId, ref:'HashTag'}],
     summary:{type:String},
+    title: String,
     versions: [{
-        title: String,
         peoples: {
             master: String,
             players: [{

@@ -285,7 +285,7 @@ class ScenarioView extends React.Component {
         }
         content=(
             <div>
-            <h2>{version.title}</h2>
+            <h2>{result.title}</h2>
                 {blockContent}
                 {reportConetnt}
                 {typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null?(

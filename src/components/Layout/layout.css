@@ -1,0 +1,32 @@
+#root{
+    max-width: 1080px;
+    min-width: 960px;
+}
+
+.base{
+    max-width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+#main-logo{
+    width: 200px;
+}
+
+.user-buttons{
+    float: right;
+}
+.search-box{
+    top: 25%;
+}
+
+.search-box .search .input{
+    display: block;
+}
+
+.menu-wrapper .ui.button{
+    background: none;
+}
+.menu-bar{
+    border-top: solid violet 1px;
+}

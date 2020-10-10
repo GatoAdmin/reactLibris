@@ -291,7 +291,7 @@ class ReplayView extends React.Component {
             <div>
                 {blockContent}
                 {reportConetnt}
-            <h2>{version.title}</h2>
+            <h2>{result.title}</h2>
                 {typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null?(
                     <Button onClick={()=>this.switchBookmark()}>
                         {isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}

@@ -32,7 +32,7 @@ class Maker extends React.Component {
                         master_tags: res.data.masterTags,
                         result:res.data.result,
                         article_id:res.data.result._id,
-                        title:res.data.result.lastVersion.title,
+                        title:res.data.result.title,
                         rating:res.data.result.lastVersion.rating,
                         background_tag:res.data.result.lastVersion.backgroundTag,
                         genre_tags:res.data.result.lastVersion.genreTags,

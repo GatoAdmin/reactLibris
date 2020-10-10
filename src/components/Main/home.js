@@ -11,40 +11,43 @@ class Home extends React.Component {
             news: [],
             recommandScenarios:  [],
             recommandReplays:[],
-            monthScenarios:  [],
-            monthReplays:[],
-            dayScenarios:  [],
-            dayReplays:[],
-            weekScenarios:  [],
-            weekReplays:[],
-            newScenarios:  [],
-            newReplays:[],
+            // monthScenarios:  [],
+            // monthReplays:[],
+            // dayScenarios:  [],
+            // dayReplays:[],
+            // weekScenarios:  [],
+            // weekReplays:[],
+            // newScenarios:  [],
+            // newReplays:[],
         };
     }    
     componentDidMount() {
         axios.post('/')
-        .then(res => {this.setState(res.data)})
+        .then(res => {console.log(res.data);this.setState(res.data)})
         .catch(function (err) {
             console.log(err);
         });
       }
     render() {        //
         var imageSrc = null;
+        var newsCardList = this.state.news;
+        var newsFirst = this.state.news[0];
         if(this.state.news.length>0){
-            if(this.state.news[0].banner!=undefined&&this.state.news[0].banner.length>0){
-                imageSrc = this.state.news[0].banner[0].imageData.replace('\\','/')
-                console.log(imageSrc)
+            if(newsFirst.banner!=undefined&&newsFirst.banner.length>0){
+                imageSrc = newsFirst.banner[0].imageData.replace('\\','/')
             }
+            newsCardList.shift();
         }
         return (
             <div className="App">
                 <h3>리브리스에 오신 것을 환영합니다!</h3>
                 <Grid>
-                    {console.log(this.state.news[0])}
                 {this.state.news.length>0?
                 <Grid.Row className="news-latest">
-                        <Grid.Column style={{backgroundImage:`url(${this.state.news[0].banner!=undefined&&this.state.news[0].banner.length>0?'/assets/images/'+imageSrc:src})`,backgroundSize: 'cover',height:'400px'}}>
-                            
+                        <Grid.Column className="newsBox" style={{backgroundImage:`url(${newsFirst.banner!=undefined&&newsFirst.banner.length>0?'/assets/images/'+imageSrc:src})`,backgroundSize: 'cover',height:'400px'}}>
+                            <h2>{newsFirst.title}</h2>
+                            <div>{newsFirst.author.userName}</div>
+                            <div>{newsFirst.summary}</div>
                         </Grid.Column>
                     </Grid.Row>:null}
                     <Grid.Row className="news">
@@ -53,17 +56,17 @@ class Home extends React.Component {
                                 뉴스
                             </Grid.Row>
                             <Grid.Row>
-                                {this.state.news.length>0?<CardList cards={this.state.news} type="news"/>:null}
+                                {this.state.news.length>0?<CardList cards={newsCardList} type="news"/>:null}
                             </Grid.Row>
                         </Grid.Column>
                     </Grid.Row>
-                    {/* <Grid.Row className="recommand_scenarios">
+                   <Grid.Row className="recommand_scenarios">
                         <Grid.Column>
                             <Grid.Row>
                                 추천 시나리오
                             </Grid.Row>
                             <Grid.Row>
-                                <CardList cards={this.state.recommandScenarios} type="scenarios"/>
+                            {this.state.recommandScenarios.length>0?<CardList cards={this.state.recommandScenarios} type="scenarios"/>:null}
                             </Grid.Row>
                         </Grid.Column>
                     </Grid.Row>
@@ -73,11 +76,11 @@ class Home extends React.Component {
                                 추천 리플레이
                             </Grid.Row>
                             <Grid.Row>
-                                <CardList cards={this.state.monthReplays} type="replays"/>
+                            {this.state.recommandReplays.length>0?<CardList cards={this.state.recommandReplays} type="replays"/>:null}
                             </Grid.Row>
                         </Grid.Column>
                     </Grid.Row>
-                    <Grid.Row className="recommand_scenarios">
+                    {/*  <Grid.Row className="recommand_scenarios">
                         <Grid.Column>
                             <Grid.Row>
                                 인기 시나리오

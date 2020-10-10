@@ -24,7 +24,7 @@ class CradList extends React.Component {
                                 return (<Card key={index} href={`/${this.state.type}/view/${card._id}`}>
                                     <Image src={card.banner!=undefined&&card.banner.length>0?"/assets/images/"+card.banner[0].imageData:src} wrapped ui={false} />
                                     <Card.Content>
-                                        <Card.Header>{card.lastVersion.title}</Card.Header>
+                                        <Card.Header>{card.title}</Card.Header>
                                         <Card.Meta>{card.author.userName}</Card.Meta>
                                         <Card.Description>
                                             {card.lastVersion.summary}

@@ -230,7 +230,7 @@ class ArticleList extends React.Component {
                             return (
                                 <Table.Row key = {index.toString()} >
                                     <Table.Cell>
-                                        <Link to={"/replays/view/"+data._id} >{latest.title}</Link>
+                                        <Link to={"/replays/view/"+data._id} >{data.title}</Link>
                                     </Table.Cell>
                                     <Table.Cell>
                                         {data.ruleTag}

@@ -16,8 +16,8 @@ const NewsSchema = new Schema({
         bannerKind :{type:String, default:"Banner", enum: [ 'Banner']}, //어디에 표기될것인가. 헤더 광고도 고려해야함
     }],
     summary:{type:String},
+    title: String,
     versions: [{
-        title: String,
         content: { type: String }, //본문. TODO: Quill에 맞춰서 수정할것.
         checked: { isChecked: { type: Boolean, default: false }, date: { type: Date } },
         created: { type: Date, default: Date.now }

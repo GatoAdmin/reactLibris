@@ -114,7 +114,7 @@ class NewsView extends React.Component {
 
     content=(
         <div>
-          <h2>{result.lastVersion.title}</h2>
+          <h2>{result.title}</h2>
             {typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null?(
                 <Button onClick={()=>this.switchBookmark()}>
                     {isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}

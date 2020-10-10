@@ -82,7 +82,7 @@ function SearchInput() {
   }, [])
 
   return (
-        <Form action="/search" method="GET">
+        <Form className="search-box" action="/search" method="GET">
           <Grid>
            <Grid.Column width={11}>
             <Search

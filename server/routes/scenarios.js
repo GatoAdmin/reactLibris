@@ -44,37 +44,6 @@ function ensureAuthenticated(req, res, next) {
     res.redirect("/login");
   }
 }
-const agg_lookup_user = {
-  from: 'userinfos', localField: 'author', foreignField: '_id', as: 'author'
-};
-const agg_lookup_rule =
-{
-  from: 'mastertags',
-  localField: 'rule',
-  foreignField: 'tags._id',
-  as: 'ruleTag'
-};
-const agg_lookup_genre =
-{
-  from: 'mastertags',
-  localField: 'versions.genreTags',
-  foreignField: 'tags._id',
-  as: 'genreTags'
-};
-const agg_lookup_background =
-{
-  from: 'mastertags',
-  localField: 'versions.backgroundTag',
-  foreignField: 'tags._id',
-  as: 'backgroundTag'
-};
-const agg_lookup_subtags =
-{
-  from: 'mastertags',
-  localField: 'versions.subTags',
-  foreignField: "tags._id",
-  as: 'subTags'
-};
 
 router.post("/", function (req, res, next) {
   var data = req.body.params;
@@ -83,14 +52,14 @@ router.post("/", function (req, res, next) {
   if (data) {
     order = data.align_order;
     if (order == "descending") {
-      if (data.align_type === "title") {
-        alignType = "-versions.title"
+      if(alignType == "author"){
+        alignType = "-author.userName"
       } else {
         alignType = "-" + data.align_type.toString();
       }
     } else {
-      if (data.align_type === "title") {
-        alignType = "versions.title"
+      if(alignType == "author"){
+        alignType = "author.userName"
       } else {
         alignType = data.align_type.toString();
       }
@@ -147,12 +116,12 @@ router.post("/make", ensureAuthenticated, function (req, res, next) {
 
           var newScenario = new Scenario({
             author: user._id,
+            title: formData.title,
             isFree: isChecked(formData.is_paid) ? false : true,
             isAgreeComment: isChecked(formData.is_agree_comment),
             rule: toObjectId(formData.rule),
             price: isChecked(formData.is_paid) ? 0 : price,
             versions: {
-              title: formData.title,
               capacity: { max: capacityMax, min: capacityMin },
               rating: formData.rating,
               masterDifficulty: formData.masterDifficulty,
@@ -243,12 +212,12 @@ router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
 
      var newScenario = new Scenario({
       author: user._id,
+      title: formData.title,
       isFree: isChecked(formData.is_paid) ? false : true,
       isAgreeComment: isChecked(formData.is_agree_comment),
       rule: toObjectId(formData.rule),
       price: isChecked(formData.is_paid) ? 0 : price,
       versions: {
-        title: formData.title,
         capacity: { max: capacityMax, min: capacityMin },
         rating: formData.rating,
         masterDifficulty: formData.masterDifficulty,
@@ -340,8 +309,9 @@ router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
         user.save();
       }
     }
+    
+    scenario.title= formData.title;
     scenario.versions.push({
-      title: formData.title,
       capacity: { max: capacityMax, min: capacityMin },
       rating: formData.rating,
       masterDifficulty: formData.masterDifficulty,
@@ -363,378 +333,6 @@ router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
     });
 
   });
-});
-
-
-router.get("/chronicles/:id", function (req, res, next) {
-  var alignType = "-works.created";
-  var order = "descending";
-  var agg_chronicle_project = {
-    _id: 1,
-    author: {
-      $let: {
-        vars: {
-          user: {
-            $arrayElemAt: ["$author", 0]
-          }
-        },
-        in: {
-          userName: "$$user.userName",
-          userEmail: "$$user.userEmail"
-        }
-      }
-    },
-    title: 1,
-    description: 1,
-    works: {
-      $map:
-      {
-        input: "$works",
-        as: "work",
-        in: {
-          _id: "$$work._id",
-          price: "$$work.price",
-          view: "$$work.view",
-          created: "$$work.created",
-          version: {
-            $let:
-            {
-              vars: { version: { $arrayElemAt: ["$$work.versions", -1] } },
-              in:
-              {
-                title: "$$version.title",
-                capacity: "$$version.capacity",
-                orpgPredictingTime: "$$version.orpgPredictingTime",
-                trpgPredictingTime: "$$version.trpgPredictingTime",
-              }
-            }
-          },
-
-          ruleTag: {
-            $let: {
-              vars: {
-                rule_tags: { $arrayElemAt: ["$$work.ruleTag", -1] },
-              },
-              in: {
-                $let: {
-                  vars: {
-                    rule_tag: {
-                      $arrayElemAt:
-                        [{
-                          $filter: {
-                            input: "$$rule_tags.tags",
-                            as: "tag",
-                            cond: { $eq: ["$$work.rule", "$$tag._id"] }
-                          }
-                        }, 0]
-                    }
-                  },
-                  in: "$$rule_tag.tag"
-                }
-              }
-            }
-          },
-
-          subTags: {
-            $let: {
-              vars: {
-                subtag: { $arrayElemAt: ["$$work.subTags", 0] },
-                version: { $arrayElemAt: ["$$work.versions", -1] }
-              },
-              in: {
-                $let: {
-                  vars: {
-                    subtags: {
-                      $filter: {
-                        input: "$$subtag.tags",
-                        as: "tag",
-                        cond: { $in: ["$$tag._id", "$$version.subTags"] }
-                      }
-                    }
-                  },
-                  in: "$$subtags.tag"
-                }
-              }
-            }
-          },
-          genreTags: {
-            $let: {
-              vars: {
-                genretag: { $arrayElemAt: ["$$work.genreTags", 0] },
-                version: { $arrayElemAt: ["$$work.versions", -1] }
-              },
-              in: {
-                $let: {
-                  vars: {
-                    genretags: {
-                      $filter: {
-                        input: "$$genretag.tags",
-                        as: "tag",
-                        cond: { $in: ["$$tag._id", "$$version.genreTags"] }
-                      }
-                    }
-                  },
-                  in: "$$genretags.tag"
-                }
-              }
-            }
-          },
-          backgroundTag: {
-            $let: {
-              vars: {
-                background_tag: { $arrayElemAt: ["$$work.backgroundTag", 0] },
-                version: { $arrayElemAt: ["$$work.versions", -1] }
-              },
-              in: {
-                $let: {
-                  vars: {
-                    background: {
-                      $filter: {
-                        input: "$$background_tag.tags",
-                        as: "tag",
-                        cond: { $eq: ["$$version.backgroundTag", "$$tag._id"] }
-                      }
-                    }
-                  },
-                  in: { $arrayElemAt: ["$$background.tag", 0] }
-                }
-              }
-            }
-          },
-
-
-        }
-      },
-    },
-    isOpened: 1
-
-  };
-  var agg_lookup_works =
-  {
-    from: 'scenarios',
-    let: { "workId": "$works" },
-    pipeline: [
-      //{ $match: {$and:[ { $expr: { "$in": ["$_id", "$$workId"] } },{$expr: { "$eq": ["$enabled", true] }}
-      //{ $expr: { "$in": ["$_id", "$$workId"] } } },
-      {
-        $match: { $and: [{ $expr: { "$in": ["$_id", "$$workId"] } }, { $expr: { "$eq": ["$enabled", true] } }] }
-      },
-      { $lookup: agg_lookup_rule },
-      { $lookup: agg_lookup_background },
-      { $lookup: agg_lookup_genre },
-      { $lookup: agg_lookup_subtags }
-    ],
-    as: 'works'
-  };
-  var agg_match = { _id: toObjectId(req.param("id")), enabled: true };
-  var agg_unwind = { path: "$works", preserveNullAndEmptyArrays: true };
-  var agg_group = {
-    _id: "$_id",
-    "author": { $first: "$author" },
-    "title": { $first: "$title" },
-    "description": { $first: "$description" },
-    "works": { $push: "$works" },
-    isOpened: { $first: "$isOpened" }
-  };
-  // var agg_unwind = { $$ruleTags };
-  Chronicle.aggregate().match(agg_match)
-    .lookup(agg_lookup_user)
-    .lookup(agg_lookup_works)
-    .project(agg_chronicle_project)
-    .unwind(agg_unwind)
-    .sort(alignType)
-    .group(agg_group)
-    .exec(function (err, results) {
-      if (err) { console.log(err); return next(err); }
-      if (results.length < 1 || typeof (results) == undefined) { return res.redirect("/") }
-      res.render("scenario/chronicleScenarios", { chronicle: results[0], moment });
-    });
-});
-
-
-router.get("/chronicles/edit/:id", function (req, res, next) {
-  var alignType = "-works.created";
-  var order = "descending";
-  var agg_chronicle_project = {
-    _id: 1,
-    author: {
-      $let: {
-        vars: {
-          user: {
-            $arrayElemAt: ["$author", 0]
-          }
-        },
-        in: {
-          userName: "$$user.userName",
-          userEmail: "$$user.userEmail"
-        }
-      }
-    },
-    title: 1,
-    description: 1,
-    works: {
-      $map:
-      {
-        input: "$works",
-        as: "work",
-        in: {
-          _id: "$$work._id",
-          price: "$$work.price",
-          view: "$$work.view",
-          created: "$$work.created",
-          version: {
-            $let:
-            {
-              vars: { version: { $arrayElemAt: ["$$work.versions", -1] } },
-              in:
-              {
-                title: "$$version.title",
-                capacity: "$$version.capacity",
-                orpgPredictingTime: "$$version.orpgPredictingTime",
-                trpgPredictingTime: "$$version.trpgPredictingTime",
-              }
-            }
-          },
-
-          ruleTag: {
-            $let: {
-              vars: {
-                rule_tags: { $arrayElemAt: ["$$work.ruleTag", -1] },
-              },
-              in: {
-                $let: {
-                  vars: {
-                    rule_tag: {
-                      $arrayElemAt:
-                        [{
-                          $filter: {
-                            input: "$$rule_tags.tags",
-                            as: "tag",
-                            cond: { $eq: ["$$work.rule", "$$tag._id"] }
-                          }
-                        }, 0]
-                    }
-                  },
-                  in: "$$rule_tag.tag"
-                }
-              }
-            }
-          },
-
-          subTags: {
-            $let: {
-              vars: {
-                subtag: { $arrayElemAt: ["$$work.subTags", 0] },
-                version: { $arrayElemAt: ["$$work.versions", -1] }
-              },
-              in: {
-                $let: {
-                  vars: {
-                    subtags: {
-                      $filter: {
-                        input: "$$subtag.tags",
-                        as: "tag",
-                        cond: { $in: ["$$tag._id", "$$version.subTags"] }
-                      }
-                    }
-                  },
-                  in: "$$subtags.tag"
-                }
-              }
-            }
-          },
-          genreTags: {
-            $let: {
-              vars: {
-                genretag: { $arrayElemAt: ["$$work.genreTags", 0] },
-                version: { $arrayElemAt: ["$$work.versions", -1] }
-              },
-              in: {
-                $let: {
-                  vars: {
-                    genretags: {
-                      $filter: {
-                        input: "$$genretag.tags",
-                        as: "tag",
-                        cond: { $in: ["$$tag._id", "$$version.genreTags"] }
-                      }
-                    }
-                  },
-                  in: "$$genretags.tag"
-                }
-              }
-            }
-          },
-          backgroundTag: {
-            $let: {
-              vars: {
-                background_tag: { $arrayElemAt: ["$$work.backgroundTag", 0] },
-                version: { $arrayElemAt: ["$$work.versions", -1] }
-              },
-              in: {
-                $let: {
-                  vars: {
-                    background: {
-                      $filter: {
-                        input: "$$background_tag.tags",
-                        as: "tag",
-                        cond: { $eq: ["$$version.backgroundTag", "$$tag._id"] }
-                      }
-                    }
-                  },
-                  in: { $arrayElemAt: ["$$background.tag", 0] }
-                }
-              }
-            }
-          },
-
-
-        }
-      },
-    },
-    isOpened: 1
-
-  };
-  var agg_lookup_works =
-  {
-    from: 'scenarios',
-    let: { "workId": "$works" },
-    pipeline: [
-      //{ $match: {$and:[ { $expr: { "$in": ["$_id", "$$workId"] } },{$expr: { "$eq": ["$enabled", true] }}
-      //{ $expr: { "$in": ["$_id", "$$workId"] } } },
-      {
-        $match: { $and: [{ $expr: { "$in": ["$_id", "$$workId"] } }, { $expr: { "$eq": ["$enabled", true] } }] }
-      },
-      { $lookup: agg_lookup_rule },
-      { $lookup: agg_lookup_background },
-      { $lookup: agg_lookup_genre },
-      { $lookup: agg_lookup_subtags }
-    ],
-    as: 'works'
-  };
-  var agg_match = { _id: toObjectId(req.param("id")), enabled: true };
-  var agg_unwind = { path: "$works", preserveNullAndEmptyArrays: true };
-  var agg_group = {
-    _id: "$_id",
-    "author": { $first: "$author" },
-    "title": { $first: "$title" },
-    "description": { $first: "$description" },
-    "works": { $push: "$works" },
-    isOpened: { $first: "$isOpened" }
-  };
-  // var agg_unwind = { $$ruleTags };
-  Chronicle.aggregate().match(agg_match)
-    .lookup(agg_lookup_user)
-    .lookup(agg_lookup_works)
-    .project(agg_chronicle_project)
-    .unwind(agg_unwind)
-    .sort(alignType)
-    .group(agg_group)
-    .exec(function (err, results) {
-      if (err) { console.log(err); return next(err); }
-      if (results.length < 1 || typeof (results) == undefined) { return res.redirect("/") }
-      res.render("scenario/chronicleScenarios", { chronicle: results[0], moment });
-    });
 });
 
 router.post("/view/:id/:version", function (req, res, next) {
@@ -909,17 +507,13 @@ router.post("/search", function (req, res, next) {
     if (data.align_order) order = data.align_order;
     if (data.align_type) alignType = data.align_type;
     if (order == "descending") {
-      if (alignType == "title") {
-        alignType = "-versions.title"
-      }else if(alignType == "author"){
+      if(alignType == "author"){
         alignType = "-author.userName"
       }else {
         alignType = "-" + alignType;
       }
     } else {
-      if (alignType == "title") {
-        alignType = "versions.title"
-      }else if(alignType == "author"){
+      if(alignType == "author"){
         alignType = "author.userName"
       }
     }

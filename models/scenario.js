@@ -13,8 +13,8 @@ const ScenarioSchema = new Schema({
     rule: {type: Schema.Types.ObjectId, ref: 'MasterTag'},//String,
     hashTags:[{type: Schema.Types.ObjectId, ref:'HashTag'}],
     summary:{type:String},
+    title: String,
     versions: [{
-        title: String,
         capacity: { max: { type: Number, default: 1 }, min: { type: Number, default: 1 } },//인원수
         rating: Number,
         orpgPredictingTime: { type: Number },

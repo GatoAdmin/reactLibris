@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import './Main/style.css';
+import './Layout/layout.css';
 import {Switch, Route, Link,useHistory, Redirect } from 'react-router-dom';
 import AuthRoute from './Layout/AuthRoute';
 import Main from './Main';

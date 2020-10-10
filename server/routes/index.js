@@ -10,6 +10,8 @@ const client = new OAuth2Client("376934500468-n23i56vurbm1eakqio5v3gmadhkmnfp2.a
 var HashTag = mongoose.model('HashTag');
 var MasterTag = mongoose.model('MasterTag');
 var Chronicle = mongoose.model('Chronicle');
+var Scenario = mongoose.model('Scenario');
+var Replay = mongoose.model('Replay');
 var News = mongoose.model('News');
 
 //템플릿용 변수 설정
@@ -24,10 +26,17 @@ router.use(function(req,res,next){
 //컬렉션을 쿼리하고, 가장 최근 사용자를 먼저 반환(descending)
 router.post("/",function(req,res,next){
   var news;
+  var scenarios;
+  var replays;
   News.find({enabled:true}).populate('author').sort('-created').limit(5).exec(function(err, results){
     news = results;
   })
-
+  Scenario.find({enabled:true, isOpened:true}).sort({'viewUsers':-1}).limit(10).exec(function(err,results){
+    scenarios = results;
+  })
+  Replay.find({enabled:true, isOpened:true}).exec(function(err,results){
+    replays = results;
+  })
   Chronicle.find()
   .populate('works works.author')
   .sort({'works.updated':"descending"})
@@ -36,8 +45,9 @@ router.post("/",function(req,res,next){
     req.session.current_url = req.originalUrl;
     if(req.user){//TODO:나중에 처음 방문한 경우만 랜딩페이지를 띄워주는것으로 바꿀것
       // data = this.sortWorks(chronicles,req.user);
-      res.json({news:news});
-    }
+      
+    } 
+    res.json({news:news,recommandScenarios:scenarios,recommandReplays:replays });
   });
 });
 
