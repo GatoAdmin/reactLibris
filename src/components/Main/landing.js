@@ -1,103 +1,182 @@
 import React from 'react';
-import { Button, List } from 'semantic-ui-react';
+import { Button, Grid,Image } from 'semantic-ui-react';
+import { Link } from 'react-router-dom';
 
 class Main extends React.Component {
     render() {
         return (
-            <div className="App">
-                <h3>리브리스에 오신 것을 환영합니다!</h3>
-                <div id="landing_header">
-                    <div className="table">
-                        <div className="tr">
-                            <div className="td">
-                                <div className="tr">
-                                </div>
-                                <div className="tr">
-                                    <a href="/signup">
-                                        <div className="btn"><Button>계정 만들기</Button></div>
-                                    </a>
-                                </div>
-                                <div className="tr">
-                                </div>
+            <div className="landing-box">
+                <div className="door-box">
+                    <Grid>
+                        <Grid.Column width={8}></Grid.Column>
+                        <Grid.Column width={8}>
+                            <Image class="logo" src='/assets/images/layout/Logo.png'/>
+                            <div>
+                                <h2>시나리오 리플레이를 한 곳에서!</h2>
+                                <span>블라블라블라블라블블라블라블라블라블라블라블라블라
+                                      블라블라블라블라블라블라블라블라블라블라블라블라</span>
                             </div>
-                            <div className="td">
-                            </div>
-                        </div>
-                    </div>
+                            <Button className="violet-btn" color="violet" as={Link} to="/login">시작하기</Button>
+                        </Grid.Column>
+                    </Grid>
+                </div>
+                <div className="explain-box">
+                    <Grid>
+                        <Grid.Row>
+                            <h3>리브리스는</h3>
+                            <span>블라블라블라블라블블라블라블라블라블라블라블라블라블라블라블라블라블블라블라블라블라블라블라블라블라
+                                블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                블라블라블라블라블블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블블라블라블라블라블라블라블라블라
+                                블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                블라블라블라블라블블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                블라블라블라블라블라블라블라블라블라블라블라블라</span>
+                        </Grid.Row>
+                        <Grid.Row>
+                            <Grid.Column width={4}/>
+                            <Grid.Column width={4}>
+                                    <Button className="with-btn" color="white" as={Link} to="/about">공식 설명서</Button>
+                            </Grid.Column>
+                            <Grid.Column  width={4}>
+                                    <Button className="violet-btn" color="violet" as={Link} to="/login">시작하기</Button>
+                            </Grid.Column>
+                            <Grid.Column width={4}/>
+                        </Grid.Row>
+                    </Grid>
+                </div>
+                <div className="feature-box">
+                    <Grid>
+                        <Grid.Row>
+                            <Grid.Column width={3}>
+                                <h3>특징1</h3>
+                                <span>블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라</span>
+                            </Grid.Column>
+                            <Grid.Column width={3}>
+                                <h3>특징2</h3>
+                                <span>블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라</span>
+                            </Grid.Column>
+                            <Grid.Column width={3}>
+                                <h3>특징3</h3>
+                                <span>블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라</span>
+                            </Grid.Column>
+                            <Grid.Column width={3}>
+                                <h3>특징4</h3>
+                                <span>블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                    블라블라블라블라블라블라블라블라블라블라블라블라</span>
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                </div>
+                <div className="sponsor-box">
+                    <Grid>
+                        <Grid.Row>
+                            <h3>프리미엄 후원자 등록</h3>
+                        </Grid.Row>
+                        <Grid.Row>
+                            <Grid.Column width={3}>
+                                <Grid.Row>
+                                    <h3>장점</h3>
+                                </Grid.Row>
+                                <Grid.Row>
+                                    <Image src=""/>
+                                </Grid.Row>
+                                <Grid.Row>
+                                    <span>블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라</span>
+                                </Grid.Row>
+                            </Grid.Column>
+                            <Grid.Column  width={3}>
+                                <Grid.Row>
+                                    <h3>장점</h3>
+                                </Grid.Row>
+                                <Grid.Row>
+                                    <Image src=""/>
+                                </Grid.Row>
+                                <Grid.Row>
+                                    <span>블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라</span>
+                                </Grid.Row>
+                            </Grid.Column>
+                            <Grid.Column width={3}>
+                                <Grid.Row>
+                                    <h3>장점</h3>
+                                </Grid.Row>
+                                <Grid.Row>
+                                    <Image src=""/>
+                                </Grid.Row>
+                                <Grid.Row>
+                                    <span>블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라</span>
+                                </Grid.Row>
+                            </Grid.Column>
+                            <Grid.Column width={3}>
+                                <Grid.Row>
+                                    <h3>장점</h3>
+                                </Grid.Row>
+                                <Grid.Row>
+                                    <Image src=""/>
+                                </Grid.Row>
+                                <Grid.Row>
+                                    <span>블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라블라
+                                        블라블라블라블라블라블라블라블라블라블라블라블라</span>
+                                </Grid.Row>
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row>
+                            <Button className="violet-btn" color="violet" as={Link} to="/">프리미엄 후원자 보기</Button>
+                        </Grid.Row>
+                    </Grid>
                 </div>
 
-                <div>
-                    <h3>리브리스를 시작하는 방법</h3>
-            <a href="/signup">
-                        <div className="btn"><Button>계정 만들기</Button></div>
-                    </a>
-                </div>
-                <div>
-                    <h3>장점1</h3>
-                    <div>적당히 이미지</div>
-                </div>
-                <div>
-                    <h3>장점2</h3>
-                    <div>적당히 이미지</div>
-                    <a href="/signup">
-                        <div className="btn"><Button>계정 만들기</Button></div>
-                    </a>
-                </div>
-                <div>
-                    <h3>장점3</h3>
-                    <div>적당히 이미지</div>
-                    <a href="/signup">
-                        <div className="btn"><Button>계정 만들기</Button></div>
-                    </a>
-                </div>
-                <div>
-                    <h3>장점4</h3>
-                    <div>적당히 이미지</div>
-                    <a href="/signup">
-                        <div className="btn"><Button>계정 만들기</Button></div>
-                    </a>
-                </div>
-                <div>
-                    <h3>최신 뉴스</h3>
-                    <div>카드 뉴스 한개</div>
-                    <div>카드 뉴스 한개</div>
-                    <div>카드 뉴스 한개</div>
-                </div>
+                <div className="cooperation-box">
+                    <Grid>
+                        <Grid.Row><h3>협력 사이트</h3></Grid.Row>
+                        <Grid.Row>
+                            <Grid.Column>
 
-                <div>
-                    <h3>우리의 회원이 되어주지 않을래요?</h3>
-                    <div>
-                        <form action="/signup" method="post">
-                            <table>
-                                <tr>
-                                    <td>이메일 : </td>
-                                    <td><input type="text" name="email" /></td>
-                                </tr>
-                                <tr>
-                                    <td>비번 : </td>
-                                    <td><input type="password" name="password" /></td>
-                                </tr>
-                                <tr>
-                                    <td><input type="submit" value="회원가입" /></td>
-                                </tr>
-                            </table>
-                        </form>
-                    </div>
-                    <div>이미 회원이시라구요? <a href="/login">로그인</a></div>
+                            </Grid.Column>
+                            <Grid.Column>
+                                
+                            </Grid.Column>
+                            <Grid.Column>
+                                
+                            </Grid.Column>
+                            <Grid.Column>
+                                
+                            </Grid.Column>
+                            <Grid.Column>
+                                
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
                 </div>
-                <div>
-                    <div className="table">
-                        <div className="tr">
-                            <div className="td">
-                            <div>로고</div>
-                            </div>
-                            <div className="td">
-                                포부
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         );
     }

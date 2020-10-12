@@ -17,6 +17,7 @@ import Login from './Main/loginPage'
 import Logout from './Main/logoutPage';
 import Signup from './Main/signup';
 import SearchResult from './Main/searchResult';
+import Footer from './Layout/footer';
 import Navbar from './Layout/pageNav';
 class BaseLayout extends React.Component {
   constructor(props) {
@@ -93,9 +94,7 @@ class BaseLayout extends React.Component {
 
         </Switch>
         </div>
-    <footer>
-        React Router v5 Browser Example (c) 2017
-    </footer>
+    <Footer/>
   </div>
   );}
 }
