@@ -39,7 +39,7 @@ class Home extends React.Component {
             newsCardList.shift();
         }
         return (
-            <div className="App">
+            <div className="home">
                 <h3>리브리스에 오신 것을 환영합니다!</h3>
                 <Grid>
                 {this.state.news.length>0?

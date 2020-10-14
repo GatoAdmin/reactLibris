@@ -84,7 +84,7 @@ function SearchInput() {
   return (
         <Form className="search-box" action="/search" method="GET">
           <Grid>
-           <Grid.Column width={11}>
+           <Grid.Column width={13}>
             <Search
               input={{ icon: 'search', iconPosition: 'left', name:'sw' }}
               loading={loading}
@@ -98,7 +98,7 @@ function SearchInput() {
             />
           </Grid.Column>
            <Grid.Column width={3}>
-          <Button type="submit">검색</Button>
+          <Button color="violet" type="submit">검색</Button>
           </Grid.Column>
           </Grid>
         </Form>

@@ -1,12 +1,32 @@
+body{
+    overflow-x: auto;
+}
 #root{
-    max-width: 1080px;
-    min-width: 960px;
+    max-width: 1920px;
+    min-width: 1500px;
 }
 
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+  }
+  
+  ::-webkit-scrollbar:vertical {
+    background: #f1f1f1;
+    width: 17px;
+  }
+  
+  ::-webkit-scrollbar:horizontal {
+    background: #f1f1f1;
+    height: 17px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
 .base{
-    max-width: 90%;
-    margin-left: 5%;
-    margin-right: 5%;
+    width: 1400px;
+    margin: auto;
 }
 
 #main-logo{
