@@ -1,7 +1,9 @@
 import React from 'react';
 import axios from 'axios';
-import { Button, List, Grid } from 'semantic-ui-react';
+import { Button, Item, Grid, ListItem } from 'semantic-ui-react';
+
 import CardList from './cardList';
+import BannerCarousel from './BannerCarousel';
 
 const src = 'https://react.semantic-ui.com/images/wireframe/image.png'
 class Home extends React.Component {
@@ -32,94 +34,58 @@ class Home extends React.Component {
         var imageSrc = null;
         var newsCardList = this.state.news;
         var newsFirst = this.state.news[0];
-        if(this.state.news.length>0){
-            if(newsFirst.banner!=undefined&&newsFirst.banner.length>0){
-                imageSrc = newsFirst.banner[0].imageData.replace('\\','/')
-            }
-            newsCardList.shift();
-        }
+        // if(this.state.news.length>0){
+        //     if(newsFirst.banner!=undefined&&newsFirst.banner.length>0){
+        //         imageSrc = newsFirst.banner[0].imageData.replace('\\','/')
+        //     }
+        //     newsCardList.shift();
+        // }
         return (
             <div className="home">
-                <h3>리브리스에 오신 것을 환영합니다!</h3>
+                {this.state.news.length>0?<BannerCarousel festivals={this.state.news}/>:null}
                 <Grid>
-                {this.state.news.length>0?
-                <Grid.Row className="news-latest">
-                        <Grid.Column className="newsBox" style={{backgroundImage:`url(${newsFirst.banner!=undefined&&newsFirst.banner.length>0?'/assets/images/'+imageSrc:src})`,backgroundSize: 'cover',height:'400px'}}>
-                            <h2>{newsFirst.title}</h2>
-                            <div>{newsFirst.author.userName}</div>
-                            <div>{newsFirst.summary}</div>
-                        </Grid.Column>
-                    </Grid.Row>:null}
-                    <Grid.Row className="news">
-                        <Grid.Column>
-                            <Grid.Row>
-                                뉴스
+                    <Grid.Column width={13}>
+                        <Grid.Row className="recommand_scenarios">
+                                <Grid.Column>
+                                    <Grid.Row>
+                                        추천 시나리오
+                                    </Grid.Row>
+                                    <Grid.Row>
+                                    {this.state.recommandScenarios.length>0?<CardList cards={this.state.recommandScenarios} type="scenarios"/>:null}
+                                    </Grid.Row>
+                                </Grid.Column>
                             </Grid.Row>
-                            <Grid.Row>
-                                {this.state.news.length>0?<CardList cards={newsCardList} type="news"/>:null}
+                            <Grid.Row className="recommand_replays">
+                                <Grid.Column>
+                                    <Grid.Row>
+                                        추천 리플레이
+                                    </Grid.Row>
+                                    <Grid.Row>
+                                    {this.state.recommandReplays.length>0?<CardList cards={this.state.recommandReplays} type="replays"/>:null}
+                                    </Grid.Row>
+                                </Grid.Column>
                             </Grid.Row>
-                        </Grid.Column>
-                    </Grid.Row>
-                   <Grid.Row className="recommand_scenarios">
-                        <Grid.Column>
-                            <Grid.Row>
-                                추천 시나리오
-                            </Grid.Row>
-                            <Grid.Row>
-                            {this.state.recommandScenarios.length>0?<CardList cards={this.state.recommandScenarios} type="scenarios"/>:null}
-                            </Grid.Row>
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row className="recommand_replays">
-                        <Grid.Column>
-                            <Grid.Row>
-                                추천 리플레이
-                            </Grid.Row>
-                            <Grid.Row>
-                            {this.state.recommandReplays.length>0?<CardList cards={this.state.recommandReplays} type="replays"/>:null}
-                            </Grid.Row>
-                        </Grid.Column>
-                    </Grid.Row>
-                    {/*  <Grid.Row className="recommand_scenarios">
-                        <Grid.Column>
-                            <Grid.Row>
-                                인기 시나리오
-                            </Grid.Row>
-                            <Grid.Row>
-                                <CardList cards={this.state.monthScenarios} type="scenarios"/>
-                            </Grid.Row>
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row className="recommand_replays">
-                        <Grid.Column>
-                            <Grid.Row>
-                                인기 리플레이
-                            </Grid.Row>
-                            <Grid.Row>
-                                <CardList cards={this.state.replays} type="replays"/>
-                            </Grid.Row>
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row className="recommand_scenarios">
-                        <Grid.Column>
-                            <Grid.Row>
-                                신규 시나리오
-                            </Grid.Row>
-                            <Grid.Row>
-                                <CardList cards={this.state.newScenarios} type="scenarios"/>
-                            </Grid.Row>
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row className="recommand_replays">
-                        <Grid.Column>
-                            <Grid.Row>
-                                신규 리플레이
-                            </Grid.Row>
-                            <Grid.Row>
-                                <CardList cards={this.state.newReplays} type="replays"/>
-                            </Grid.Row>
-                        </Grid.Column>
-                    </Grid.Row>                                         */}
+                    </Grid.Column>
+                    <Grid.Column width={3}>
+                        <Grid.Row><div className="google-ad"></div></Grid.Row>
+                        <Grid.Row>
+                            <div className="notice-box">
+                                <h3>공지사항</h3>
+                                <Item.Group divided>
+                                    {this.state.news.map((notice,index)=>{
+                                        return <Item>
+                                            <Item.Image/>
+                                            <Item.Content>
+                                                <Item.Header>{notice.title}</Item.Header>
+                                            </Item.Content>
+                                        </Item>
+                                    })}
+                                </Item.Group>
+                            </div>
+                        </Grid.Row>
+                        <Grid.Row><div className="google-ad"></div></Grid.Row>
+                        <Grid.Row><div className="twitter-box"></div></Grid.Row>
+                    </Grid.Column>
                 </Grid>
             </div>
         );

@@ -1,12 +1,12 @@
 body{
-    overflow-x: auto;
+    overflow-x: auto !important;
 }
 #root{
     max-width: 1920px;
     min-width: 1500px;
 }
 
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
     -webkit-appearance: none;
   }
   
@@ -22,7 +22,7 @@ body{
   
   ::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.5);
-  }
+  } */
   
 .base{
     width: 1400px;
@@ -49,4 +49,18 @@ body{
 }
 .menu-bar{
     border-top: solid violet 1px;
+}
+
+.slider-box{
+    padding: 50px 0px 50px 0px;
+}
+.festival-banner img{
+    height: 500px;
+    width: 1000px;
+}
+
+.google-ad{
+    background-color: gray;
+    width: 350px;
+    height: 200px;
 }

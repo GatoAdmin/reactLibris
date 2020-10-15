@@ -20,7 +20,6 @@ class CradList extends React.Component {
                 <div style={{overflowX:'scroll',height:'380px'}}>
                         <Card.Group stackable={true} doubling={true} centered={true} style={{width:'1540px'}}>
                             {this.state.cards.map((card, index)=>{
-                                console.log(card);
                                 return (<Card key={index} href={`/${this.state.type}/view/${card._id}`}>
                                     <Image src={card.banner!=undefined&&card.banner.length>0?"/assets/images/"+card.banner[0].imageData:src} wrapped ui={false} />
                                     <Card.Content>
