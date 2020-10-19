@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
-import { Button, Item, Grid, ListItem } from 'semantic-ui-react';
+import { Button, Item, Grid, Image } from 'semantic-ui-react';
+import Moment from 'react-moment';
 
 import CardList from './cardList';
 import BannerCarousel from './BannerCarousel';
@@ -44,11 +45,11 @@ class Home extends React.Component {
             <div className="home">
                 {this.state.news.length>0?<BannerCarousel festivals={this.state.news}/>:null}
                 <Grid>
-                    <Grid.Column width={13}>
+                    <Grid.Column width={12}>
                         <Grid.Row className="recommand_scenarios">
                                 <Grid.Column>
                                     <Grid.Row>
-                                        추천 시나리오
+                                        <h3>시나리오 추천작</h3>
                                     </Grid.Row>
                                     <Grid.Row>
                                     {this.state.recommandScenarios.length>0?<CardList cards={this.state.recommandScenarios} type="scenarios"/>:null}
@@ -58,7 +59,27 @@ class Home extends React.Component {
                             <Grid.Row className="recommand_replays">
                                 <Grid.Column>
                                     <Grid.Row>
-                                        추천 리플레이
+                                        <h3>리플레이 추천작</h3>
+                                    </Grid.Row>
+                                    <Grid.Row>
+                                    {this.state.recommandReplays.length>0?<CardList cards={this.state.recommandReplays} type="replays"/>:null}
+                                    </Grid.Row>
+                                </Grid.Column>
+                            </Grid.Row>
+                        <Grid.Row className="recommand_scenarios">
+                                <Grid.Column>
+                                    <Grid.Row>
+                                        <h3>이런 시나리오 어때요?</h3>
+                                    </Grid.Row>
+                                    <Grid.Row>
+                                    {this.state.recommandScenarios.length>0?<CardList cards={this.state.recommandScenarios} type="scenarios"/>:null}
+                                    </Grid.Row>
+                                </Grid.Column>
+                            </Grid.Row>
+                            <Grid.Row className="recommand_replays">
+                                <Grid.Column>
+                                    <Grid.Row>
+                                        <h3>이런 리플레이 어때요?</h3>
                                     </Grid.Row>
                                     <Grid.Row>
                                     {this.state.recommandReplays.length>0?<CardList cards={this.state.recommandReplays} type="replays"/>:null}
@@ -66,25 +87,35 @@ class Home extends React.Component {
                                 </Grid.Column>
                             </Grid.Row>
                     </Grid.Column>
-                    <Grid.Column width={3}>
-                        <Grid.Row><div className="google-ad"></div></Grid.Row>
+                    <Grid.Column width={4}>
+                        <Grid.Row><div className="google-ad">
+                            <Image src='/assets/images/layout/google-ad-test-336.png'/>
+                            </div></Grid.Row>
                         <Grid.Row>
                             <div className="notice-box">
                                 <h3>공지사항</h3>
                                 <Item.Group divided>
                                     {this.state.news.map((notice,index)=>{
                                         return <Item>
-                                            <Item.Image/>
+                                            <Item.Image src={src} size="tiny"/>
                                             <Item.Content>
-                                                <Item.Header>{notice.title}</Item.Header>
+                                                <Item.Header>{notice.title}</Item.Header>        
+                                                <Item.Meta>
+                                                    <Moment format="YYYY.MM.DD">{notice.created}</Moment>
+                                                </Item.Meta>
                                             </Item.Content>
                                         </Item>
                                     })}
                                 </Item.Group>
                             </div>
                         </Grid.Row>
-                        <Grid.Row><div className="google-ad"></div></Grid.Row>
-                        <Grid.Row><div className="twitter-box"></div></Grid.Row>
+                        <Grid.Row><div className="google-ad">
+                            <Image src='/assets/images/layout/google-ad-test-336.png'/>
+                            </div></Grid.Row>
+                        <Grid.Row><div className="twitter-box">
+                            <h3>트위터</h3>
+                            <div className="twitter-timeline"></div>
+                            </div></Grid.Row>
                     </Grid.Column>
                 </Grid>
             </div>

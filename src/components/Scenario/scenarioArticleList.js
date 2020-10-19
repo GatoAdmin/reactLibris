@@ -12,6 +12,7 @@ class ArticleList extends React.Component {
         super(props);
         // this.setState({rows:array});
         this.state = {
+            is_show_detail_filter:false,
             rows: [],
             align_type: 'created',
             align_order: 'descending',
@@ -175,6 +176,10 @@ class ArticleList extends React.Component {
         }
     }
     
+    setShowFilter(){
+        this.setState((prevState)=>({is_show_detail_filter:!prevState.is_show_detail_filter}))
+    }
+
     getList(type){
         if(type==="card"){
             return (
@@ -400,8 +405,9 @@ class ArticleList extends React.Component {
                         <Form.Input label="시나리오 제목" tpye="text" width={6} name="filter_title" onChange={()=> this.onScenarioSearchChange} placeholder= "찾을 시나리오 제목"/>
                         <Form.Input label="작가" tpye="text" width={4} name="filter_author" onChange={()=> this.onScenarioSearchChange} placeholder= "찾을 작가"/>
 
-                    </Form.Group>     
-                    <Form.Group>
+                    </Form.Group>  
+                    {this.state.is_show_detail_filter?<div>
+                    <Form.Group className='detail-filter'>
                         <Form.Select 
                                 label='룰'
                                 name= "filter_rule"
@@ -432,11 +438,14 @@ class ArticleList extends React.Component {
                                 options={select_sub_tags}
                                 placeholder='찾을 태그'/>                                                              
                     </Form.Group>
-                    <Form.Group grouped >
-                        <Form.Group><Label>인원수</Label><Form.Input type="number" name="filter_capacity_min" onChange={()=>this.onScenarioSearchChange} min={1} placeholder='최소 인원수'/>~<Form.Input lable="" type="number" name="filter_capacity_max" onChange={()=>this.onScenarioSearchChange} min={1} placeholder='최대 인원수'/></Form.Group>
-                        <Form.Group><Label>가격</Label><Form.Input type="number" name="filter_price_min" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최소 가격'/>~<Form.Input lable="" type="number" name="filter_price_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최대 가격'/></Form.Group>
-                        <Form.Group><Label>시간</Label><Form.Input type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최소 시간'/>~<Form.Input lable="" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최대 시간'/></Form.Group>
+                    <Form.Group className='detail-filter' inline>
+                        <Form.Group><Label>인원수</Label><Form.Input type="number" name="filter_capacity_min" onChange={()=>this.onScenarioSearchChange} min={1} placeholder='최소 인원수'/><span className='dash'>~</span><Form.Input lable="" type="number" name="filter_capacity_max" onChange={()=>this.onScenarioSearchChange} min={1} placeholder='최대 인원수'/></Form.Group>
+                        <Form.Group><Label>가격</Label><Form.Input type="number" name="filter_price_min" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최소 가격'/><span className='dash'>~</span><Form.Input lable="" type="number" name="filter_price_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최대 가격'/></Form.Group>
+                        <Form.Group><Label>시간</Label><Form.Input type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최소 시간'/><span className='dash'>~</span><Form.Input lable="" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최대 시간'/></Form.Group>
                     </Form.Group>
+                    <Button type="button" onClick={()=>this.setShowFilter()}>상세 검색 닫기</Button>
+                    </div> :<Button type="button" onClick={()=>this.setShowFilter()}>상세 검색</Button>
+                    }
                     <Form.Button type="submit">검색</Form.Button>
                 </Form>
             </div>

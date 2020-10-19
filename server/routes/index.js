@@ -31,10 +31,16 @@ router.post("/",function(req,res,next){
   News.find({enabled:true}).populate('author').sort('-created').limit(5).exec(function(err, results){
     news = results;
   })
-  Scenario.find({enabled:true, isOpened:true}).sort({'viewUsers':-1}).limit(10).exec(function(err,results){
+  Scenario.aggregate([
+    {$addFields : {view: { $cond: { if: { $isArray: "$viewUsers" }, then: { $size: "$viewUsers" }, else: 0} }}},
+    {$sort: {view: -1}},{ $limit : 5 }])//.find({enabled:true, isOpened:true}).sort({'viewUsers':-1}).limit(5)
+    .exec(function(err,results){
     scenarios = results;
   })
-  Replay.find({enabled:true, isOpened:true}).exec(function(err,results){
+  Replay.aggregate([
+    {$addFields : {view: { $cond: { if: { $isArray: "$viewUsers" }, then: { $size: "$viewUsers" }, else: 0} }}},
+    {$sort: {view: -1}},{ $limit : 5 }])//.find({enabled:true, isOpened:true}).sort({'viewUsers':-1}).limit(5)
+  .exec(function(err,results){
     replays = results;
   })
   Chronicle.find()

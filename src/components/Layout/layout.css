@@ -1,6 +1,10 @@
 body{
     overflow-x: auto !important;
 }
+
+footer{
+    background-color: rgb(70, 18, 70);
+}
 #root{
     max-width: 1920px;
     min-width: 1500px;
@@ -23,7 +27,10 @@ body{
   ::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.5);
   } */
-  
+.dash{
+    padding: 5px 5px 5px 0px;
+    margin-right: 5px;
+}
 .base{
     width: 1400px;
     margin: auto;
@@ -58,9 +65,33 @@ body{
     height: 500px;
     width: 1000px;
 }
-
+.notice-box{
+    margin-bottom: 25px;
+}
+.notice-banner{
+    width: 50px;
+}
 .google-ad{
     background-color: gray;
-    width: 350px;
-    height: 200px;
+    width: 100%;
+    height: 275px;
+    margin-bottom: 25px;
+}
+.twitter-box{
+    width: 100%;
+}
+.twitter-timeline{
+    background-color: purple;
+    width: 100%;
+    height: 500px;
+}
+.detail-filter .fields{
+    padding-left: 10px;
+    text-align: center;
+}
+.detail-filter .label{
+    line-height: 2 !important;
+}
+.view_type{
+    text-align: end;
 }
