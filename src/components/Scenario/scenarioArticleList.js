@@ -10,7 +10,6 @@ const align_types = ['title', 'rule', 'author', 'view', 'price', 'created'];
 class ArticleList extends React.Component {
     constructor(props) {
         super(props);
-        // this.setState({rows:array});
         this.state = {
             is_show_detail_filter:false,
             rows: [],
@@ -42,12 +41,10 @@ class ArticleList extends React.Component {
                 }
             })
                 .then(res => {
-                    console.log(res.data.articles);
                     this.setState({
                         rows: res.data.articles,
                         master_tags: res.data.masterTags
                     });
-                    //    setTimeout(getArticles, 1000 * 10); // REPEAT THIS EVERy 10 SECONDS
                 })
                 .catch(function (err) {
                     console.log(err);
@@ -91,14 +88,10 @@ class ArticleList extends React.Component {
                 }
             })
                 .then(res => {
-                    console.log(res.data.articles);
-                    console.log(res.data.masterTags);
                     this.setState({
                         rows: res.data.articles,
                         master_tags: res.data.masterTags
                     });
-
-                    //    setTimeout(getArticles, 1000 * 10); // REPEAT THIS EVERy 10 SECONDS
                 })
                 .catch(function (err) {
                     console.log(err);
@@ -112,10 +105,9 @@ class ArticleList extends React.Component {
         }
         );
     }
-    onScenarioSearchSelected = (e) => {
-        var options = Array.from(e.target.selectedOptions, option => option.value);
+    onScenarioSearchSelected = (e, data) => {
         this.setState({
-            [e.target.name]: options
+            [data.name]: data.value
         }
         );
     }
@@ -148,16 +140,13 @@ class ArticleList extends React.Component {
                         rows: res.data.articles,
                         master_tags: res.data.masterTags
                     });
-
-                    //    setTimeout(getArticles, 1000 * 10); // REPEAT THIS EVERy 10 SECONDS
                 })
                 .catch(function (err) {
                     console.log(err);
                 })
         }
-        // if (this.state.searchs !== prevState.searchs ) {
+        
         getArticles();
-        // }
     }
     getAlignIcon(order){
         if(this.state.align_type === order){
@@ -359,42 +348,18 @@ class ArticleList extends React.Component {
             select_rule = ruleTags.tags.map((tag, id) => {
                         return { value: tag._id, key: id.toString(), text:tag.tag };
                     })
-            // = e("select", { className: "is-select2-select", name: "filter_rule", onChange: this.onScenarioSearchSelected, multiple: "multiple", tabIndex: "-1", placeholder: "룰" },
-            //     e("option", { value: "", selectd: "selected" }, "-"),
-            //     ruleTags.tags.map((tag, id) => {
-            //         return e("option", { value: tag._id, key: id.toString() }, tag.tag);
-            //     })
-            // )
             var genreTags = this.state.master_tags.find(tags => tags.name === "genre");
             select_genre = genreTags.tags.map((tag, id) => {
                 return { value: tag._id, key: id.toString(), text:tag.tag };
             })
-            // e("select", { className: "is-select2-select", onChange: this.onScenarioSearchSelected, multiple: "multiple", name: "filter_genre", tabIndex: "-1", placeholder: "룰" },
-            //     e("option", { value: "", selectd: "selected" }, "-"),
-            //     genreTags.tags.map((tag, id) => {
-            //         return e("option", { value: tag._id, key: id.toString() }, tag.tag);
-            //     })
-            // )
             var backgroundTags = this.state.master_tags.find(tags => tags.name === "background");
             select_background = backgroundTags.tags.map((tag, id) => {
                 return { value: tag._id, key: id.toString(), text:tag.tag };
             })
-            // e("select", { className: "is-select2-select", onChange: this.onScenarioSearchSelected, multiple: "multiple", name: "filter_background", tabIndex: "-1", placeholder: "룰" },
-            //     e("option", { value: "", selectd: "selected" }, "-"),
-            //     backgroundTags.tags.map((tag, id) => {
-            //         return e("option", { value: tag._id, key: id.toString() }, tag.tag);
-            //     })
-            // )
             var subTags = this.state.master_tags.find(tags => tags.name === "subTag");
             select_sub_tags = subTags.tags.map((tag, id) => {
                 return { value: tag._id, key: id.toString(), text:tag.tag };
             })
-            //e("select", { className: "is-select2-select", onChange: this.onScenarioSearchSelected, multiple: "multiple", name: "filter_sub_tags", tabIndex: "-1", placeholder: "룰" },
-            //     e("option", { value: "", selectd: "selected" }, "-"),
-            //     subTags.tags.map((tag, id) => {
-            //         return e("option", { value: tag._id, key: id.toString() }, tag.tag);
-            //     })
-            // )
         }
         var header =
         <div>
@@ -402,12 +367,9 @@ class ArticleList extends React.Component {
                 <Form id="tag-form"  onSubmit={(e)=>this.onScenarioSearchSubmit(e)}>
                     <Form.Group>
                         <Form.Input id="rdTag" type="hidden" value="" name="tag"/>
-                        <Form.Input label="시나리오 제목" tpye="text" width={6} name="filter_title" onChange={()=> this.onScenarioSearchChange} placeholder= "찾을 시나리오 제목"/>
-                        <Form.Input label="작가" tpye="text" width={4} name="filter_author" onChange={()=> this.onScenarioSearchChange} placeholder= "찾을 작가"/>
+                        <Form.Input label="시나리오 제목" tpye="text" width={4} name="filter_title" onChange={(e)=> this.onScenarioSearchChange(e)} placeholder= "찾을 시나리오 제목"/>
+                        <Form.Input label="작가" tpye="text" width={4} name="filter_author" onChange={(e)=> this.onScenarioSearchChange(e)} placeholder= "찾을 작가"/>
 
-                    </Form.Group>  
-                    {this.state.is_show_detail_filter?<div>
-                    <Form.Group className='detail-filter'>
                         <Form.Select 
                                 label='룰'
                                 name= "filter_rule"
@@ -415,6 +377,9 @@ class ArticleList extends React.Component {
                                 onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                 options={select_rule}
                                 placeholder='찾을 룰'/>
+                    </Form.Group>  
+                    {this.state.is_show_detail_filter?<div>
+                    <Form.Group className='detail-filter'>
                         <Form.Select 
                                 label='장르'
                                 name= "filter_genre"
@@ -454,119 +419,6 @@ class ArticleList extends React.Component {
                     <Button icon value="card" onClick={()=>this.onViewClick}><Icon name="grid layout"/></Button>
             </div>
         </div>
-        // if (this.state.master_tags.length > 0) {
-        //     var ruleTags = this.state.master_tags.find(tags => tags.name === "rule");
-        //     select_rule = e("select", { className: "is-select2-select", name: "filter_rule", onChange: this.onScenarioSearchSelected, multiple: "multiple", tabIndex: "-1", placeholder: "룰" },
-        //         e("option", { value: "", selectd: "selected" }, "-"),
-        //         ruleTags.tags.map((tag, id) => {
-        //             return e("option", { value: tag._id, key: id.toString() }, tag.tag);
-        //         })
-        //     )
-        //     var genreTags = this.state.master_tags.find(tags => tags.name === "genre");
-        //     select_genre = e("select", { className: "is-select2-select", onChange: this.onScenarioSearchSelected, multiple: "multiple", name: "filter_genre", tabIndex: "-1", placeholder: "룰" },
-        //         e("option", { value: "", selectd: "selected" }, "-"),
-        //         genreTags.tags.map((tag, id) => {
-        //             return e("option", { value: tag._id, key: id.toString() }, tag.tag);
-        //         })
-        //     )
-        //     var backgroundTags = this.state.master_tags.find(tags => tags.name === "background");
-        //     select_background = e("select", { className: "is-select2-select", onChange: this.onScenarioSearchSelected, multiple: "multiple", name: "filter_background", tabIndex: "-1", placeholder: "룰" },
-        //         e("option", { value: "", selectd: "selected" }, "-"),
-        //         backgroundTags.tags.map((tag, id) => {
-        //             return e("option", { value: tag._id, key: id.toString() }, tag.tag);
-        //         })
-        //     )
-        //     var subTags = this.state.master_tags.find(tags => tags.name === "subTag");
-        //     select_sub_tags = e("select", { className: "is-select2-select", onChange: this.onScenarioSearchSelected, multiple: "multiple", name: "filter_sub_tags", tabIndex: "-1", placeholder: "룰" },
-        //         e("option", { value: "", selectd: "selected" }, "-"),
-        //         subTags.tags.map((tag, id) => {
-        //             return e("option", { value: tag._id, key: id.toString() }, tag.tag);
-        //         })
-        //     )
-        // }
-        // var header =
-        //     e("div", null,
-        //         e("span",null,"시나리오"), 
-        //         typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?e(Link, {to:'/scenarios/make'},"새로 만들기"):null,
-        //         e("div", { className: "search_window" },
-        //             e("form", { action: "/scenarios/search", method: "POST", id: "tag-form" },
-        //                 e("ul", { className: "search_ul" },
-        //                     e("li", null,
-        //                         e("input", { id: "rdTag", type: "hidden", value: "", name: "tag" }),
-        //                         e("div", { className: "form-field" },
-        //                             e("label", { htmlFor: "filter_title" }, "시나리오 제목"),
-        //                             e("input", { type: "text", size: "12", name: "filter_title", onChange: this.onScenarioSearchChange, placeholder: "찾을 시나리오 제목" })
-        //                         )
-        //                     ),
-        //                     e("li", null,
-        //                         e("div", { className: "form-field" },
-        //                             e("label", { htmlFor: "filter_author" }, "작가"),
-        //                             e("input", { type: "text", size: "10", name: "filter_author", onChange: this.onScenarioSearchChange, placeholder: "찾을 작가" })
-        //                         )
-        //                     ),
-        //                     e("li", null,
-        //                         e("div", { className: "form-field" },
-        //                             e("label", { htmlFor: "filter_rule" }, "룰"),
-        //                             select_rule
-        //                         )
-        //                     ),
-        //                     e("li", null,
-        //                         e("div", { className: "form-field" },
-        //                             e("label", { htmlFor: "filter_background" }, "배경"),
-        //                             select_background
-        //                         )
-        //                     ),
-        //                     e("li", null,
-        //                         e("div", { className: "form-field" },
-        //                             e("label", { htmlFor: "filter_genre" }, "장르"),
-        //                             select_genre
-        //                         )
-        //                     ),
-        //                     e("li", null,
-        //                         e("div", { className: "form-field" },
-        //                             e("label", { htmlFor: "filter_sub_tags" }, "태그"),
-        //                             select_sub_tags
-        //                         )
-        //                     ),
-        //                 ), 
-        //                 e("ul", { className: "search_ul" },
-        //                     e("li", null,
-        //                         e("div", { className: "form-field" },
-        //                             e("label", { htmlFor: "filter_capacity_min" }, "인원수"),
-        //                             e("input", { type: "number", className:"size_2", name: "filter_capacity_min", onChange: this.onScenarioSearchChange, min:1,title:"검색될 최소 필요 인원수 입력" }),
-        //                             e("span",null,"~"),
-        //                             e("input", { type: "number",  className:"size_2", name: "filter_capacity_max", onChange: this.onScenarioSearchChange, min:1,title:"검색될 최대 필요 인원수 입력" })
-        //                         )
-        //                     ),
-        //                     e("li", null,
-        //                         e("div", { className: "form-field" },
-        //                             e("label", { htmlFor: "filter_price_min" }, "가격"),
-        //                             e("input", { type: "number",  className:"size_5", name: "filter_price_min", onChange: this.onScenarioSearchChange, min:0, title:"검색될 최소 가격 입력" }),
-        //                             e("span",null,"~"),
-        //                             e("input", { type: "number",  className:"size_5", name: "filter_price_max", onChange: this.onScenarioSearchChange, min:0, title:"검색될 최대 가격 입력" })
-        //                         )
-        //                     ),
-        //                     e("li", null,
-        //                         e("div", { className: "form-field" },
-        //                             e("label", { htmlFor: "filter_time_min" }, "시간"),
-        //                             e("input", { type: "number", className:"size_2", name: "filter_time_min", onChange: this.onScenarioSearchChange, min:0, title:"검색될 최소 예측 시간 입력" }),
-        //                             e("span",null,"~"),
-        //                             e("input", { type: "number", className:"size_2", name: "filter_time_max", onChange: this.onScenarioSearchChange, min:0, title:"검색될 최대 예측 시간 입력" })
-        //                         )
-        //                     ),
-        //                 ),
-        //                 e("button", {
-        //                     type: "submit", onClick: this.onScenarioSearchSubmit
-        //                     // onClick: () => this.setState({ search_tags: ["CoC", ["사랑", "죽어라"]] })
-        //                 }, "검색")
-        //             ),
-        //             e("ul", { id: "tag-list" }),
-        //         ),
-        //         e("div",{className:"view_type"},
-        //             e(Button,{icon:true ,value:"list", onClick:this.onViewClick},e(Icon,{name:"list layout"})),
-        //             e(Button,{icon:true ,value:"card", onClick:this.onViewClick},e(Icon,{name:"grid layout"}))
-        //         )
-        //     );
         var component = <div>
             {header}
             {this.getList(this.state.viewType)}
@@ -575,17 +427,6 @@ class ArticleList extends React.Component {
     }
 }
 
-// Find all DOM containers, and render Like buttons into them.
-// document.querySelectorAll('.articles_box')
-//     .forEach(domContainer => {
-//         // Read the comment ID from a data-* attribute.
-//         const commentID = parseInt(domContainer.dataset.commentid, 10);
-//         ReactDOM.render(
-//             e(ArticleList, { commentID: commentID }),
-//             domContainer
-//         );
-//     });
-
 export default ArticleList;
-// ReactDOM.render(e(ArticleList), document.querySelector('.articles_box'));
+
 

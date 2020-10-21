@@ -31,6 +31,9 @@ footer{
     padding: 5px 5px 5px 0px;
     margin-right: 5px;
 }
+.text-center{
+    text-align: center;
+}
 .base{
     width: 1400px;
     margin: auto;

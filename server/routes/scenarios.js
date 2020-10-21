@@ -13,6 +13,7 @@ var Report =  mongoose.model('Report');
 
 const bcrypt = require('bcryptjs');
 var moment = require('moment');
+const { merge } = require('.');
 require('moment-timezone');
 moment.tz.setDefault('Asia/Seoul');
 var nowDate = moment().format();
@@ -522,119 +523,44 @@ router.post("/search", function (req, res, next) {
     //   searchs.push({ "versions.useSearchTags": { $in: Array.isArray(tag) ? tag : [tag] } });
     // });
     var search = data.searchs;
-/*
-    search.filter_author != "" ? after_searchs.push({ "author.userName": { $regex: search.filter_author } }) : "";
-    search.filter_title != "" ? before_searchs.push({ "versions.title": { $regex: search.filter_title } }) : "";
-    if (search.filter_background.length > 0) {
-      if (search.filter_background[0] != "") {
-        before_searchs.push({ "versions.backgroundTag": { $in: toObjectId(search.filter_background) } });
-      }
-    }
-    if (search.filter_genre.length > 0) {
-      if (search.filter_genre[0] != "") {
-        before_searchs.push({ "versions.genreTags": { $in: toObjectId(search.filter_genre) } });
-      }
-    }
-    if (search.filter_rule.length > 0) {
-      if (search.filter_rule[0] != "") {
-        before_searchs.push({ "rule": { $in: toObjectId(search.filter_rule) } });
-      }
-    }
-    if (search.filter_sub_tags.length > 0) {
-      if (search.filter_sub_tags[0] != "") {
-        before_searchs.push({ "versions.subTags": { $in: toObjectId(search.filter_sub_tags) } });
-      }
-    }
-    if (search.filter_capacity_min != "" || search.filter_capacity_max != "") {
-      before_searchs.push({
-        $or: [{ "versions.capacity.min": convertGteLte(search.filter_capacity_min, search.filter_capacity_max) },
-        { "versions.capacity.max": convertGteLte(search.filter_capacity_min, search.filter_capacity_max) }]
-      });
-    }
-    if (search.filter_time_min != "" || search.filter_time_max != "") {
-      before_searchs.push({
-        $or: [{ "versions.orpgPredictingTime": convertGteLte(search.filter_time_min, search.filter_time_max) },
-        { "versions.trpgPredictingTime": convertGteLte(search.filter_time_min, search.filter_time_max) }]
-      });
-    }
-    if (search.filter_price_min != "" || search.filter_price_max != "") {
-      before_searchs.push({ "price": convertGteLte(search.filter_price_min, search.filter_price_max) });
-    }*/
+    
     if(search.filter_author != ""){
       after_searchs.author = {};
-      // after_searchs.author.userName={$regex:search.filter_author};
-
       after_searchs.author.userName=search.filter_author;
     }
     
-    search.filter_title != "" ? before_searchs.versions.title = {$regex:search.filter_title } : "";
+    if(search.filter_title != "")before_searchs.title = {$regex:search.filter_title };
  
     if (search.filter_background.length > 0) {
       if (search.filter_background[0] != "") {
-        // before_searchs.push({ "versions.backgroundTag": { $in: toObjectId(search.filter_background) } });
-
-        before_searchs.versions = {};
-        before_searchs.versions.backgroundTag={ $in: toObjectId(search.filter_background) };
+        Object.assign(before_searchs, {'versions.backgroundTag':{ $in: toObjectId(search.filter_background) }});
       }
     }
     if (search.filter_genre.length > 0) {
       if (search.filter_genre[0] != "") {
-        before_searchs.versions = {};
-        // before_searchs.push({ "versions.genreTags": { $in: toObjectId(search.filter_genre) } });
-        before_searchs.versions.genreTags= { $in: toObjectId(search.filter_genre) } ;
+        Object.assign(before_searchs,  { 'versions.genreTags':{ $in: toObjectId(search.filter_genre) }});
       }
     }
     if (search.filter_rule.length > 0) {
       if (search.filter_rule[0] != "") {
-        before_searchs.versions = {};
-        // before_searchs.push({ "rule": { $in: toObjectId(search.filter_rule) } });
         before_searchs.rule= { $in: toObjectId(search.filter_rule) };
       }
     }
     if (search.filter_sub_tags.length > 0) {
       if (search.filter_sub_tags[0] != "") {
-        before_searchs.versions = {};
-        // before_searchs.push({ "versions.subTags": { $in: toObjectId(search.filter_sub_tags) } });
-        before_searchs.versions.subTags = { $in: toObjectId(search.filter_sub_tags) };
+        Object.assign(before_searchs, {'versions.subTags':{ $in: toObjectId(search.filter_sub_tags) }});
       }
     }
+    
     if (search.filter_price_min != "" || search.filter_price_max != "") {
-      before_searchs.versions = {};
-      // before_searchs.push({ "price": convertGteLte(search.filter_price_min, search.filter_price_max) });
       before_searchs.price = convertGteLte(search.filter_price_min, search.filter_price_max) ;
     }
   }
-
-  var agg_match = {
-    $and: [{ enabled: true }, { isOpened: true }]
-  };
-  var agg_after_match = {};
-  if (before_searchs.length > 0) {
-    agg_match = {
-      $and:[{$and:[{enabled: true},{isOpened: true}]}, {$and: before_searchs}]
-    };
-  }
-  if (after_searchs.length > 0) {
-    agg_after_match = { $and: after_searchs };
-  }
-
-  // Scenario.aggregate().match(agg_match)
-  //   .lookup(agg_lookup_user)
-  //   .lookup(agg_lookup_rule)
-  //   .lookup(agg_lookup_genre)
-  //   .lookup(agg_lookup_background)
-  //   .lookup(agg_lookup_subtags)
-  //   .match(agg_after_match)
-  //   .project(agg_scenraio_project)
-  //   .sort(alignType)
-  //   .exec(function (err, results) {
-  //     if (err) { console.log(err); next(err); }
-  //     return res.json({ articles: results, masterTags: masterTags });
-  //   });
-
+  
     var findSearch = before_searchs;
     findSearch.enabled = true;
     findSearch.isOpened= true;
+    console.log(findSearch)
     Scenario.find(findSearch)
     .sort(alignType)
     .exec(function (err, results) {
@@ -764,7 +690,7 @@ function checkAfterAlignType(alignType){
 
 function toObjectId(strings) {
   if (Array.isArray(strings)) {
-    return strings.map(mongoose.Types.ObjectId);
+    return strings.map(string=>mongoose.Types.ObjectId(string));
   }
   return mongoose.Types.ObjectId(strings);
 }

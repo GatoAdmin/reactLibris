@@ -263,93 +263,45 @@ router.post("/search", function (req, res, next) {
       }
     }
 
-    // data.searchs.forEach(tag => {
-    //   searchs.push({ "versions.useSearchTags": { $in: Array.isArray(tag) ? tag : [tag] } });
-    // });
     var search = data.searchs;
 
-    // search.filter_author != "" ? after_searchs.push({ "author.userName":{$regex:search.filter_author} }) : "";
-    // search.filter_title != "" ? before_searchs.push({ "versions.title": {$regex:search.filter_title }}) : "";
     if(search.filter_author != ""){
       after_searchs.author = {};
-      // after_searchs.author.userName={$regex:search.filter_author};
-
       after_searchs.author.userName=search.filter_author;
     }
     
-    search.filter_title != "" ? before_searchs.versions.title = {$regex:search.filter_title } : "";
+    search.filter_title != "" ? before_searchs.title = {$regex:search.filter_title } : "";
  
     if (search.filter_background.length > 0) {
       if (search.filter_background[0] != "") {
-        // before_searchs.push({ "versions.backgroundTag": { $in: toObjectId(search.filter_background) } });
-
-        before_searchs.versions = {};
-        before_searchs.versions.backgroundTag={ $in: toObjectId(search.filter_background) };
+        Object.assign(before_searchs, {'versions.backgroundTag':{ $in: toObjectId(search.filter_background) }});
       }
     }
     if (search.filter_genre.length > 0) {
       if (search.filter_genre[0] != "") {
-        before_searchs.versions = {};
-        // before_searchs.push({ "versions.genreTags": { $in: toObjectId(search.filter_genre) } });
-        before_searchs.versions.genreTags= { $in: toObjectId(search.filter_genre) } ;
+        Object.assign(before_searchs,  { 'versions.genreTags':{ $in: toObjectId(search.filter_genre) }});
       }
     }
     if (search.filter_rule.length > 0) {
       if (search.filter_rule[0] != "") {
-        before_searchs.versions = {};
-        // before_searchs.push({ "rule": { $in: toObjectId(search.filter_rule) } });
         before_searchs.rule= { $in: toObjectId(search.filter_rule) };
       }
     }
     if (search.filter_sub_tags.length > 0) {
       if (search.filter_sub_tags[0] != "") {
-        before_searchs.versions = {};
-        // before_searchs.push({ "versions.subTags": { $in: toObjectId(search.filter_sub_tags) } });
-        before_searchs.versions.subTags = { $in: toObjectId(search.filter_sub_tags) };
+        Object.assign(before_searchs, {'versions.subTags':{ $in: toObjectId(search.filter_sub_tags) }});
       }
     }
+    
     if (search.filter_price_min != "" || search.filter_price_max != "") {
-      before_searchs.versions = {};
-      // before_searchs.push({ "price": convertGteLte(search.filter_price_min, search.filter_price_max) });
       before_searchs.price = convertGteLte(search.filter_price_min, search.filter_price_max) ;
     }
   }
 
-  var agg_match = {
-    $and:[{enabled: true},{isOpened: true}] 
-  };
-  var agg_after_match = {};
-  if (before_searchs.length > 0) {
-    agg_match = {
-      $and:[{$and:[{enabled: true},{isOpened: true}]}, {$and: before_searchs}]
-    };
-  }
-  if (after_searchs.length > 0) {
-    agg_after_match ={$and:after_searchs};
-  }
-
-  // Replay.aggregate().match(agg_match)
-  //   .lookup(agg_lookup_user)
-  //   .lookup(agg_lookup_rule)
-  //   .lookup(agg_lookup_genre)
-  //   .lookup(agg_lookup_background)
-  //   .lookup(agg_lookup_subtags)
-  //   .match(agg_after_match)
-  //   .project(agg_replay_project)
-  //   // .sort("version.title")
-  //   .sort(alignType)
-  //   .exec(function (err, results) {
-  //     if (err) { console.log(err); next(err); }
-  //     return res.json({ articles: results, masterTags: masterTags });
-  //   });
   var findSearch = before_searchs;
   findSearch.enabled = true;
   findSearch.isOpened= true;
-  // if(after_searchs.author.userName != undefined){
-  //   findSearch["author.userName"] = after_searchs.author.userName;
-  // }
-  // findSearch["author.userName"] = after_searchs["author.userName"]!=undefined?after_searchs["author.userName"]:"";
-  
+
     Replay.find(findSearch)
     .sort(alignType)
     .exec(function (err, results) {
@@ -679,9 +631,10 @@ function isMirrorChecked(value) {
   if (value === undefined|| value === "undefined") { return true; }
   else { return false; }
 }
+
 function toObjectId(strings) {
   if (Array.isArray(strings)) {
-    return strings.map(mongoose.Types.ObjectId);
+    return strings.map(string=>mongoose.Types.ObjectId(string));
   }
   return mongoose.Types.ObjectId(strings);
 }

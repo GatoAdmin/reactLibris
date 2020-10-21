@@ -10,7 +10,7 @@ import AuthRoute from '../Layout/AuthRoute';
 function Scenario({ currentUser, match })  {
   return (
       <div>
-        <h1>Scenario</h1>
+        <h1>시나리오</h1>
         <div>
           <Route exact path={match.path} component={(props)=><ArticleList currentUser={currentUser} {...props}/>} />
           <Route path={`${match.path}/view/:id`} component={(props)=><Viewer currentUser={currentUser} {...props}/>} />

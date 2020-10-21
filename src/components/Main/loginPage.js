@@ -19,13 +19,13 @@ class LoginPage extends React.Component{
     render(){
         return (
             <Segment placeholder>
-              <Grid columns={2} relaxed='very' stackable>
-                  <Grid.Column>
-                  <Grid.Row>
-                  <Grid.Column>
+              <Grid relaxed='very' stackable>
+                  <Grid.Column className="text-center">
+                  {/*<Grid.Row>
+                   <Grid.Column>
                     <Form onSubmit={this.submitHandler}> 
-                    {/* <Form action='/test' method="POST">  */}
-                    {/* <Form action="/login" method="POST"> */}
+                    {/* <Form action='/test' method="POST">  
+                    {/* <Form action="/login" method="POST"> 
                       <Form.Input
                         icon='user'
                         iconPosition='left'
@@ -43,24 +43,24 @@ class LoginPage extends React.Component{
             
                       <Button content='Login' primary />
                     </Form>
-                  </Grid.Column>
-                    <Grid.Column>
+                  </Grid.Column> <Grid.Column>*/}
+                    
                       {/* <Form action='/login/google' method="POST"> 
                         <Button type="submit" icon="google" content='Sign with Google' /> */}
                         <GoogleLogin 
                           clientId="376934500468-n23i56vurbm1eakqio5v3gmadhkmnfp2.apps.googleusercontent.com"
-                          buttonText="Goggle Login"
+                          buttonText="구글로 로그인"
                           onSuccess={(response)=>this.props.responseSuccessGoogle(response)}
                           onFailure={(response)=>this.props.responseFailureGoogle(response)}
                           uxMode="popup"
                           cookiePolicy={'single_host_origin'}
                         />
-                      {/* </Form> */}
-                    </Grid.Column>
-                  </Grid.Row>   
+                      {/*</Grid.Column> </Form> 
+                    
+                  </Grid.Row>   */}
                 </Grid.Column>
-                <Grid.Column verticalAlign='middle'>
-                    <Button content='Sign up' icon='signup' size='big' as={Link} to="/signup" />
+                {/* <Grid.Column verticalAlign='middle'>
+                    <Button content='Sign up' icon='signup' size='big' as={Link} to="/signup" /> */}
 
                 {/* <Grid.Row>
                   <Grid.Column>
@@ -69,10 +69,10 @@ class LoginPage extends React.Component{
                     </Form>
                   </Grid.Column>
                 </Grid.Row>     */}
-                </Grid.Column> 
+                {/* </Grid.Column>  */}
               </Grid>
           
-              <Divider vertical>Or</Divider>
+              {/* <Divider vertical>Or</Divider> */}
             </Segment>
           )
     } 
