@@ -185,7 +185,7 @@ class ArticleList extends React.Component {
                                         <Card.Content>
                                             <Card.Meta>
                                                 <Grid>
-                                                    <Grid.Column className="tag_item">#{latest.backgroundTag}</Grid.Column>
+                                                    <Grid.Column className="tag_item"><Label as='a' content={latest.backgroundTag} icon='hashtag' /></Grid.Column>
                                                 </Grid>
                                             </Card.Meta>
                                             <Card.Meta>
@@ -257,23 +257,23 @@ class ArticleList extends React.Component {
                                     </Table.Cell>
                                     <Table.Cell>
                                         <Grid>
-                                            <Grid.Row>
-                                                <Grid.Column className="tag_item">#{latest.backgroundTag}</Grid.Column>
-                                            </Grid.Row>
+                                            <Grid.Column>
+                                                <Label className="tag_item" as='a' content={latest.backgroundTag} icon='hashtag' />
+                                            </Grid.Column>
                                         </Grid>
                                     </Table.Cell>
                                     <Table.Cell>
                                         <Grid>
-                                            <Grid.Row>
-                                                {latest.genreTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
-                                            </Grid.Row>
+                                            <Grid.Column>
+                                                {latest.genreTags.map((tag, id) => { return <Label className="tag_item" key={id.toString()} as='a' content={tag} icon='hashtag' />}) }
+                                            </Grid.Column>
                                         </Grid>
                                     </Table.Cell>
                                     <Table.Cell>
                                         <Grid>
-                                            <Grid.Row>
-                                                {latest.subTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
-                                            </Grid.Row>
+                                            <Grid.Column>
+                                                {latest.subTags.map((tag, id) => { return <Label className="tag_item" key={id.toString()} as='a' content={tag} icon='hashtag' />}) }
+                                            </Grid.Column>
                                         </Grid>
                                     </Table.Cell>
                                     <Table.Cell>
@@ -377,41 +377,52 @@ class ArticleList extends React.Component {
                                 onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                 options={select_rule}
                                 placeholder='찾을 룰'/>
-                    </Form.Group>  
-                    {this.state.is_show_detail_filter?<div>
-                    <Form.Group className='detail-filter'>
+                    
+                        <Form.Select 
+                                    label='배경'
+                                    name= "filter_background"
+                                    multiple
+                                    onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
+                                    options={select_background}
+                                    placeholder='찾을 배경'/> 
+                        
                         <Form.Select 
                                 label='장르'
                                 name= "filter_genre"
                                 multiple
                                 onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                 options={select_genre}
-                                placeholder='찾을 장르'/>
+                                placeholder='찾을 장르'/>                
+                        <Form.Button className="filter-submit" type="submit" color="violet">검색</Form.Button>
+                    </Form.Group>  
+                    {this.state.is_show_detail_filter?<Grid>
+                        <Grid.Row centered>
+                            <Form.Group className='detail-filter' inline>
 
-                        <Form.Select 
-                                label='배경'
-                                name= "filter_background"
-                                multiple
-                                onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
-                                options={select_background}
-                                placeholder='찾을 배경'/>     
-                        <Form.Select 
-                                label='태그'
-                                name= "filter_sub_tags"
-                                multiple
-                                onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
-                                options={select_sub_tags}
-                                placeholder='찾을 태그'/>                                                              
-                    </Form.Group>
-                    <Form.Group className='detail-filter' inline>
-                        <Form.Group><Label>인원수</Label><Form.Input type="number" name="filter_capacity_min" onChange={()=>this.onScenarioSearchChange} min={1} placeholder='최소 인원수'/><span className='dash'>~</span><Form.Input lable="" type="number" name="filter_capacity_max" onChange={()=>this.onScenarioSearchChange} min={1} placeholder='최대 인원수'/></Form.Group>
-                        <Form.Group><Label>가격</Label><Form.Input type="number" name="filter_price_min" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최소 가격'/><span className='dash'>~</span><Form.Input lable="" type="number" name="filter_price_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최대 가격'/></Form.Group>
-                        <Form.Group><Label>시간</Label><Form.Input type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최소 시간'/><span className='dash'>~</span><Form.Input lable="" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder='최대 시간'/></Form.Group>
-                    </Form.Group>
-                    <Button type="button" onClick={()=>this.setShowFilter()}>상세 검색 닫기</Button>
-                    </div> :<Button type="button" onClick={()=>this.setShowFilter()}>상세 검색</Button>
+                                <Form.Select 
+                                        label='태그'
+                                        name= "filter_sub_tags"
+                                        multiple
+                                        onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
+                                        options={select_sub_tags}
+                                        placeholder='찾을 태그'/>      
+                                <div className='detail-filter-secondary'>
+                                    
+                                    <Form.Group>    
+                                        <Form.Input className="search-number" type="number" name="filter_capacity_min" onChange={()=>this.onScenarioSearchChange} min={1} label='인원수' placeholder="최소"/><span className='dash'>~</span><Form.Input label="" type="number" name="filter_capacity_max" onChange={()=>this.onScenarioSearchChange} min={1} placeholder="최대"/>
+                                    </Form.Group>
+                                <Form.Group><Form.Input className="search-number" type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} label='시간' placeholder="최소"/><span className='dash'>~</span><Form.Input label="" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/></Form.Group>                                                       
+                                <Form.Group><Form.Input className="search-number" type="number" name="filter_price_min" onChange={()=>this.onScenarioSearchChange} min={0} label='가격' placeholder="최소"/><span className='dash'>~</span><Form.Input label="" type="number" name="filter_price_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/></Form.Group>
+                            
+                                </div>  
+                                </Form.Group>
+                        </Grid.Row>
+                        <Grid.Row centered>
+                        <Button type="button" onClick={()=>this.setShowFilter()}>상세 검색 닫기</Button>
+                        </Grid.Row>
+                    
+                    </Grid> :<Grid><Grid.Row centered><Button type="button" onClick={()=>this.setShowFilter()}>상세 검색</Button></Grid.Row></Grid>
                     }
-                    <Form.Button type="submit">검색</Form.Button>
                 </Form>
             </div>
             <div className="view_type">

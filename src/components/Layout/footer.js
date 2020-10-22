@@ -9,7 +9,7 @@ class Footer extends React.Component {
                     <Grid>
                         <Grid.Row>
                             <Grid.Column width={7}>
-                                <Image class="logo" src='/assets/images/layout/Logo.png'/>
+                                <Image className="logo" src='/assets/images/layout/Logo.png'/>
                             </Grid.Column>
                             <Grid.Column width={3}>
                                 <List>

@@ -4,6 +4,8 @@ body{
 
 footer{
     background-color: rgb(70, 18, 70);
+    margin-top: 100px;
+    color:white;
 }
 #root{
     max-width: 1920px;
@@ -27,9 +29,12 @@ footer{
   ::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.5);
   } */
+.footer .logo{
+    width: 200px;
+}
 .dash{
-    padding: 5px 5px 5px 0px;
-    margin-right: 5px;
+    padding: 25px 5px 5px 0px;
+    margin-left: -25px;
 }
 .text-center{
     text-align: center;
@@ -88,6 +93,11 @@ footer{
     width: 100%;
     height: 500px;
 }
+.detail-filter{
+    background-color: rgb(165, 130, 165);
+    align-content: center;
+    text-align: center;
+}
 .detail-filter .fields{
     padding-left: 10px;
     text-align: center;
@@ -97,4 +107,18 @@ footer{
 }
 .view_type{
     text-align: end;
+}
+
+.filter-submit{
+    margin-top: 25px !important;
+    padding: 0px;
+    width: 92px;
+}
+
+.detail-filter-secondary{
+    margin-top: 15px;
+    display: flex;
+}
+.detail-filter-secondary .fields .field .input{
+    width: 80px !important;
 }
