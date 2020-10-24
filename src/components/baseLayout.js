@@ -66,10 +66,10 @@ class BaseLayout extends React.Component {
   render() {
   return (
     <div className="base">
-    <header>
-      <Navbar currentUser={this.state.currentUser}/>
-    </header>
-        <div className='Contents-wrapper'>
+      <header>
+        <Navbar currentUser={this.state.currentUser}/>
+      </header>
+      <div className='contents-wrapper'>
         <Switch>
               <Route exact path="/" component={(props)=><Main currentUser={this.state.currentUser}{...props}/>} />
               <Route path="/about" component={About} />

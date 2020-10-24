@@ -152,13 +152,13 @@ class ArticleList extends React.Component {
         if(this.state.align_type === order){
             return this.state.align_order === "ascending" ?"sort down" : "sort up"
         }else{
-            return "";
+            return "sort";
         }
     }
     
-    onViewClick= (e) =>{
+    onViewClick= (e, data) =>{
         e.preventDefault();
-        var viewType = e.target.value;
+        var viewType = data.value;
         console.log(viewType)
         if(viewType !=null && viewType!=undefined){
             this.setState(() => ({viewType: viewType}));
@@ -180,27 +180,27 @@ class ArticleList extends React.Component {
                                     <Card key = {index.toString()} >
                                         {/* <Link to={"/replays/view/"+data._id} ><Image src={data.banner}/></Link> */}
                                         <Card.Content>
-                                            <Card.Header><Link to={"/replays/view/"+data._id} >{latest.title}</Link></Card.Header>
+                                            <Card.Header><Link to={"/scenarios/view/"+data._id} >{latest.title}</Link></Card.Header>
                                         </Card.Content>
                                         <Card.Content>
                                             <Card.Meta>
                                                 <Grid>
-                                                    <Grid.Column className="tag_item"><Label as='a' content={latest.backgroundTag} icon='hashtag' /></Grid.Column>
+                                                <Label className="tag_item" content={latest.backgroundTag} icon='hashtag' />
                                                 </Grid>
                                             </Card.Meta>
                                             <Card.Meta>
                                                 <Grid columns="equal">
-                                                    {latest.genreTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
+                                                    {latest.genreTags.map((tag, id) => { return <Label className="tag_item" key={id.toString()}  content={tag} icon='hashtag' />}) }
                                                 </Grid>
                                             </Card.Meta>
                                             <Card.Meta>
                                                 <Grid columns="equal">
-                                                    {latest.subTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag}</Grid.Column>}) }
+                                                    {latest.subTags.map((tag, id) => { return <Label className="tag_item" key={id.toString()}  content={tag} icon='hashtag' />}) }
                                                 </Grid>
                                             </Card.Meta>
                                             <Card.Meta>
                                                 <Grid columns="equal">
-                                                    {data.hashTags.map((tag, id) => { return <Grid.Column className="tag_item" key={id.toString()}>#{tag.name}</Grid.Column>}) }
+                                                    {data.hashTags.map((tag, id) => { return <Label className="tag_item" key={id.toString()}  content={tag} icon='hashtag' />}) }
                                                 </Grid>
                                             </Card.Meta>
                                         </Card.Content>
@@ -221,17 +221,17 @@ class ArticleList extends React.Component {
                 );
         }else if(type==="list"){
             return(
-                <Table>
-                    <Table.Header>
-                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value="title" icon onClick= {this.onAlignClick}>제목<Icon name={this.getAlignIcon("title")}/></Button></Table.HeaderCell>
-                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value="ruleTag" icon onClick= {this.onAlignClick}>기반룰<Icon name={this.getAlignIcon("ruleTag")}/></Button></Table.HeaderCell>
-                            <Table.HeaderCell><Button className= "btn align-btn" type="button"value='author' icon  onClick= {this.onAlignClick}>작성자<Icon name={this.getAlignIcon('author')}/></Button></Table.HeaderCell>
-                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='view' icon  onClick= {this.onAlignClick}>조회수<Icon name={this.getAlignIcon('view')}/></Button></Table.HeaderCell>
-                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='price' icon  onClick= {this.onAlignClick}>가격<Icon name={this.getAlignIcon('price')}/></Button></Table.HeaderCell>
-                            <Table.HeaderCell>배경</Table.HeaderCell>
-                            <Table.HeaderCell>장르</Table.HeaderCell>
+                <Table  basic='very'>
+                    <Table.Header >
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value="title" icon onClick= {this.onAlignClick}>제목<Icon name={this.getAlignIcon("title")}disabled={this.getAlignIcon('title')==="sort"?true:false}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value="ruleTag" icon onClick= {this.onAlignClick}>기반룰<Icon name={this.getAlignIcon("ruleTag")}disabled={this.getAlignIcon('ruleTag')==="sort"?true:false}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button"value='author' icon  onClick= {this.onAlignClick}>작성자<Icon name={this.getAlignIcon('author')}disabled={this.getAlignIcon('author')==="sort"?true:false}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='view' icon  onClick= {this.onAlignClick}>조회수<Icon name={this.getAlignIcon('view')}disabled={this.getAlignIcon('view')==="sort"?true:false}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='price' icon  onClick= {this.onAlignClick}>가격<Icon name={this.getAlignIcon('price')} disabled={this.getAlignIcon('price')==="sort"?true:false}/></Button></Table.HeaderCell>
+                            {/* <Table.HeaderCell>배경</Table.HeaderCell>
+                            <Table.HeaderCell>장르</Table.HeaderCell> */}
                             <Table.HeaderCell>태그</Table.HeaderCell>
-                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='created' icon  onClick= {this.onAlignClick}>발행<Icon name={this.getAlignIcon('created')}/></Button></Table.HeaderCell>
+                            <Table.HeaderCell><Button className= "btn align-btn" type="button" value='created' icon  onClick= {this.onAlignClick}>발행<Icon name={this.getAlignIcon('created')}disabled={this.getAlignIcon('created')==="sort"?true:false}/></Button></Table.HeaderCell>
                    </Table.Header>
 
                     <Table.Body id="data_tbody" basic>
@@ -249,13 +249,13 @@ class ArticleList extends React.Component {
                                     <Table.Cell>
                                         <a  href={"/user/"+data.author.userName} >{data.author.userName}</a>
                                     </Table.Cell>
-                                    <Table.Cell>
+                                    <Table.Cell className="text-center">
                                         {data.view}
                                     </Table.Cell>
-                                    <Table.Cell>
-                                        {data.price}
+                                    <Table.Cell className="text-center">
+                                        {data.price===0?"무료":data.price}
                                     </Table.Cell>
-                                    <Table.Cell>
+                                    {/* <Table.Cell>
                                         <Grid>
                                             <Grid.Column>
                                                 <Label className="tag_item" as='a' content={latest.backgroundTag} icon='hashtag' />
@@ -275,9 +275,18 @@ class ArticleList extends React.Component {
                                                 {latest.subTags.map((tag, id) => { return <Label className="tag_item" key={id.toString()} as='a' content={tag} icon='hashtag' />}) }
                                             </Grid.Column>
                                         </Grid>
+                                    </Table.Cell> */}
+                                    
+                                    <Table.Cell>
+                                        <Label className="tag-item background-tag" as='a' content={latest.backgroundTag} icon='hashtag' />
+                                    
+                                        {latest.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()} as='a' content={tag} icon='hashtag' />}) }
+                                    
+                                        {latest.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()} as='a' content={tag} icon='hashtag' />}) }
+                                            
                                     </Table.Cell>
                                     <Table.Cell>
-                                        <Moment  format="YYYY-MM-DD HH:mm">{date}</Moment>
+                                        <Moment  format="YY-MM-DD">{date}</Moment>
                                     </Table.Cell>
                                 </Table.Row>
                                 );
@@ -285,55 +294,6 @@ class ArticleList extends React.Component {
                 }
                     </Table.Body>                    
                 </Table>
-                // e(Table, null,
-                //     e(Table.Header, null,
-                //         e(Table.Row, null,
-                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"title" ,icon:true ,onClick:this.onAlignClick},"제목"  ,e(Icon,{name:this.getAlignIcon("title")})) ),
-                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"ruleTag" ,icon:true ,onClick:this.onAlignClick},"사용룰",e(Icon,{name:this.getAlignIcon("ruleTag")}))  ),
-                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"author" ,icon:true ,onClick:this.onAlignClick},"작가"  ,e(Icon,{name:this.getAlignIcon("author")}))  ),
-                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"view" ,icon:true ,onClick:this.onAlignClick},"조회수",e(Icon,{name:this.getAlignIcon( "view")}))    ),
-                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"price" ,icon:true ,onClick:this.onAlignClick},"가격"  ,e(Icon,{name:this.getAlignIcon( "price")}))  ),
-                //             e("th",null,"배경"),
-                //             e("th",null,"장르"),
-                //             e("th",null,"태그"),
-                //             e("th",null, e(Button,{className:"btn align-btn", type:"button", value:"created" ,icon:true ,onClick:this.onAlignClick},"발행일",e(Icon,{name:this.getAlignIcon("created")}))   )
-                //         )
-                //     ),
-                //     e(Table.Body, { id: "data_tbody" },
-                //         this.state.rows.map((data, index) => {
-                //             var date = new Date(data.created);//.format('yyyy-MM-dd HH:mm');
-                //             var latest = data.lastVersion;//.last();
-                //             return e(Table.Row, { key: index.toString() },
-                //                 e(Table.Cell, null,
-                //                     e("a", { href: "/scenarios/view/" + data._id }, latest.title)),
-                //                 e(Table.Cell, null, data.ruleTag),
-                //                 e(Table.Cell, null, e("a", { href: "/user/" + data.author.userName }, data.author.userName)),
-                //                 e(Table.Cell, null, data.view),
-                //                 e(Table.Cell, null, data.price),
-                //                 e(Table.Cell, null,
-                //                     e("ul", null,
-                //                         e("li", { className: "tag_item" }, "#" + latest.backgroundTag)
-                //                     )
-                //                 ),
-                //                 e(Table.Cell, null,
-                //                     e("ul", null,
-                //                     latest.genreTags.map((tag, id) => {
-                //                             return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
-                //                         })
-                //                     )
-                //                 ),
-                //                 e(Table.Cell, null, e("ul", null,
-                //                 latest.subTags.map((tag, id) => {
-                //                         return e("li", { className: "tag_item", key: id.toString() }, "#" + tag);
-                //                     })
-                //                 )
-                //                 ),
-                //                 e(Table.Cell, null, e(Moment,{format:"YYYY-MM-DD HH:mm"},date))
-
-                //             );
-                //         })
-                //     )
-                // )
                 );
         }
     }
@@ -364,11 +324,12 @@ class ArticleList extends React.Component {
         var header =
         <div>
             <div className="search_window">
+                <div className="form-box">
                 <Form id="tag-form"  onSubmit={(e)=>this.onScenarioSearchSubmit(e)}>
-                    <Form.Group>
-                        <Form.Input id="rdTag" type="hidden" value="" name="tag"/>
-                        <Form.Input label="시나리오 제목" tpye="text" width={4} name="filter_title" onChange={(e)=> this.onScenarioSearchChange(e)} placeholder= "찾을 시나리오 제목"/>
-                        <Form.Input label="작가" tpye="text" width={4} name="filter_author" onChange={(e)=> this.onScenarioSearchChange(e)} placeholder= "찾을 작가"/>
+                    <Form.Group className="main-search-box  text-left" inline>
+                        {/* <Form.Input id="rdTag" type="hidden" value="" name="tag"/> */}
+                        <Form.Input label="시나리오 제목" tpye="text"  name="filter_title" onChange={(e)=> this.onScenarioSearchChange(e)} placeholder= "찾을 시나리오 제목"/>
+                        <Form.Input label="작가" tpye="text" name="filter_author" onChange={(e)=> this.onScenarioSearchChange(e)} placeholder= "찾을 작가"/>
 
                         <Form.Select 
                                 label='룰'
@@ -376,59 +337,68 @@ class ArticleList extends React.Component {
                                 multiple
                                 onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                 options={select_rule}
-                                placeholder='찾을 룰'/>
-                    
-                        <Form.Select 
-                                    label='배경'
-                                    name= "filter_background"
-                                    multiple
-                                    onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
-                                    options={select_background}
-                                    placeholder='찾을 배경'/> 
-                        
-                        <Form.Select 
-                                label='장르'
-                                name= "filter_genre"
-                                multiple
-                                onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
-                                options={select_genre}
-                                placeholder='찾을 장르'/>                
+                                placeholder='찾을 룰'/>           
                         <Form.Button className="filter-submit" type="submit" color="violet">검색</Form.Button>
                     </Form.Group>  
-                    {this.state.is_show_detail_filter?<Grid>
-                        <Grid.Row centered>
-                            <Form.Group className='detail-filter' inline>
-
+                    {this.state.is_show_detail_filter?
+                    <Grid>
+                        <Grid.Row  centered>   
+                            <Form.Group className='detail-filter text-left' inline>
+                                <Form.Select 
+                                            label='배경'
+                                            name= "filter_background"
+                                            multiple
+                                            onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
+                                            options={select_background}
+                                            placeholder='찾을 배경'/> 
+                                
+                                <Form.Select 
+                                        label='장르'
+                                        name= "filter_genre"
+                                        multiple
+                                        onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
+                                        options={select_genre}
+                                        placeholder='찾을 장르'/>  
                                 <Form.Select 
                                         label='태그'
                                         name= "filter_sub_tags"
                                         multiple
                                         onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                         options={select_sub_tags}
-                                        placeholder='찾을 태그'/>      
+                                        placeholder='찾을 태그'/>   
+                                   
                                 <div className='detail-filter-secondary'>
-                                    
-                                    <Form.Group>    
-                                        <Form.Input className="search-number" type="number" name="filter_capacity_min" onChange={()=>this.onScenarioSearchChange} min={1} label='인원수' placeholder="최소"/><span className='dash'>~</span><Form.Input label="" type="number" name="filter_capacity_max" onChange={()=>this.onScenarioSearchChange} min={1} placeholder="최대"/>
+                                    <Form.Group className="text-left" inline>    
+                                        <Form.Input className="search-number " type="number" name="filter_capacity_min" onChange={()=>this.onScenarioSearchChange} min={1} label='인원수' placeholder="최소"/>
+                                            {/* <Label className='dash'>~</Label> */}
+                                        <Form.Input className="search-number search-number-right" label="" type="number" name="filter_capacity_max" onChange={()=>this.onScenarioSearchChange} min={1} placeholder="최대"/>
                                     </Form.Group>
-                                <Form.Group><Form.Input className="search-number" type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} label='시간' placeholder="최소"/><span className='dash'>~</span><Form.Input label="" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/></Form.Group>                                                       
-                                <Form.Group><Form.Input className="search-number" type="number" name="filter_price_min" onChange={()=>this.onScenarioSearchChange} min={0} label='가격' placeholder="최소"/><span className='dash'>~</span><Form.Input label="" type="number" name="filter_price_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/></Form.Group>
+                                <Form.Group className="text-left" inline><Form.Input className="search-number " type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} label='시간' placeholder="최소"/>
+                                    {/* <Label className='dash'>~</Label> */}
+                                    <Form.Input className="search-number search-number-right" label="" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/></Form.Group>                                                       
+                                <Form.Group className="text-left" inline><Form.Input className="search-number" type="number" name="filter_price_min" onChange={()=>this.onScenarioSearchChange} min={0} label='가격' placeholder="최소"/>
+                                    {/* <Label className='dash'>~</Label> */}
+                                    <Form.Input className="search-number search-number-right" label="" type="number" name="filter_price_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/></Form.Group>
                             
                                 </div>  
-                                </Form.Group>
+                            </Form.Group>
                         </Grid.Row>
+                    </Grid>
+                :null}
+                </Form>
+                </div>
+                {this.state.is_show_detail_filter?<Grid>
                         <Grid.Row centered>
-                        <Button type="button" onClick={()=>this.setShowFilter()}>상세 검색 닫기</Button>
+                        <Button className="detail-search-button" type="button" onClick={()=>this.setShowFilter()}>상세 검색 닫기</Button>
                         </Grid.Row>
                     
-                    </Grid> :<Grid><Grid.Row centered><Button type="button" onClick={()=>this.setShowFilter()}>상세 검색</Button></Grid.Row></Grid>
-                    }
-                </Form>
+                    </Grid> :<Grid><Grid.Row centered><Button className="detail-search-button"  type="button" onClick={()=>this.setShowFilter()}>상세 검색</Button></Grid.Row></Grid>
+                } 
             </div>
-            <div className="view_type">
-                    <Button icon value="list" onClick={()=>this.onViewClick}><Icon name="list layout"/></Button>
-                    <Button icon value="card" onClick={()=>this.onViewClick}><Icon name="grid layout"/></Button>
-            </div>
+            {/* <div className="view_type">
+                    <Button icon value="list" onClick={(e, data)=>this.onViewClick(e, data)}><Icon name="list layout"/></Button>
+                    <Button icon value="card" onClick={(e, data)=>this.onViewClick(e, data)}><Icon name="grid layout"/></Button>
+            </div> */}
         </div>
         var component = <div>
             {header}
