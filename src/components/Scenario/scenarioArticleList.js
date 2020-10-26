@@ -2,7 +2,12 @@ import React from 'react';
 import axios from 'axios';
 import Moment from 'react-moment';
 import {Link} from 'react-router-dom';
-import { Grid, Card, Icon, Form, Image, Table, Button, Label } from 'semantic-ui-react'
+import { Grid, Card, Icon, Form, Image, Table, Button, Label,Dropdown } from 'semantic-ui-react'
+import Pagination from 'rc-pagination';
+import Select from 'rc-select';
+import localeInfo from 'rc-pagination/es/locale/ko_KR';
+import 'rc-select/assets/index.css';
+import 'rc-pagination/assets/index.css';
 
 const e = React.createElement;
 
@@ -28,7 +33,9 @@ class ArticleList extends React.Component {
             filter_rule: [],
             filter_sub_tags: [],
             master_tags: [],
-            viewType:'list'
+            viewType:'list',
+            current_page:1,
+            pageSize: 15,
         };
     }
 
@@ -99,6 +106,14 @@ class ArticleList extends React.Component {
         }
         getArticles();
     }
+
+    onChangePage = (page) =>{
+        this.setState({current_page: page})
+    }
+    onShowSizeChange = (current, pageSize) => {
+        this.setState({ pageSize });
+      };
+
     onScenarioSearchChange = (e) => {
         this.setState({
             [e.target.name]: e.target.value
@@ -403,6 +418,17 @@ class ArticleList extends React.Component {
         var component = <div>
             {header}
             {this.getList(this.state.viewType)}
+            <Pagination
+                selectComponentClass={Select}
+                showQuickJumper
+                showSizeChanger
+                pageSize={this.state.pageSize}
+                onShowSizeChange={this.onShowSizeChange}
+                defaultCurrent={1}
+                onChange={this.onChangePage}
+                total={this.state.rows.length}
+                locale={localeInfo}
+            />
         </div>
         return component;
     }
