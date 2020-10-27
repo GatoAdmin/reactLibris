@@ -47,7 +47,17 @@ function ensureAuthenticated(req, res, next) {
 }
 
 router.post("/", function (req, res, next) {
+  var page= 0;
+  var pageSize= 15;
   var data = req.body.params;
+  if(req.query.p === undefined||req.query.p === null||req.query.ps === undefined||req.query.ps === null){ 
+    page = 0;
+    pageSize = 15;
+  }else{
+    page = req.query.p-1;
+    pageSize = parseInt(req.query.ps,10);
+  }
+
   var alignType = "-created";
   var order = "descending";
   if (data) {
@@ -68,13 +78,18 @@ router.post("/", function (req, res, next) {
   }
 
   var findSearch = {enabled: true,isOpened: true};
-  Scenario.find(findSearch)
-  .sort(alignType)
-  .exec(function (err, results) {
+  Scenario.count(findSearch,function (err, count){
     if (err) { console.log(err); next(err); }
-    results = filterBlockResult(req.user,results);
-    return res.json({ articles: results, masterTags: masterTags });
-  });
+    Scenario.find(findSearch)
+    .sort(alignType)
+    .skip(pageSize*page)
+    .limit(pageSize)
+    .exec(function (err, results) {
+      if (err) { console.log(err); next(err); }
+      results = filterBlockResult(req.user,results);
+      return res.json({ articles: results, totalSize: count, masterTags: masterTags });
+    });
+  })
 });
 
 router.post("/make", ensureAuthenticated, function (req, res, next) {
@@ -497,7 +512,16 @@ router.post("/delete/:id", function (req, res, next) {
   });
 });
 
-router.post("/search", function (req, res, next) {
+router.post("/search", function (req, res, next) {  var page= 0;
+  var pageSize= 15;
+  var data = req.body.params;
+  if(req.query.p === undefined||req.query.p === null||req.query.ps === undefined||req.query.ps === null){ 
+    page = 0;
+    pageSize = 15;
+  }else{
+    page = req.query.p-1;
+    pageSize = parseInt(req.query.ps,10);
+  }
   var data = req.body.params;
   var alignType = "-created";
   var order = "descending";
@@ -561,23 +585,28 @@ router.post("/search", function (req, res, next) {
     findSearch.enabled = true;
     findSearch.isOpened= true;
     console.log(findSearch)
-    Scenario.find(findSearch)
-    .sort(alignType)
-    .exec(function (err, results) {
+    Scenario.count(findSearch,function (err, count){
       if (err) { console.log(err); next(err); }
-      if(results != undefined && after_searchs.author != undefined){
-        results = results.filter(function(result){
-          return result.findAuthorUserName(after_searchs);
-        });
-      }
-      if(results.length >0 && checkAfterAlignType(alignType)){
-        results =results.sort(function(a,b){
-          return sortAfterResult(a,b,data.align_type, order);
-        });
-      }
-      results = filterBlockResult(req.user,results);
-      return res.json({ articles: results, masterTags: masterTags });
-    });
+      Scenario.find(findSearch)
+      .sort(alignType)
+      .skip(pageSize*page)
+      .limit(pageSize)
+      .exec(function (err, results) {
+        if (err) { console.log(err); next(err); }
+        if(results != undefined && after_searchs.author != undefined){
+          results = results.filter(function(result){
+            return result.findAuthorUserName(after_searchs);
+          });
+        }
+        if(results.length >0 && checkAfterAlignType(alignType)){
+          results =results.sort(function(a,b){
+            return sortAfterResult(a,b,data.align_type, order);
+          });
+        }
+        results = filterBlockResult(req.user,results);
+        return res.json({ articles: results, totalSize: count, masterTags: masterTags });
+      });
+    })
 });
 
 router.post("/comment/add/:id", ensureAuthenticated, function (req, res, next) {

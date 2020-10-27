@@ -34,22 +34,26 @@ class ArticleList extends React.Component {
             filter_sub_tags: [],
             master_tags: [],
             viewType:'list',
+            total_size:0,
             current_page:1,
-            pageSize: 15,
+            pageSize: 5,
         };
     }
 
     componentDidMount() {
         let getArticles = () => {
-            axios.post('/scenarios', {
+            // const params = new url.URLSearchParams({ foo: 'bar' });
+            axios.post(window.location.href, {
                 params: {
                     align_order: this.state.align_order,
                     align_type: this.state.align_type
                 }
             })
                 .then(res => {
+                    console.log(res.data)
                     this.setState({
                         rows: res.data.articles,
+                        total_size:  res.data.totalSize,
                         master_tags: res.data.masterTags
                     });
                 })
@@ -97,6 +101,7 @@ class ArticleList extends React.Component {
                 .then(res => {
                     this.setState({
                         rows: res.data.articles,
+                        total_size:  res.data.totalSize,
                         master_tags: res.data.masterTags
                     });
                 })
@@ -153,6 +158,7 @@ class ArticleList extends React.Component {
                     console.log(res.data.articles);
                     this.setState({
                         rows: res.data.articles,
+                        total_size:  res.data.totalSize,
                         master_tags: res.data.masterTags
                     });
                 })
@@ -426,7 +432,7 @@ class ArticleList extends React.Component {
                 onShowSizeChange={this.onShowSizeChange}
                 defaultCurrent={1}
                 onChange={this.onChangePage}
-                total={this.state.rows.length}
+                total={this.state.total_size}
                 locale={localeInfo}
             />
         </div>
