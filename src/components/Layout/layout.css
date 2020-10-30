@@ -19,7 +19,12 @@ footer{
 .padding-top-0{
     padding-top: 0 !important;
 }
-
+.margin-top-1{
+    margin-top: 1em!important;
+}
+.margin-bottom-1{
+    margin-bottom: 1em!important;
+}
 .text-left{
     text-align: left !important;
 }
@@ -28,6 +33,12 @@ footer{
 }
 .text-center{
     text-align: center !important;
+}
+.ellipsis{
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 .base{
     width: 1400px;
@@ -79,6 +90,14 @@ footer{
 /* .tag-item.sub-tag{
     background-color
 } */
+.card-tags{
+    margin-top: 1em!important;
+    max-height: 80px;
+    overflow: hidden;
+}
+.pagination{
+    margin-left: 100px!important;
+}
 #tag-form{
     margin: auto;
     width: min-content;
@@ -215,3 +234,59 @@ footer{
 .detail-filter-secondary .fields .field .input{
     width: 80px !important;
 }
+
+/* rc-select */
+.rc-select{
+    width: 100px!important;
+    z-index: 100;
+}
+.rc-select-selection-item{
+    line-height: 2em;
+}
+.rc-select-arrow{ 
+    line-height: 2em;
+}
+.rc-select .rc-select-selector{
+    cursor: pointer;
+    word-wrap: break-word;
+    line-height: 1em;
+    white-space: normal;
+    outline: 0!important;
+    transform: rotateZ(0deg);
+    min-width: 100px;
+    min-height: 2.71428571em;
+    background: #FFFFFF;
+    display: inline-block;
+    padding: 0.78571429em 2.1em 0.78571429em 1em;
+    color: rgba(0, 0, 0, 0.87);
+    box-shadow: none;
+    border: 1px solid rgba(34, 36, 38, 0.15) !important;
+    border-radius: 0.28571429rem !important;
+    transition: box-shadow 0.1s ease, width 0.1s ease;
+}
+
+.rc-select .rc-select-selector:hover {
+    border-color: rgba(34, 36, 38, 0.35);
+    box-shadow: none;
+} 
+
+.rc-select-dropdown {
+    border: 1px solid rgba(34, 36, 38, 0.15)!important;
+}
+.rc-select-item-option-active {
+    background: rgb(221, 195, 221) !important;
+}
+/* 
+.ui.multiple.dropdown {
+    padding: 0.22619048em 2.1em 0.22619048em 0.35714286em;
+} */
+
+/* .ui.dropdown {
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    outline: none;
+    text-align: left;
+    transition: box-shadow 0.1s ease, width 0.1s ease;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+} */

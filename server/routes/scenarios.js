@@ -54,7 +54,7 @@ router.post("/", function (req, res, next) {
     page = 0;
     pageSize = 15;
   }else{
-    page = req.query.p-1;
+    page = req.query.p-1>0?req.query.p-1:0;
     pageSize = parseInt(req.query.ps,10);
   }
 

@@ -2,15 +2,15 @@ import React from 'react';
 import axios from 'axios';
 import Moment from 'react-moment';
 import {Link} from 'react-router-dom';
-import { Grid, Card, Icon, Form, Image, Table, Button, Label,Dropdown } from 'semantic-ui-react'
+import { Grid, Card, Icon, Form, Image, Table, Button, Label, Select,Dropdown } from 'semantic-ui-react'
 import Pagination from 'rc-pagination';
-import Select from 'rc-select';
+import Selection from 'rc-select';
 import localeInfo from 'rc-pagination/es/locale/ko_KR';
 import 'rc-select/assets/index.css';
 import 'rc-pagination/assets/index.css';
 
 const e = React.createElement;
-
+const src = 'https://react.semantic-ui.com/images/wireframe/image.png'
 const align_types = ['title', 'rule', 'author', 'view', 'price', 'created'];
 class ArticleList extends React.Component {
     constructor(props) {
@@ -33,22 +33,22 @@ class ArticleList extends React.Component {
             filter_rule: [],
             filter_sub_tags: [],
             master_tags: [],
-            viewType:'list',
+            viewType:'card',
             total_size:0,
             current_page:1,
-            pageSize: 5,
+            pageSize: 30,
         };
     }
 
     componentDidMount() {
         let getArticles = () => {
             // const params = new url.URLSearchParams({ foo: 'bar' });
-            axios.post(window.location.href, {
+            axios.post('/scenarios', {
                 params: {
                     align_order: this.state.align_order,
                     align_type: this.state.align_type
                 }
-            })
+            },{params:{p:this.state.current_page, ps:this.state.pageSize}})
                 .then(res => {
                     console.log(res.data)
                     this.setState({
@@ -112,8 +112,17 @@ class ArticleList extends React.Component {
         getArticles();
     }
 
-    onChangePage = (page) =>{
+    onChangePage = (page, pageSize) =>{
         this.setState({current_page: page})
+        axios.post('/scenarios',null,{params:{p:page, ps:pageSize}})
+             .then(res=>{
+                 this.setState({
+                     rows: res.data.articles
+                 })
+             })
+             .catch(function (err) {
+                 console.log(err);
+             })
     }
     onShowSizeChange = (current, pageSize) => {
         this.setState({ pageSize });
@@ -130,6 +139,53 @@ class ArticleList extends React.Component {
             [data.name]: data.value
         }
         );
+    }
+    onClickTag =(name, tagText)=>{
+        var select_tag =[];
+
+        if (this.state.master_tags.length > 0) {
+            if(name === 'filter_rule'){
+                select_tag.push(this.state.master_tags.find(tags => tags.name === "rule").tags.find(tag=>tag.tag===tagText)._id); 
+            }else if(name === 'filter_background'){
+                select_tag.push(this.state.master_tags.find(tags => tags.name === "background").tags.find(tag=>tag.tag===tagText)._id);
+            }else if(name === 'filter_genre'){
+                select_tag.push(this.state.master_tags.find(tags => tags.name === "genre").tags.find(tag=>tag.tag===tagText)._id);
+            }else if(name === 'filter_sub_tags'){
+                select_tag.push(this.state.master_tags.find(tags => tags.name === "subTag").tags.find(tag=>tag.tag===tagText)._id);
+            }
+        }
+        let getArticles = () => {
+            axios.post('/scenarios/search', {
+                params: {
+                    align_order: this.state.align_order,
+                    align_type: this.state.align_type,
+                    searchs: {
+                        filter_title: this.state.filter_title,
+                        filter_author: this.state.filter_author,
+                        filter_background: this.state.filter_background,
+                        filter_genre: this.state.filter_genre,
+                        filter_rule: this.state.filter_rule,
+                        filter_sub_tags: this.state.filter_sub_tags,
+                        filter_capacity_min: this.state.filter_capacity_min,
+                        filter_capacity_max: this.state.filter_capacity_max,
+                        filter_time_min: this.state.filter_time_min,
+                        filter_time_max: this.state.filter_time_max ,
+                        filter_price_min: this.state.filter_price_min ,
+                        filter_price_max: this.state.filter_price_max ,
+                    }
+                }
+            },{params:{p:1, ps:this.state.pageSize}})
+                .then(res => {
+                    console.log(res.data.articles);
+                    this.setState({
+                        rows: res.data.articles
+                    });
+                })
+                .catch(function (err) {
+                    console.log(err);
+                })
+        }
+        this.setState({[name]:select_tag, is_show_detail_filter:true },()=>getArticles());
     }
     onScenarioSearchSubmit = (e) => {
         e.preventDefault();
@@ -180,7 +236,6 @@ class ArticleList extends React.Component {
     onViewClick= (e, data) =>{
         e.preventDefault();
         var viewType = data.value;
-        console.log(viewType)
         if(viewType !=null && viewType!=undefined){
             this.setState(() => ({viewType: viewType}));
         }
@@ -193,44 +248,28 @@ class ArticleList extends React.Component {
     getList(type){
         if(type==="card"){
             return (
-                <Card.Group>
+                <Card.Group className="margin-top-1 margin-bottom-1" itemsPerRow={5}>
                     {this.state.rows.map((data, index) => {
                                 var date = new Date(data.created);
                                 var latest = data.lastVersion;
                                 return (
                                     <Card key = {index.toString()} >
-                                        {/* <Link to={"/replays/view/"+data._id} ><Image src={data.banner}/></Link> */}
+                                        <Image as={Link} to={"/scenarios/view/"+data._id} src={data.banner!=undefined&&data.banner.length>0?"/assets/images/"+data.banner[0].imageData:src} wrapped ui={false} />
                                         <Card.Content>
-                                            <Card.Header><Link to={"/scenarios/view/"+data._id} >{latest.title}</Link></Card.Header>
-                                        </Card.Content>
-                                        <Card.Content>
-                                            <Card.Meta>
-                                                <Grid>
-                                                <Label className="tag_item" content={latest.backgroundTag} icon='hashtag' />
-                                                </Grid>
-                                            </Card.Meta>
-                                            <Card.Meta>
-                                                <Grid columns="equal">
-                                                    {latest.genreTags.map((tag, id) => { return <Label className="tag_item" key={id.toString()}  content={tag} icon='hashtag' />}) }
-                                                </Grid>
-                                            </Card.Meta>
-                                            <Card.Meta>
-                                                <Grid columns="equal">
-                                                    {latest.subTags.map((tag, id) => { return <Label className="tag_item" key={id.toString()}  content={tag} icon='hashtag' />}) }
-                                                </Grid>
-                                            </Card.Meta>
-                                            <Card.Meta>
-                                                <Grid columns="equal">
-                                                    {data.hashTags.map((tag, id) => { return <Label className="tag_item" key={id.toString()}  content={tag} icon='hashtag' />}) }
-                                                </Grid>
+                                            <Card.Header className="ellipsis"><Link to={"/scenarios/view/"+data._id}>{latest.title}</Link></Card.Header>
+                                            <Card.Meta><Link to={"/user/"+data.author.userName}><Icon name="user"/>{data.author.userName}</Link></Card.Meta>
+                                            <Card.Meta className="card-tags">
+                                                <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',latest.backgroundTag)}  content={latest.backgroundTag} icon='hashtag' />                                                
+                                                    {latest.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_genre',tag)}  content={tag} icon='hashtag' />}) }                                               
+                                                    {latest.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                                
+                                                    {/* {data.hashTags.map((tag, id) => { return <Label className="tag-item" key={id.toString()}  content={tag} icon='hashtag' />}) } */}                                               
                                             </Card.Meta>
                                         </Card.Content>
                                         <Card.Content extra>
                                             <Card.Meta>
                                                 <Grid columns="equal">
-                                                    <Grid.Column ><a  href={"/user/"+data.author.userName} ><Icon name="user"/>{data.author.userName}</a></Grid.Column>
                                                     <Grid.Column ><Icon name="eye"/>{data.view}</Grid.Column>
-                                                    <Grid.Column ><Moment  format="YYYY-MM-DD HH:mm">{date}</Moment></Grid.Column>
+                                                    <Grid.Column className="text-right"><Moment  format="YY-MM-DD">{date}</Moment></Grid.Column>
                                                 </Grid>
                                             </Card.Meta>
                                         </Card.Content>
@@ -299,11 +338,11 @@ class ArticleList extends React.Component {
                                     </Table.Cell> */}
                                     
                                     <Table.Cell>
-                                        <Label className="tag-item background-tag" as='a' content={latest.backgroundTag} icon='hashtag' />
+                                        <Label className="tag-item background-tag"  as={Button} onClick={()=>this.onClickTag('filter_background',latest.backgroundTag)}  content={latest.backgroundTag} icon='hashtag' />
                                     
-                                        {latest.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()} as='a' content={tag} icon='hashtag' />}) }
+                                        {latest.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()} as={Button} onClick={()=>this.onClickTag('filter_genre',tag)} content={tag} icon='hashtag' />}) }
                                     
-                                        {latest.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()} as='a' content={tag} icon='hashtag' />}) }
+                                        {latest.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()} as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)} content={tag} icon='hashtag' />}) }
                                             
                                     </Table.Cell>
                                     <Table.Cell>
@@ -342,9 +381,12 @@ class ArticleList extends React.Component {
                 return { value: tag._id, key: id.toString(), text:tag.tag };
             })
         }
+        // selectComponentClass={<Select className="ui select" options={}/>}
+
         var header =
         <div>
             <div className="search_window">
+                {this.state.is_show_detail_filter?
                 <div className="form-box">
                 <Form id="tag-form"  onSubmit={(e)=>this.onScenarioSearchSubmit(e)}>
                     <Form.Group className="main-search-box  text-left" inline>
@@ -358,10 +400,10 @@ class ArticleList extends React.Component {
                                 multiple
                                 onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                 options={select_rule}
+                                value={this.state.filter_rule}
                                 placeholder='찾을 룰'/>           
                         <Form.Button className="filter-submit" type="submit" color="violet">검색</Form.Button>
                     </Form.Group>  
-                    {this.state.is_show_detail_filter?
                     <Grid>
                         <Grid.Row  centered>   
                             <Form.Group className='detail-filter text-left' inline>
@@ -371,6 +413,7 @@ class ArticleList extends React.Component {
                                             multiple
                                             onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                             options={select_background}
+                                            value={this.state.filter_background}
                                             placeholder='찾을 배경'/> 
                                 
                                 <Form.Select 
@@ -379,6 +422,7 @@ class ArticleList extends React.Component {
                                         multiple
                                         onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                         options={select_genre}
+                                        value={this.state.filter_genre}
                                         placeholder='찾을 장르'/>  
                                 <Form.Select 
                                         label='태그'
@@ -386,6 +430,7 @@ class ArticleList extends React.Component {
                                         multiple
                                         onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                         options={select_sub_tags}
+                                        value={this.state.filter_sub_tags}
                                         placeholder='찾을 태그'/>   
                                    
                                 <div className='detail-filter-secondary'>
@@ -405,9 +450,9 @@ class ArticleList extends React.Component {
                             </Form.Group>
                         </Grid.Row>
                     </Grid>
-                :null}
+                
                 </Form>
-                </div>
+                </div>:null}
                 {this.state.is_show_detail_filter?<Grid>
                         <Grid.Row centered>
                         <Button className="detail-search-button" type="button" onClick={()=>this.setShowFilter()}>상세 검색 닫기</Button>
@@ -416,22 +461,24 @@ class ArticleList extends React.Component {
                     </Grid> :<Grid><Grid.Row centered><Button className="detail-search-button"  type="button" onClick={()=>this.setShowFilter()}>상세 검색</Button></Grid.Row></Grid>
                 } 
             </div>
-            {/* <div className="view_type">
+            <div className="view_type">
                     <Button icon value="list" onClick={(e, data)=>this.onViewClick(e, data)}><Icon name="list layout"/></Button>
                     <Button icon value="card" onClick={(e, data)=>this.onViewClick(e, data)}><Icon name="grid layout"/></Button>
-            </div> */}
+            </div>
         </div>
         var component = <div>
             {header}
             {this.getList(this.state.viewType)}
             <Pagination
-                selectComponentClass={Select}
-                showQuickJumper
+                className="text-center pagination"
+                selectComponentClass={Selection}
                 showSizeChanger
+                totalBoundaryShowSizeChanger={50}
+                pageSizeOptions	={[30,50,100]}
                 pageSize={this.state.pageSize}
                 onShowSizeChange={this.onShowSizeChange}
                 defaultCurrent={1}
-                onChange={this.onChangePage}
+                onChange={(p,ps)=>this.onChangePage(p,ps)}
                 total={this.state.total_size}
                 locale={localeInfo}
             />
