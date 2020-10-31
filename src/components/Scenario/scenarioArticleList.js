@@ -6,7 +6,7 @@ import { Grid, Card, Icon, Form, Image, Table, Button, Label, Select,Dropdown } 
 import Pagination from 'rc-pagination';
 import Selection from 'rc-select';
 import localeInfo from 'rc-pagination/es/locale/ko_KR';
-import 'rc-select/assets/index.css';
+import '../../dist/rc-select_index.css';
 import 'rc-pagination/assets/index.css';
 
 const e = React.createElement;

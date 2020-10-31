@@ -26,10 +26,10 @@ class CradList extends React.Component {
                                         <Card.Header>{card.title}</Card.Header>
                                         <Card.Meta>{card.author.userName}</Card.Meta>
                                     </Card.Content>
-                                    <Card.Content extra>
+                                    {/* <Card.Content extra>
                                             <Icon name='eye' />
                                             {card.view}
-                                    </Card.Content>
+                                    </Card.Content> */}
                                 </Card>);
                             })}
                         </Card.Group>
