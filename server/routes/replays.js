@@ -44,7 +44,14 @@ router.use(function(req,res,next){
     }
   }
 
-  router.post("/", function (req, res, next) {
+  router.post("/", function (req, res, next) { 
+    var page= 0;
+    var pageSize= 30;
+    if(req.query.p !== undefined||req.query.p !== null||req.query.ps !== undefined||req.query.ps !== null){ 
+      page = req.query.p-1>0?req.query.p-1:0;
+      pageSize = parseInt(req.query.ps,10);
+    }
+
     var data = req.body.params;
     var alignType = "-created";
     var order = "descending";
@@ -66,15 +73,19 @@ router.use(function(req,res,next){
     }
         
     var findSearch = {enabled: true,isOpened: true}
-    Replay.find(findSearch)
-    .sort(alignType)
-    .exec(function (err, results) {
-      if (err) { console.log(err); next(err); }
-      results = filterBlockResult(req.user,results);
-      return res.json({ articles: results, masterTags: masterTags });
-    });
-
-  });
+    Replay.count(findSearch,function (err, count){
+      Replay.find(findSearch)
+      .populate('author')
+      .sort(alignType)
+      .skip(pageSize*page)
+      .limit(pageSize)
+      .exec(function (err, results) {
+        if (err) { console.log(err); next(err); }
+        results = filterBlockResult(req.user,results);
+        return res.json({ articles: results, totalSize: count, masterTags: masterTags });
+      });
+  })
+});
   
 router.post("/make", ensureAuthenticated, function (req, res, next) {
   var formData = req.body;
@@ -242,6 +253,13 @@ router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
 });
 
 router.post("/search", function (req, res, next) {
+  var page = 0;
+  var pageSize= 30;
+  var data = req.body.params;
+  if(req.query.p !== undefined||req.query.p !== null||req.query.ps !== undefined||req.query.ps !== null){ 
+    page = req.query.p-1;
+    pageSize = parseInt(req.query.ps,10);
+  }
   var data = req.body.params;
   var alignType = "-created";
   var order = "descending";
@@ -301,9 +319,12 @@ router.post("/search", function (req, res, next) {
   var findSearch = before_searchs;
   findSearch.enabled = true;
   findSearch.isOpened= true;
-
+  Replay.count(findSearch,function (err, count){
     Replay.find(findSearch)
+    .populate('author')
     .sort(alignType)
+    .skip(pageSize*page)
+    .limit(pageSize)
     .exec(function (err, results) {
       if (err) { console.log(err); next(err); }
       if(results != undefined&& after_searchs.author != undefined){
@@ -317,9 +338,9 @@ router.post("/search", function (req, res, next) {
         });
       }
       results = filterBlockResult(req.user,results);
-      return res.json({ articles: results, masterTags: masterTags });
+      return res.json({ articles: results, totalSize: count, masterTags: masterTags });
     });
-
+  })
 });
 
 router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {

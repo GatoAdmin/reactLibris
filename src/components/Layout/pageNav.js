@@ -25,7 +25,7 @@ class Navbar extends React.Component{
       <Grid>
         <Grid.Row>
           <Grid.Column width={3}>
-              <Image id="main-logo" src='/assets/images/layout/Logo.png' as={Link} to='/'/>
+              <Image id="main-logo" src='/assets/images/layout/Logo.png' onClick={(e)=>this.handleItemClick(e,"home")} as={Link} to='/'/>
           </Grid.Column>
           <Grid.Column width={6}></Grid.Column>
           <Grid.Column width={7}>

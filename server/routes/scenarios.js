@@ -48,12 +48,9 @@ function ensureAuthenticated(req, res, next) {
 
 router.post("/", function (req, res, next) {
   var page= 0;
-  var pageSize= 15;
+  var pageSize= 30;
   var data = req.body.params;
-  if(req.query.p === undefined||req.query.p === null||req.query.ps === undefined||req.query.ps === null){ 
-    page = 0;
-    pageSize = 15;
-  }else{
+  if(req.query.p !== undefined||req.query.p !== null||req.query.ps !== undefined||req.query.ps !== null){ 
     page = req.query.p-1>0?req.query.p-1:0;
     pageSize = parseInt(req.query.ps,10);
   }
@@ -513,13 +510,10 @@ router.post("/delete/:id", function (req, res, next) {
 });
 
 router.post("/search", function (req, res, next) {  var page= 0;
-  var pageSize= 15;
+  var pageSize= 30;
   var data = req.body.params;
-  if(req.query.p === undefined||req.query.p === null||req.query.ps === undefined||req.query.ps === null){ 
-    page = 0;
-    pageSize = 15;
-  }else{
-    page = req.query.p-1;
+  if(req.query.p !== undefined||req.query.p !== null||req.query.ps !== undefined||req.query.ps !== null){ 
+    page = req.query.p-1>0?req.query.p-1:0;
     pageSize = parseInt(req.query.ps,10);
   }
   var data = req.body.params;

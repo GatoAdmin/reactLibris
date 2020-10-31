@@ -10,7 +10,6 @@ import AuthRoute from '../Layout/AuthRoute';
 function Replay({ currentUser, match }) {
   return (
       <div>
-        <h1>Replay</h1>
         <div>
           <Route exact path={match.path} component={(props)=><ArticleList currentUser={currentUser} {...props}/>} />
           <Route path={`${match.path}/view/:id`} component={(props)=><Viewer currentUser={currentUser} {...props}/>}  />

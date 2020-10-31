@@ -1,9 +1,12 @@
 import React from 'react';
 import { Button, Grid,Image } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
+import { instanceOf } from 'prop-types';
+import { useCookies  } from 'react-cookie';
 
-class Main extends React.Component {
-    render() {
+function Main(){
+        const [cookies, setCookie] = useCookies(['libris_visite']);
+        setCookie('libris_visite', true, { path: '/' });
         return (
             <div className="landing-box">
                 <div className="door-box">
@@ -180,5 +183,4 @@ class Main extends React.Component {
             </div>
         );
     }
-}
 export default Main;

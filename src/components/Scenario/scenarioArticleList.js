@@ -33,10 +33,10 @@ class ArticleList extends React.Component {
             filter_rule: [],
             filter_sub_tags: [],
             master_tags: [],
-            viewType:'card',
+            view_type:'card',
             total_size:0,
             current_page:1,
-            pageSize: 30,
+            page_size: 30,
         };
     }
 
@@ -48,7 +48,7 @@ class ArticleList extends React.Component {
                     align_order: this.state.align_order,
                     align_type: this.state.align_type
                 }
-            },{params:{p:this.state.current_page, ps:this.state.pageSize}})
+            },{params:{p:this.state.current_page, ps:this.state.page_size}})
                 .then(res => {
                     console.log(res.data)
                     this.setState({
@@ -97,7 +97,7 @@ class ArticleList extends React.Component {
                         filter_price_max: this.state.filter_price_max ,
                     }
                 }
-            })
+            },{params:{p:this.state.current_page, ps:this.state.page_size}})
                 .then(res => {
                     this.setState({
                         rows: res.data.articles,
@@ -125,7 +125,7 @@ class ArticleList extends React.Component {
              })
     }
     onShowSizeChange = (current, pageSize) => {
-        this.setState({ pageSize });
+        this.setState({page_size: pageSize });
       };
 
     onScenarioSearchChange = (e) => {
@@ -174,11 +174,12 @@ class ArticleList extends React.Component {
                         filter_price_max: this.state.filter_price_max ,
                     }
                 }
-            },{params:{p:1, ps:this.state.pageSize}})
+            },{params:{p:1, ps:this.state.page_size}})
                 .then(res => {
                     console.log(res.data.articles);
                     this.setState({
-                        rows: res.data.articles
+                        rows: res.data.articles,
+                        total_size:  res.data.totalSize
                     });
                 })
                 .catch(function (err) {
@@ -237,7 +238,7 @@ class ArticleList extends React.Component {
         e.preventDefault();
         var viewType = data.value;
         if(viewType !=null && viewType!=undefined){
-            this.setState(() => ({viewType: viewType}));
+            this.setState(() => ({view_type: viewType}));
         }
     }
     
@@ -256,7 +257,7 @@ class ArticleList extends React.Component {
                                     <Card key = {index.toString()} >
                                         <Image as={Link} to={"/scenarios/view/"+data._id} src={data.banner!=undefined&&data.banner.length>0?"/assets/images/"+data.banner[0].imageData:src} wrapped ui={false} />
                                         <Card.Content>
-                                            <Card.Header className="ellipsis"><Link to={"/scenarios/view/"+data._id}>{latest.title}</Link></Card.Header>
+                                            <Card.Header className="ellipsis"><Link to={"/scenarios/view/"+data._id}>{data.title}</Link></Card.Header>
                                             <Card.Meta><Link to={"/user/"+data.author.userName}><Icon name="user"/>{data.author.userName}</Link></Card.Meta>
                                             <Card.Meta className="card-tags">
                                                 <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',latest.backgroundTag)}  content={latest.backgroundTag} icon='hashtag' />                                                
@@ -385,6 +386,7 @@ class ArticleList extends React.Component {
 
         var header =
         <div>
+            {/* {typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?<Button as={Link} to='/scenarios/make'>새로 만들기</Button>:null} */}
             <div className="search_window">
                 {this.state.is_show_detail_filter?
                 <div className="form-box">
@@ -468,14 +470,14 @@ class ArticleList extends React.Component {
         </div>
         var component = <div>
             {header}
-            {this.getList(this.state.viewType)}
+            {this.getList(this.state.view_type)}
             <Pagination
                 className="text-center pagination"
                 selectComponentClass={Selection}
                 showSizeChanger
                 totalBoundaryShowSizeChanger={50}
                 pageSizeOptions	={[30,50,100]}
-                pageSize={this.state.pageSize}
+                pageSize={this.state.page_size}
                 onShowSizeChange={this.onShowSizeChange}
                 defaultCurrent={1}
                 onChange={(p,ps)=>this.onChangePage(p,ps)}

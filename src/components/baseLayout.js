@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import { CookiesProvider } from 'react-cookie';
 import './Layout/layout.css';
 import {Switch, Route, Link,useHistory, Redirect } from 'react-router-dom';
 import AuthRoute from './Layout/AuthRoute';
@@ -66,6 +67,8 @@ class BaseLayout extends React.Component {
   render() {
   return (
     <div className="base">
+      <CookiesProvider>
+
       <header>
         <Navbar currentUser={this.state.currentUser}/>
       </header>
@@ -95,6 +98,7 @@ class BaseLayout extends React.Component {
         </Switch>
         </div>
     <Footer/>
+      </CookiesProvider>
   </div>
   );}
 }
