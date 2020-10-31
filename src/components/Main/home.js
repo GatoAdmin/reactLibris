@@ -97,11 +97,11 @@ class Home extends React.Component {
                                 <Item.Group divided>
                                     {this.state.news.map((notice,index)=>{
                                         return <Item>
-                                            <Item.Image src={src} size="tiny"/>
+                                            <Item.Image src={notice.banner.length>0?"/assets/images/"+notice.banner[0].imageData:src} size="tiny"/>
                                             <Item.Content>
                                                 <Item.Header>{notice.title}</Item.Header>        
                                                 <Item.Meta>
-                                                    <Moment format="YYYY.MM.DD">{notice.created}</Moment>
+                                                    <Moment format="YY.MM.DD">{notice.created}</Moment>
                                                 </Item.Meta>
                                             </Item.Content>
                                         </Item>

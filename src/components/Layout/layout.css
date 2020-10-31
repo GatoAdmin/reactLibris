@@ -172,7 +172,7 @@ footer{
 }
 .festival-banner img{
     height: 500px;
-    width: 1000px;
+    /* width: 1000px; */
 }
 .notice-box{
     margin-bottom: 25px;

@@ -12,7 +12,7 @@ class BannerCarousel extends React.Component {
         super();
         if(props.festivals!==undefined){
             images = props.festivals.map((festival,index)=>{
-                return <Image className="festival-banner" src={src} as={Link} to={`/news/view/${festival._id}`} />// festival.banner
+                return <Image className="festival-banner" src={festival.banner.length>0?"/assets/images/"+festival.banner[0].imageData:src} as={Link} to={`/news/view/${festival._id}`} />// festival.banner
             })
         }
         
