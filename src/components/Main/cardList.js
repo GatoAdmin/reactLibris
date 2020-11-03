@@ -6,9 +6,9 @@ import { Component } from 'react';
 const src = 'https://react.semantic-ui.com/images/wireframe/image.png'
 class CradList extends React.Component {
     constructor(props) {
-        super(props);
-        console.log(props);
+        super();
         this.state = {
+            name:props.name,
             type:props.type,
             cards: props.cards
         };
@@ -17,6 +17,8 @@ class CradList extends React.Component {
         var component = <div className="card-list" ></div>;
         if(this.state.cards.length>4){
             component = <div className="card-list" >
+                <div className="inline-flex"><h3>{this.state.name}</h3>
+                <Button className="shadow-none btn" size="tiny" basic as={Link} to={`/${this.state.type}`}>더보기<Icon name="arrow right"/></Button></div>
                 {/* <div style={{overflowX:'hidden',height:'330px',overflowY:'hidden'}}> */}
                         <Card.Group stackable={true} doubling={true} centered={false} itemsPerRow={5}>
                             {this.state.cards.map((card, index)=>{
@@ -34,11 +36,12 @@ class CradList extends React.Component {
                             })}
                         </Card.Group>
                     {/* </div> */}
-                    <Button as={Link} to='/news'>더보기</Button>
             </div>;
         }else if(this.state.cards.length>0){
             component = <div className="card-list" >
                 <div>
+                <div className="inline-flex"><h3>{this.state.name}</h3>
+                <Button className="shadow-none btn" size="tiny" basic as={Link} to={`/${this.state.type}`}>더보기<Icon name="arrow right"/></Button></div>
                         <Card.Group stackable={true} doubling={true} centered={true}>
                             {this.state.cards.map((card, index)=>{
                                 console.log(card);
@@ -48,15 +51,14 @@ class CradList extends React.Component {
                                         <Card.Header>{card.title}</Card.Header>
                                         <Card.Meta>{card.author.userName}</Card.Meta>
                                     </Card.Content>
-                                    <Card.Content extra>
+                                    {/* <Card.Content extra>
                                             <Icon name='eye' />
                                             {card.view}
-                                    </Card.Content>
+                                    </Card.Content> */}
                                 </Card>);
                             })}
                         </Card.Group>
                     </div>
-                    <Button as={Link} to='/news'>더보기</Button>
             </div>;
         }
         return component;

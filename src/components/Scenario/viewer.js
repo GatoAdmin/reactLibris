@@ -1,6 +1,6 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.css';
-import {Button, List, Icon} from 'semantic-ui-react';
+import {Button, Grid, Image, Icon} from 'semantic-ui-react';
 import {Switch, Route, Link} from 'react-router-dom';
 import axios from 'axios';
 import Moment from 'react-moment';
@@ -8,6 +8,7 @@ import QuillViewer from '../Quill/react-quill-viewer';
 import CommentBox from '../Comment/commentPart';
 import ArticleReport from '../Report/articleReport'; 
 
+const userSrc = 'https://react.semantic-ui.com/images/wireframe/square-image.png';
 class ScenarioView extends React.Component {
   constructor(props) {
       super(props);
@@ -164,11 +165,23 @@ class ScenarioView extends React.Component {
         let quillBoxStyle = {width: "80%", marginLeft: "10%"};
           content = (
             <div>
-                <div>
-                    <span>작가 : </span>
-                    <Link to={`/user/${result.author.userName }`}>
-                        {result.author.userName}
-                    </Link>
+                <div className="inline-flex">
+                    <Image className="user-image" avatar src={result.author.portrait!==undefined?result.author.portrait:userSrc} as={Link} to={`/user/${result.author.userName }`}/>
+                    <div>
+                        <Button className="shadow-none btn text" size="mini" basic as={Link} to={`/user/${result.author.userName }`}>
+                            <h4>{result.author.userName}</h4>
+                        </Button>
+                        <div>
+                            <div className="inline-flex extra-data">
+                                <Moment format="YYYY.MM.DD HH:mm">{result.created}</Moment>
+                                <span>|</span> 
+                                <Icon name='eye' />{result.view}
+                                {/* <span>|</span>  */}
+                                {/* <Icon name='comments' />{result.view}
+                                <span>|</span>  */}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <span>룰 : </span>
@@ -196,7 +209,6 @@ class ScenarioView extends React.Component {
                 <div>
                     {version.rating != null ? <span>{version.rating} 금</span> : <span>전체 이용가</span>}
                 </div>
-                <div><span>조회수 : </span>{result.view}</div>
                 <div>
                     <span>가격 :</span>
                     {!result.isFree ? <span>{result.price}</span> : <span>무료</span>}
@@ -285,22 +297,32 @@ class ScenarioView extends React.Component {
         }
         content=(
             <div>
-            <h2>{result.title}</h2>
-                {blockContent}
-                {reportConetnt}
-                {typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null?(
-                    <Button onClick={()=>this.switchBookmark()}>
-                        {isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}
-                    </Button>):null
-                }
-                
-            {this.state.isAuthor?(<div>
-                    <Button as={Link} to={`/scenarios/edit/${result._id}`}>수정</Button>
-                    <Button onClick={()=>this.switchOpened(result.isOpened)}>{result.isOpened?'비공개':'공개'}</Button>
-                    {this.state.isCanDelete?<Button onClick={()=>this.deleteScenario()}>삭제</Button>:<span>구매한 유저가 있는 유료 리플레이는 삭제할 수 없습니다.</span>}
-                </div>
-                ):null}
-        
+                <Grid className="article-title ">
+                    <Grid.Row>
+                    <Grid.Column className="inline-flex" width={8}>
+                        <h2>{result.title}</h2>
+                        {typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!=null?(
+                            <Button className="shadow-none btn" basic onClick={()=>this.switchBookmark()}>
+                                {isBookmark?<Icon name='bookmark'/>:<Icon name='bookmark outline'/>}
+                            </Button>):null
+                        }
+                        
+                        {this.state.isAuthor?(<div>
+                                <Button as={Link} to={`/scenarios/edit/${result._id}`}>수정</Button>
+                                <Button onClick={()=>this.switchOpened(result.isOpened)}>{result.isOpened?'비공개':'공개'}</Button>
+                                {this.state.isCanDelete?<Button onClick={()=>this.deleteScenario()}>삭제</Button>:<span>구매한 유저가 있는 유료 리플레이는 삭제할 수 없습니다.</span>}
+                            </div>
+                            ):null}
+                    </Grid.Column>
+                    
+                    <Grid.Column className="text-right" width={8}>
+                        <div className="inline-flex">
+                            {blockContent}
+                            {reportConetnt}
+                        </div>
+                    </Grid.Column>
+                    </Grid.Row>
+                </Grid>
             {!isBlock?this.getViewPage(result):null}
             <CommentBox/>
             </div>

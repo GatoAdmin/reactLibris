@@ -13,7 +13,6 @@ function Main({ currentUser,match })  {
       <div>
         <div>
           <Route exact path={match.path} component={typeof(currentUser) === 'object'&&!Array.isArray(currentUser)&&currentUser!==undefined?Home:cookies.libris_visite?Home:Landing} />
-          {/* <Route exact path={match.path} component={Landing} /> */}
         </div>
       </div>
   );

@@ -37,10 +37,10 @@ class Footer extends React.Component {
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row >
-                            <Grid.Column  width={8}>
+                            <Grid.Column width={8}>
                                 <span>©2020 Libris | All Rights Reserved</span>
                             </Grid.Column>
-                            <Grid.Column  width={8}>
+                            <Grid.Column className="text-right" width={8}>
                                 <Link to="">개인 정보 보호 정책</Link> | <Link to="">이용 약관</Link> 
                             </Grid.Column>
                         </Grid.Row>

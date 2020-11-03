@@ -46,46 +46,26 @@ class Home extends React.Component {
                 {this.state.news.length>0?<BannerCarousel festivals={this.state.news}/>:null}
                 <Grid>
                     <Grid.Column width={12}>
-                        <Grid.Row className="recommand_scenarios">
-                                <Grid.Column>
-                                    <Grid.Row>
-                                        <h3>시나리오 추천작</h3>
-                                    </Grid.Row>
-                                    <Grid.Row>
-                                    {this.state.recommandScenarios.length>0?<CardList cards={this.state.recommandScenarios} type="scenarios"/>:null}
-                                    </Grid.Row>
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row className="recommand_replays">
-                                <Grid.Column>
-                                    <Grid.Row>
-                                        <h3>리플레이 추천작</h3>
-                                    </Grid.Row>
-                                    <Grid.Row>
-                                    {this.state.recommandReplays.length>0?<CardList cards={this.state.recommandReplays} type="replays"/>:null}
-                                    </Grid.Row>
-                                </Grid.Column>
-                            </Grid.Row>
-                        <Grid.Row className="recommand_scenarios">
-                                <Grid.Column>
-                                    <Grid.Row>
-                                        <h3>이런 시나리오 어때요?</h3>
-                                    </Grid.Row>
-                                    <Grid.Row>
-                                    {this.state.recommandScenarios.length>0?<CardList cards={this.state.recommandScenarios} type="scenarios"/>:null}
-                                    </Grid.Row>
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row className="recommand_replays">
-                                <Grid.Column>
-                                    <Grid.Row>
-                                        <h3>이런 리플레이 어때요?</h3>
-                                    </Grid.Row>
-                                    <Grid.Row>
-                                    {this.state.recommandReplays.length>0?<CardList cards={this.state.recommandReplays} type="replays"/>:null}
-                                    </Grid.Row>
-                                </Grid.Column>
-                            </Grid.Row>
+                        <Grid.Row className="recommand-box scenarios">
+                            <Grid.Column>
+                                {this.state.recommandScenarios.length>0?<CardList name="시나리오 추천작" cards={this.state.recommandScenarios} type="scenarios"/>:null}
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row className="recommand-box replays">
+                            <Grid.Column>
+                                {this.state.recommandReplays.length>0?<CardList name="리플레이 추천작" cards={this.state.recommandReplays} type="replays"/>:null}
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row className="recommand-box scenarios">
+                            <Grid.Column>
+                                {this.state.recommandScenarios.length>0?<CardList name="이런 시나리오 어때요?" cards={this.state.recommandScenarios} type="scenarios"/>:null}
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row className="recommand-box replays">
+                            <Grid.Column>
+                                {this.state.recommandReplays.length>0?<CardList name="이런 리플레이 어때요?" cards={this.state.recommandReplays} type="replays"/>:null}
+                            </Grid.Column>
+                        </Grid.Row>
                     </Grid.Column>
                     <Grid.Column width={4}>
                         <Grid.Row><div className="google-ad">
@@ -93,7 +73,7 @@ class Home extends React.Component {
                             </div></Grid.Row>
                         <Grid.Row>
                             <div className="notice-box">
-                                <h3>공지사항</h3>
+                                <h3>새소식</h3>
                                 <Item.Group divided>
                                     {this.state.news.map((notice,index)=>{
                                         return <Item>

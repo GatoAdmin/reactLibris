@@ -20,6 +20,7 @@ import Signup from './Main/signup';
 import SearchResult from './Main/searchResult';
 import Footer from './Layout/footer';
 import Navbar from './Layout/pageNav';
+import Landing from './Main/landing';
 class BaseLayout extends React.Component {
   constructor(props) {
       super(props);
@@ -89,6 +90,7 @@ class BaseLayout extends React.Component {
             
              <Route path="/comments" component={(props)=><Comment currentUser={this.state.currentUser}{...props}/>} />
              <Route path="/chronicles" component={(props)=><Chronicle currentUser={this.state.currentUser}{...props}/>} />
+             <Route exact path={`/landing`} component={Landing} />
              <Route path='/login' component={(props)=><Login responseSuccessGoogle={this.responseSuccessGoogle} responseFailureGoogle={this.responseFailureGoogle} login_process={this.login}/>} />
              <AuthRoute path='/logout' currentUser={this.state.currentUser} render={(props)=><Logout currentUser={this.state.currentUser}{...props}/>} />
              <Route path='/signup' component={Signup } />

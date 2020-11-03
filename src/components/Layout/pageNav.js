@@ -37,7 +37,6 @@ class Navbar extends React.Component{
           <Menu secondary>
             <Menu.Item className="menu-button" name="scenarios" active={this.state.activeItem === 'scenarios'} onClick={this.handleItemClick} as={Link} to='/scenarios'>시나리오</Menu.Item>
             <Menu.Item className="menu-button" name="replays"   active={this.state.activeItem === 'replays'} onClick={this.handleItemClick} as={Link} to='/replays'>리플레이</Menu.Item> 
-            <Menu.Item className="menu-button" name="news"      active={this.state.activeItem === 'news'} onClick={this.handleItemClick} as={Link} to='/news'>공지사항</Menu.Item>    
             <Menu.Item className="menu-button" name="about"     active={this.state.activeItem === 'about'} onClick={this.handleItemClick} as={Link} to='/about'>도움말</Menu.Item>       
             
           </Menu>
@@ -50,6 +49,7 @@ class Navbar extends React.Component{
           </Grid.Column>
           <Grid.Column width={6}>
           <Menu className="user-buttons" secondary>
+            <Menu.Item className="menu-button" name="news"      active={this.state.activeItem === 'news'} onClick={this.handleItemClick} as={Link} to='/news'>새소식</Menu.Item>    
              {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="library" active={this.state.activeItem === 'library'} onClick={this.handleItemClick} as={Link} to='/library'>내 책장</Menu.Item>:null}
              {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="profile"   active={this.state.activeItem === 'profile'} onClick={this.handleItemClick} as={Link} to={`/user/${this.props.currentUser!==null?this.props.currentUser.userName:''}`}>프로필</Menu.Item> :null}
              {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="user"      active={this.state.activeItem === 'user'} onClick={this.handleItemClick} as={Link} to='/user'>내 정보</Menu.Item>    :null}

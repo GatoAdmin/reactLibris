@@ -240,7 +240,6 @@ class NewsArticleList extends React.Component {
         }
         var component = 
         <div>            
-            <span>뉴스</span>
             <div className="search_window">
                 <Form id= "tag-form" action="/news/search" method= "POST">
                         <Form.Input  id= "rdTag" type= "hidden" value= "" name= "tag"/>

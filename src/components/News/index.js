@@ -7,7 +7,6 @@ import Viewer from './viewer';
 function News({ currentUser, match }) {
   return (
       <div>
-        <h1>News</h1>
         <div>
           <Route exact path={match.path} component={(props)=><ArticleList currentUser={currentUser} {...props}/>} />
           <Route path={`${match.path}/view/:id`} component={(props)=><Viewer currentUser={currentUser} {...props}/>}  />
