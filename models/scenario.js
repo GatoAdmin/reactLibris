@@ -14,6 +14,10 @@ const ScenarioSchema = new Schema({
     hashTags:[{type: Schema.Types.ObjectId, ref:'HashTag'}],
     summary:{type:String},
     title: String,
+    banner : {
+        imageName :{type:String, default:"none",require:true}, //표기될 이미지
+        imageData:{type:String, require:true},
+    },
     versions: [{
         capacity: { max: { type: Number, default: 1 }, min: { type: Number, default: 1 } },//인원수
         rating: Number,

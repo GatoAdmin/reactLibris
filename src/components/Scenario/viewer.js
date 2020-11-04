@@ -1,6 +1,6 @@
 import React from 'react';
 import 'semantic-ui-css/semantic.css';
-import {Button, Grid, Image, Icon} from 'semantic-ui-react';
+import {Button, Grid, Image, Icon, Table, Tab,Label} from 'semantic-ui-react';
 import {Switch, Route, Link} from 'react-router-dom';
 import axios from 'axios';
 import Moment from 'react-moment';
@@ -158,15 +158,214 @@ class ScenarioView extends React.Component {
     {
         this.setState({isBlock:isBlock, isBookmark:isBookmark});
     }
+
+    getInfoTab(result){
+        let infoTab;
+        if(result !== null){
+            let version = result.versions[this.state.version-1];
+            infoTab = (
+                <div className="meta-data-box">
+                    
+                    <div>
+                        <Image className="article-banner" centered src={result.banner!==undefined?"/assets/images/"+result.banner.imageData:userSrc}/>
+                    </div>
+                    <Grid padded>
+                        <Grid.Row className="width-auto">
+                            <Grid.Column>
+                                룰 
+                            </Grid.Column>
+                            <Grid.Column className="display-conents">                                   
+                                {result.ruleTag}
+                            </Grid.Column>
+                            <Grid.Column className="display-conents">                                   
+                                인원수
+                            </Grid.Column>
+                            <Grid.Column className="display-conents">
+                                <Icon.Group size="large">
+                                    <Icon name="user outline" size="large" color='blue'/>
+                                    <Icon color="white" fitted>{version.capacity.min}</Icon>
+                                </Icon.Group>
+                                {(version.capacity.min != version.capacity.max)?(<span><span>~</span>         
+                                    
+                                <Icon.Group size="large">
+                                    <Icon name="user outline" size="large" color='purple'/>
+                                    <Icon  color="white" fitted>{version.capacity.max}</Icon>
+                                </Icon.Group></span>):null}
+                            </Grid.Column>
+                            <Grid.Column className="display-conents"> 
+                                플레이 시간 
+                            </Grid.Column>
+                            <Grid.Column className="display-conents">         
+                                <span className="predictingTime">
+                                    {version.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
+                                </span>
+                                <span>
+                                    {version.orpgPredictingTime==null?version.trpgPredictingTime:version.orpgPredictingTime}
+                                </span>
+                                <span> 시간</span>
+                            </Grid.Column>
+                            <Grid.Column>
+                                가격 
+                            </Grid.Column>
+                            <Grid.Column className="display-conents">         
+                                {!result.isFree ? <span>{result.price}</span> : <span>무료</span>}
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row>
+                            <Grid.Column>                            
+                                {version.rating != null ? <span>{version.rating} 금</span> : <Icon.Group size="large"><Icon size="large" name="circle outline"/><Icon fitted size="mini">ALL</Icon></Icon.Group>}
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row className="width-auto">
+                            <Grid.Column>
+                                배경 
+                            </Grid.Column>
+                            <Grid.Column  className="display-conents">       
+                                <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',version.backgroundTag)}  content={version.backgroundTag} icon='hashtag' />  
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row className="width-auto">
+                            <Grid.Column>
+                                장르 
+                            </Grid.Column>
+                            <Grid.Column  className="display-conents">                                                       
+                                {version.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_genre',tag)}  content={tag} icon='hashtag' />}) }                                               
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row className="width-auto">
+                            <Grid.Column>
+                                분위기 
+                            </Grid.Column>
+                            <Grid.Column className="display-conents">         
+                            {version.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                        
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                    <div>
+                        소개글
+                    </div>
+                    <div>
+                        주의글
+                    </div>
+                </div>)
+        }
+        return infoTab;
+    }
+    
+    getContentTab(result){
+        let contentTab;
+        let quillBoxStyle = {width: "80%", marginLeft: "10%"};
+        if(result !== null){
+            let version = result.versions[this.state.version-1];
+            contentTab = (
+                <div className="quill-box" style={quillBoxStyle}>
+                    {result.isFree?<QuillViewer setValue={result.versions[this.state.version-1].content}/>:
+                    this.state.isPaid?<QuillViewer setValue={result.versions[this.state.version-1].content}/>:
+                    <div>구매하지 않으면 볼 수 없는 컨텐츠 입니다.</div>
+                    }
+                    {/* {- include('../quill-viewer',{context: version.content}) } */}
+                </div>
+                )
+        }
+        return contentTab;
+    }
+    
+    getLogTab(result){
+        let logTab;
+        if(result !== null){
+            let version = result.versions[this.state.version-1];
+            logTab = (
+                <div className="meta-data-box">
+                    <Table>
+                        <div>
+                            <span>룰 : </span>
+                            {result.ruleTag}
+                        </div>
+                        <div>
+                            <span>
+                                플레이 인원 :
+                            </span>
+                            <span>{version.capacity.min}</span>
+                            {(version.capacity.min != version.capacity.max)?(<span><span>~</span>         
+                                <span>{version.capacity.max}</span></span>):null}
+                            <span> 인</span>
+                        </div>
+                        <div>
+                            <span>플레이 시간: </span>
+                            <span className="predictingTime">
+                                {version.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
+                            </span>
+                            <span>
+                                {version.orpgPredictingTime==null?version.trpgPredictingTime:version.orpgPredictingTime}
+                            </span>
+                            <span> 시간</span>
+                        </div>
+                        <div>
+                            {version.rating != null ? <span>{version.rating} 금</span> : <span>전체 이용가</span>}
+                        </div>
+                        <div>
+                            <span>가격 :</span>
+                            {!result.isFree ? <span>{result.price}</span> : <span>무료</span>}
+                        </div>
+                        <div>
+                            <ul>
+                                <li>
+                                    <span>배경 : </span>
+                                </li>
+                                <li className="tag_item">
+                                    #{version.backgroundTag}
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <ul>
+                                <li>
+                                    <span>장르 : </span>
+                                </li>
+                                {version.genreTags.map( (tag, index)=>(
+                                    <li className="tag_item" key={index}>
+                                        #{tag}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div>
+                            <ul>
+                                <li>
+                                    <span>태그 : </span>
+                                </li>
+                                {version.subTags.map((tag, index)=>(
+                                    <li className="tag_item" key={index}> 
+                                        #{tag}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </Table>
+                </div>)
+        }
+        return logTab;
+    }
   getViewPage(result){
       let content;
       let version = result.versions[this.state.version-1];
       if(result != null){
-        let quillBoxStyle = {width: "80%", marginLeft: "10%"};
+        let panes = [{
+                menuItem:'개요',
+                render:()=><Tab.Pane attached={false}>{this.getInfoTab(result)}</Tab.Pane>
+            },
+            {   menuItem:'본문',
+                render:()=><Tab.Pane attached={false}>{this.getContentTab(result)}</Tab.Pane>
+            },
+            {
+                menuItem:'로그',
+                render:()=><Tab.Pane attached={false}>{this.getLogTab(result)}</Tab.Pane>
+            },
+        ];
           content = (
             <div>
-                <div className="inline-flex">
-                    <Image className="user-image" avatar src={result.author.portrait!==undefined?result.author.portrait:userSrc} as={Link} to={`/user/${result.author.userName }`}/>
+                <div className="text-right">
+                    <Image className="user-image float-right" avatar src={result.author.portrait!==undefined?result.author.portrait:userSrc} as={Link} to={`/user/${result.author.userName }`}/>
                     <div>
                         <Button className="shadow-none btn text" size="mini" basic as={Link} to={`/user/${result.author.userName }`}>
                             <h4>{result.author.userName}</h4>
@@ -183,80 +382,7 @@ class ScenarioView extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div>
-                    <span>룰 : </span>
-                    {result.ruleTag}
-                </div>
-                <div>
-                    <span>
-                        플레이 인원 :
-                      </span>
-                    <span>{version.capacity.min}</span>
-                    {(version.capacity.min != version.capacity.max)?(<span><span>~</span>         
-                        <span>{version.capacity.max}</span></span>):null}
-                    <span> 인</span>
-                </div>
-                <div>
-                    <span>플레이 시간: </span>
-                    <span className="predictingTime">
-                        {version.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
-                    </span>
-                    <span>
-                        {version.orpgPredictingTime==null?version.trpgPredictingTime:version.orpgPredictingTime}
-                    </span>
-                    <span> 시간</span>
-                </div>
-                <div>
-                    {version.rating != null ? <span>{version.rating} 금</span> : <span>전체 이용가</span>}
-                </div>
-                <div>
-                    <span>가격 :</span>
-                    {!result.isFree ? <span>{result.price}</span> : <span>무료</span>}
-                </div>
-                <div>
-                    <ul>
-                        <li>
-                            <span>배경 : </span>
-                        </li>
-                        <li className="tag_item">
-                            #{version.backgroundTag}
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <ul>
-                        <li>
-                            <span>장르 : </span>
-                        </li>
-                        {version.genreTags.map( (tag, index)=>(
-                            <li className="tag_item" key={index}>
-                                #{tag}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <div>
-                    <ul>
-                        <li>
-                            <span>태그 : </span>
-                        </li>
-                        {version.subTags.map((tag, index)=>(
-                            <li className="tag_item" key={index}> 
-                                #{tag}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-  
-                <div className="quill-box" style={quillBoxStyle}>
-                    <span>본문 </span>
-                    
-                    {result.isFree?<QuillViewer setValue={result.versions[this.state.version-1].content}/>:
-                    this.state.isPaid?<QuillViewer setValue={result.versions[this.state.version-1].content}/>:
-                    <div>구매하지 않으면 볼 수 없는 컨텐츠 입니다.</div>
-                    }
-                    {/* {- include('../quill-viewer',{context: version.content}) } */}
-                </div>
+                <Tab menu={{ secondary: true, pointing: true }}panes={panes}/>
             </div>
   
         );
@@ -297,7 +423,7 @@ class ScenarioView extends React.Component {
         }
         content=(
             <div>
-                <Grid className="article-title ">
+                <Grid className="article-title">
                     <Grid.Row>
                     <Grid.Column className="inline-flex" width={8}>
                         <h2>{result.title}</h2>

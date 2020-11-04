@@ -24,6 +24,12 @@ a:hover {color: violet!important;}
 .inline-flex{
     display: inline-flex!important;
 }
+.display-conents{
+    display: contents!important;
+}
+.width-auto{
+    width: auto!important;
+}
 .padding-top-0{
     padding-top: 0 !important;
 }
@@ -41,6 +47,18 @@ a:hover {color: violet!important;}
 }
 .text-center{
     text-align: center !important;
+}
+.text-white{
+    color: white;
+}
+.float-right{
+    float: right;
+}
+.text-boder{
+    -webkit-text-stroke: white 0.2px;
+    -webkit-text-fill-color : black;
+    /* text-shadow: 1px 1px 0 white; */
+    /* text-decoration: white 1px; */
 }
 .ellipsis{
     width: 100%;
@@ -83,6 +101,10 @@ a:hover {color: violet!important;}
   ::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.5);
   } */
+.article-banner{
+    width: 700px;
+    height: 350px;
+}
 .footer .logo{
     width: 200px;
 }
