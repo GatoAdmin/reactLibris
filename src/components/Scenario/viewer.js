@@ -163,39 +163,39 @@ class ScenarioView extends React.Component {
         let infoTab;
         if(result !== null){
             let version = result.versions[this.state.version-1];
+            console.log(result.banner)
             infoTab = (
-                <div className="meta-data-box">
-                    
+                <div className="meta-data-box font-mm">
                     <div>
-                        <Image className="article-banner" centered src={result.banner!==undefined?"/assets/images/"+result.banner.imageData:userSrc}/>
+                        <Image className="article-banner" centered src={result.banner!==undefined?result.banner.imageData!==undefined?"/assets/images/"+result.banner.imageData:userSrc:userSrc}/>
                     </div>
-                    <Grid padded>
-                        <Grid.Row className="width-auto">
+                    {/* <Grid padded columns='equal'>
+                        <Grid.Row className="width-auto font-mm">
                             <Grid.Column>
                                 룰 
                             </Grid.Column>
-                            <Grid.Column className="display-conents">                                   
+                            <Grid.Column >                                   
                                 {result.ruleTag}
                             </Grid.Column>
-                            <Grid.Column className="display-conents">                                   
+                            <Grid.Column >                                   
                                 인원수
                             </Grid.Column>
-                            <Grid.Column className="display-conents">
+                            <Grid.Column >
                                 <Icon.Group size="large">
-                                    <Icon name="user outline" size="large" color='blue'/>
+                                    <Icon name="user outline" fitted size="large" color='blue'/>
                                     <Icon color="white" fitted>{version.capacity.min}</Icon>
                                 </Icon.Group>
                                 {(version.capacity.min != version.capacity.max)?(<span><span>~</span>         
                                     
                                 <Icon.Group size="large">
-                                    <Icon name="user outline" size="large" color='purple'/>
+                                    <Icon name="user outline" fitted size="large" color='purple'/>
                                     <Icon  color="white" fitted>{version.capacity.max}</Icon>
                                 </Icon.Group></span>):null}
                             </Grid.Column>
-                            <Grid.Column className="display-conents"> 
+                            <Grid.Column > 
                                 플레이 시간 
                             </Grid.Column>
-                            <Grid.Column className="display-conents">         
+                            <Grid.Column >         
                                 <span className="predictingTime">
                                     {version.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
                                 </span>
@@ -207,13 +207,13 @@ class ScenarioView extends React.Component {
                             <Grid.Column>
                                 가격 
                             </Grid.Column>
-                            <Grid.Column className="display-conents">         
+                            <Grid.Column >         
                                 {!result.isFree ? <span>{result.price}</span> : <span>무료</span>}
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row>
                             <Grid.Column>                            
-                                {version.rating != null ? <span>{version.rating} 금</span> : <Icon.Group size="large"><Icon size="large" name="circle outline"/><Icon fitted size="mini">ALL</Icon></Icon.Group>}
+                                {version.rating != null ? <span>{version.rating} 금</span> : <Icon.Group size="large"><Icon size="large" fitted name="circle outline"/><Icon fitted size="small"><b>ALL</b></Icon></Icon.Group>}
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row className="width-auto">
@@ -240,7 +240,87 @@ class ScenarioView extends React.Component {
                             {version.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                        
                             </Grid.Column>
                         </Grid.Row>
-                    </Grid>
+                    </Grid> */}
+                    
+                    <Table>
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.HeaderCell>
+                                    룰 
+                                </Table.HeaderCell>
+                                <Table.HeaderCell>
+                                인원수 
+                                </Table.HeaderCell>
+                                <Table.HeaderCell>
+                                플레이 시간  
+                                </Table.HeaderCell>
+                                <Table.HeaderCell>
+                                가격  
+                                </Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+
+                        <Table.Row className="width-auto font-mm">
+                            <Table.Cell >                                   
+                                {result.ruleTag}
+                            </Table.Cell>
+                            <Table.Cell >
+                                <Icon.Group size="large">
+                                    <Icon name="user outline" fitted size="large" color='blue'/>
+                                    <Icon color="white" fitted>{version.capacity.min}</Icon>
+                                </Icon.Group>
+                                {(version.capacity.min != version.capacity.max)?(<span><span>~</span>         
+                                    
+                                <Icon.Group size="large">
+                                    <Icon name="user outline" fitted size="large" color='purple'/>
+                                    <Icon  color="white" fitted>{version.capacity.max}</Icon>
+                                </Icon.Group></span>):null}
+                            </Table.Cell>
+                            <Table.Cell >         
+                                <span className="predictingTime">
+                                    {version.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
+                                </span>
+                                <span>
+                                    {version.orpgPredictingTime==null?version.trpgPredictingTime:version.orpgPredictingTime}
+                                </span>
+                                <span> 시간</span>
+                            </Table.Cell>
+                            <Table.Cell >         
+                                {!result.isFree ? <span>{result.price}</span> : <span>무료</span>}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell >                            
+                                {version.rating != null ? <span>{version.rating} 금</span> : <Icon.Group size="large"><Icon size="large" fitted name="circle outline"/><Icon fitted size="small"><b>ALL</b></Icon></Icon.Group>}
+                            </Table.Cell >
+                        </Table.Row>
+                        <Table.Row className="width-auto">
+                            <Table.Cell >
+                                배경 
+                            </Table.Cell >
+                            <Table.Cell  className="display-conents">       
+                                <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',version.backgroundTag)}  content={version.backgroundTag} icon='hashtag' />  
+                            </Table.Cell >
+                        </Table.Row>
+                        <Table.Row className="width-auto">
+                            <Table.Cell >
+                                장르 
+                            </Table.Cell >
+                            <Table.Cell   className="display-conents">                                                       
+                                {version.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_genre',tag)}  content={tag} icon='hashtag' />}) }                                               
+                            </Table.Cell >
+                        </Table.Row>
+                        <Table.Row className="width-auto">
+                            <Table.Cell >
+                                분위기 
+                            </Table.Cell >
+                            <Table.Cell  className="display-conents">         
+                            {version.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                        
+                            </Table.Cell >
+                        </Table.Row>
+                        </Table.Body>
+                    </Table>
                     <div>
                         소개글
                     </div>

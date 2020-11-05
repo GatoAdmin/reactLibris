@@ -12,6 +12,7 @@ const ReplaySchema = new Schema({
     isAgreeComment: { type: Boolean, default: false },
     hashTags:[{type: Schema.Types.ObjectId, ref:'HashTag'}],
     summary:{type:String},
+    notice:{type: String},
     title: String,
     banner : {
         imageName :{type:String, default:"none",require:true}, //표기될 이미지

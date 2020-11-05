@@ -54,6 +54,9 @@ a:hover {color: violet!important;}
 .float-right{
     float: right;
 }
+.font-mm{
+    font-size: medium;
+}
 .text-boder{
     -webkit-text-stroke: white 0.2px;
     -webkit-text-fill-color : black;
