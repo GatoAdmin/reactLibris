@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import QuillEditor from '../Quill/react-quill-editor';
+import { Grid, Card, Icon, Form, Image, Table, Button, Label, Select, Dropdown,Checkbox, Input } from 'semantic-ui-react'
 import '../../index.css';
 
 class Maker extends React.Component {    
@@ -31,14 +32,17 @@ class Maker extends React.Component {
         getTags();
     }
 
-    changeCapacityType=(e)=>{
+    changeCapacityType=(e, data)=>{
         e.preventDefault();
-        var obj = e.target;
+        // var obj = e.target;
         var multiple_capacity = document.querySelector('#multiple_capacity');
-        if (obj.checked) {
+
+        if (data.checked) {
             multiple_capacity.classList.remove('hidden');
+        console.log(multiple_capacity);
         } else {
             multiple_capacity.classList.add('hidden');
+        console.log(multiple_capacity);
         }
     }
 
@@ -103,7 +107,27 @@ class Maker extends React.Component {
         var selectBackground;        
         var selectGenres;
         var selectTags;
+        var select_rule;
+        var select_genre;
+        var select_background;
+        var select_sub_tags;
         if(masterTags.length>0){
+            var ruleTags = masterTags.find(tags => tags.name === "rule");
+            select_rule = ruleTags.tags.map((tag, id) => {
+                        return { value: tag._id, key: id.toString(), text:tag.tag };
+                    })
+            var genreTags = masterTags.find(tags => tags.name === "genre");
+            select_genre = genreTags.tags.map((tag, id) => {
+                return { value: tag._id, key: id.toString(), text:tag.tag };
+            })
+            var backgroundTags = masterTags.find(tags => tags.name === "background");
+            select_background = backgroundTags.tags.map((tag, id) => {
+                return { value: tag._id, key: id.toString(), text:tag.tag };
+            })
+            var subTags = masterTags.find(tags => tags.name === "subTag");
+            select_sub_tags = subTags.tags.map((tag, id) => {
+                return { value: tag._id, key: id.toString(), text:tag.tag };
+            })
             selectRule = (
                 <div className="form-group">
                     <label htmlFor="rule">기반 룰</label>
@@ -152,14 +176,34 @@ class Maker extends React.Component {
         }
         component = (
             <div id="form-container" className="container">
-                <form method="POST" action={`/scenarios/make/${this.state.chronicle_id }`} onSubmit={()=>this.convertQuill()}>
+                <Form method="POST" action={`/scenarios/make/${this.state.chronicle_id }`} onSubmit={()=>this.convertQuill()}>
+                    <Form.Input size="massive" type="text"  name="title"  placeholder="제목을 입력해 주세요"/>
+                    <Form.Input type="text"  name="title_short"  placeholder="시나리오 줄임말을 스페이스바 없이 입력해주세요"/>
+                        
+                    <Form.Select 
+                            label='사용 룰'
+                            name= "rule"
+                            // onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
+                            options={select_rule}
+                            // value={this.state.filter_rule}
+                            placeholder='사용 룰'/>   
+                    <Form.Group className="text-left" inline>       
+                        <Form.Input className="search-number " type="number" name="capacity_min" onChange={()=>this.onScenarioSearchChange} min={1} label='필요 인원수' placeholder="최소 인원수"/>
+                        <span id="multiple_capacity" className="hidden"><Form.Input className="search-number search-number-right" label="~" type="number" name="capacity_max" onChange={()=>this.onScenarioSearchChange} min={1} placeholder="최대 인원수"/></span>
+                    </Form.Group>                            
+                    <Checkbox name="is_multiple_capacity" label="이 시나리오는 가변적인 인원수에 대응할 수 있습니다."  value="check" onChange={(e,data)=>this.changeCapacityType(e,data)} />
+                    <Form.Group className="text-left" inline>
+                        <Form.Input className="search-number " type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} label='시간' placeholder="최소"/>
+                        <Form.Input className="search-number search-number-right" label="~" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/>
+                    </Form.Group>
+
                     <div className="row">
                         {/* <div className="col-xs-4">
            <div className="img-rounded"></div>//썸네일 필요하지 않을까?
           <a className="change-link" href='#'>Change picture</a> 
         </div>  */}
                         <div className="col-xs-8">
-                            <div className="form-group">
+                            {/* <div className="form-group">
                                 <label htmlFor="title">제목</label>
                                 <input className="form-control" name="title" type="text" placeholder="제목을 입력해주세요" />
                             </div>                    
@@ -179,7 +223,7 @@ class Maker extends React.Component {
                                 <label htmlFor="is_multiple_capacity">이 시나리오는 가변적인 인원수에 대응할 수 있습니다.</label>
                                 <input className="form-control" name="is_multiple_capacity" type="checkbox" value="check" onChange={this.changeCapacityType} />    
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="form-group">
                                 <div className="toggle toggle--time">
                                     {/* <Button.Group size='large'>
@@ -241,7 +285,7 @@ class Maker extends React.Component {
                     <div className="row">
                         <button className="btn btn-primary" type="submit">발행</button>
                     </div>
-                </form >
+                </Form >
             </div >
         );
         return component;

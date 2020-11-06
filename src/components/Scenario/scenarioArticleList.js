@@ -386,7 +386,7 @@ class ArticleList extends React.Component {
 
         var header =
         <div>
-            {/* {typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?<Button as={Link} to='/scenarios/make'>새로 만들기</Button>:null} */}
+            {typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?<Button as={Link} to='/scenarios/make'>새로 만들기</Button>:null}
             <div className="search_window">
                 {this.state.is_show_detail_filter?
                 <div className="form-box">
