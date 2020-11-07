@@ -196,7 +196,30 @@ class Maker extends React.Component {
                         <Form.Input className="search-number " type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} label='시간' placeholder="최소"/>
                         <Form.Input className="search-number search-number-right" label="~" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/>
                     </Form.Group>
-
+                    <Form.Group className="text-left" inline>
+                    <Form.Select 
+                            label='배경'
+                            name= "background_tag"
+                            // onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
+                            options={select_background}
+                            // value={this.state.filter_rule}
+                            placeholder='시나리오 배경'/> 
+                    <Form.Select 
+                            label='장르'
+                            name= "genre_tags"
+                            multiple
+                            // onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
+                            options={select_genre}
+                            // value={this.state.filter_rule}
+                            placeholder='시나리오의 장르'/> 
+                    <Form.Select 
+                            label='분위기'
+                            name= "sub_tags"
+                            multiple
+                            // onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
+                            options={select_sub_tags}
+                            // value={this.state.filter_rule}
+                            placeholder='분위기'/> </Form.Group>
                     <div className="row">
                         {/* <div className="col-xs-4">
            <div className="img-rounded"></div>//썸네일 필요하지 않을까?
