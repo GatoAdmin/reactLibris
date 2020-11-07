@@ -3,6 +3,7 @@ import { Button, Grid,Image } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { instanceOf } from 'prop-types';
 import { useCookies  } from 'react-cookie';
+import './style.css'
 
 function Main(){
         const [cookies, setCookie] = useCookies(['libris_visite']);
