@@ -21,6 +21,9 @@ a:hover {color: violet!important;}
 .clear{
     clear: both;
 }
+.border-none{
+    border: none!important;
+}
 .inline-flex{
     display: inline-flex!important;
 }
@@ -51,6 +54,9 @@ a:hover {color: violet!important;}
 .text-white{
     color: white;
 }
+.background-color-main{
+    background-color: rgb(221, 195, 221);
+}
 .float-right{
     float: right;
 }
@@ -72,6 +78,9 @@ a:hover {color: violet!important;}
 .base{
     width: 1400px;
     margin: auto;
+}
+.ql-editor{
+    min-height: 500px;
 }
 .menu-button:hover {
     background-color:  rgb(70, 18, 70)!important;
