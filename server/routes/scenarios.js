@@ -90,189 +90,197 @@ router.post("/", function (req, res, next) {
 });
 
 router.post("/make", ensureAuthenticated, function (req, res, next) {
-  var formData = req.body;
-  var article = formData.article;
-  var capacityMin = 1;
-  var capacityMax = 1;
-  var trpgTime = 1;
-  var orpgTime = 1;
-  var price = 0;
-  var user = req.user;
-  capacityMin = formData.capacity_min;
-  capacityMax = isChecked(formData.is_multiple_capacity) ? formData.capacity_max : formData.capacity_min;
+  User.findOne({id:req.user._id}, function (err, author) {
+     newScenario = new Scenario({author:req.user._id});
+     newScenario.save(function(err,scenario){
+       res.json({id:scenario._id});  
+    });
+  })
+})
+// router.post("/make", ensureAuthenticated, function (req, res, next) {
+//   var formData = req.body;
+//   var article = formData.article;
+//   var capacityMin = 1;
+//   var capacityMax = 1;
+//   var trpgTime = 1;
+//   var orpgTime = 1;
+//   var price = 0;
+//   var user = req.user;
+//   capacityMin = formData.capacity_min;
+//   capacityMax = isChecked(formData.is_multiple_capacity) ? formData.capacity_max : formData.capacity_min;
 
-  if (isChecked(formData.is_online_time)) {
-    orpgTime = formData.predicting_time;
-    trpgTime = null;
-  } else {
-    orpgTime = null;
-    trpgTime = formData.predicting_time;
-  }
+//   if (isChecked(formData.is_online_time)) {
+//     orpgTime = formData.predicting_time;
+//     trpgTime = null;
+//   } else {
+//     orpgTime = null;
+//     trpgTime = formData.predicting_time;
+//   }
 
-  if (isChecked(formData.is_paid)) {
-    if (user.agreeList.paidContent.agree) {
-      price = formData.price;
-    } else {
-      if (isChecked(formData.is_agree_paid)) {
-        var nowDate = moment().format();
-        price = formData.price;
-        user.agreeList.paidContent = { agree: true, agreeDate: new Date(nowDate) };
-      }
-      user.save();
-    }
-  }
+//   if (isChecked(formData.is_paid)) {
+//     if (user.agreeList.paidContent.agree) {
+//       price = formData.price;
+//     } else {
+//       if (isChecked(formData.is_agree_paid)) {
+//         var nowDate = moment().format();
+//         price = formData.price;
+//         user.agreeList.paidContent = { agree: true, agreeDate: new Date(nowDate) };
+//       }
+//       user.save();
+//     }
+//   }
 
-  HashTag.findOne({name:formData.title_short})
-         .exec((err,result)=>{
-          if(err){next(err);}
-          var hashTags = [];
+//   HashTag.findOne({name:formData.title_short})
+//          .exec((err,result)=>{
+//           if(err){next(err);}
+//           var hashTags = [];
 
-          var newScenario = new Scenario({
-            author: user._id,
-            title: formData.title,
-            isFree: isChecked(formData.is_paid) ? false : true,
-            isAgreeComment: isChecked(formData.is_agree_comment),
-            rule: toObjectId(formData.rule),
-            price: isChecked(formData.is_paid) ? 0 : price,
-            versions: {
-              capacity: { max: capacityMax, min: capacityMin },
-              rating: formData.rating,
-              masterDifficulty: formData.masterDifficulty,
-              playerDifficulty: formData.playerDifficulty,
-              content: article,
-              backgroundTag: toObjectId(formData.background_tag),
-              genreTags: toObjectId(formData.genre_tags),
-              subTags: toObjectId(formData.sub_tags),
-              orpgPredictingTime: orpgTime,
-              trpgPredictingTime: trpgTime,
-            }
-          });
-          newScenario.save()
-          if(result==null||result==undefined){
-            var newHash = new HashTag({
-              name:formData.title_short,
-              article: newScenario._id,
-              onModel :'Replay'
-            })
-            newHash.save();
-            hashTags.push(newHash);
-          }else{
-            result.article = newScenario._id;
-            result.onModel = 'Replay';
-            result.save();
-            hashTags.push(result);
-          }
-          newScenario.hashTags = hashTags;
-          newScenario.save();
+//           var newScenario = new Scenario({
+//             author: user._id,
+//             title: formData.title,
+//             isFree: isChecked(formData.is_paid) ? false : true,
+//             isAgreeComment: isChecked(formData.is_agree_comment),
+//             rule: toObjectId(formData.rule),
+//             price: isChecked(formData.is_paid) ? 0 : price,
+//             versions: {
+//               capacity: { max: capacityMax, min: capacityMin },
+//               rating: formData.rating,
+//               masterDifficulty: formData.masterDifficulty,
+//               playerDifficulty: formData.playerDifficulty,
+//               content: article,
+//               backgroundTag: toObjectId(formData.background_tag),
+//               genreTags: toObjectId(formData.genre_tags),
+//               subTags: toObjectId(formData.sub_tags),
+//               orpgPredictingTime: orpgTime,
+//               trpgPredictingTime: trpgTime,
+//             }
+//           });
+//           newScenario.save()
+//           if(result==null||result==undefined){
+//             var newHash = new HashTag({
+//               name:formData.title_short,
+//               article: newScenario._id,
+//               onModel :'Replay'
+//             })
+//             newHash.save();
+//             hashTags.push(newHash);
+//           }else{
+//             result.article = newScenario._id;
+//             result.onModel = 'Replay';
+//             result.save();
+//             hashTags.push(result);
+//           }
+//           newScenario.hashTags = hashTags;
+//           newScenario.save();
 
-          var newChronicle = new Chronicle({
-            title: formData.title,
-            author: user._id,
-            onModel: 'Scenario',//TODO:ENUM 값으로 바꿀것
-            works: [newScenario._id]
-          });
-          newChronicle.save()
-            .then(chronicle => {
-              req.flash("info", "성공적으로 발행되었습니다.");
-              res.redirect("/scenarios");
-            })
-            .catch(err=>console.log(err));
-        });
+//           var newChronicle = new Chronicle({
+//             title: formData.title,
+//             author: user._id,
+//             onModel: 'Scenario',//TODO:ENUM 값으로 바꿀것
+//             works: [newScenario._id]
+//           });
+//           newChronicle.save()
+//             .then(chronicle => {
+//               req.flash("info", "성공적으로 발행되었습니다.");
+//               res.redirect("/scenarios");
+//             })
+//             .catch(err=>console.log(err));
+//         });
 
-});
+// });
 
-router.post("/make/setting",ensureAuthenticated, function (req, res, next) {
-  var formData = req.body;
-  var capacityMin = 1;
-  var capacityMax = 1;
-  var trpgTime = 1;
-  var orpgTime = 1;
-  var price = 0;
-  var user = req.user;
-  capacityMin = formData.capacity_min;
-  capacityMax = isChecked(formData.is_multiple_capacity) ? formData.capacity_max : formData.capacity_min;
+// router.post("/make/setting",ensureAuthenticated, function (req, res, next) {
+//   var formData = req.body;
+//   var capacityMin = 1;
+//   var capacityMax = 1;
+//   var trpgTime = 1;
+//   var orpgTime = 1;
+//   var price = 0;
+//   var user = req.user;
+//   capacityMin = formData.capacity_min;
+//   capacityMax = isChecked(formData.is_multiple_capacity) ? formData.capacity_max : formData.capacity_min;
 
-  if (isChecked(formData.is_online_time)) {
-    orpgTime = formData.predicting_time;
-    trpgTime = null;
-  } else {
-    orpgTime = null;
-    trpgTime = formData.predicting_time;
-  }
+//   if (isChecked(formData.is_online_time)) {
+//     orpgTime = formData.predicting_time;
+//     trpgTime = null;
+//   } else {
+//     orpgTime = null;
+//     trpgTime = formData.predicting_time;
+//   }
 
-  if (isChecked(formData.is_paid)) {
-    if (user.agreeList.paidContent.agree) {
-      price = formData.price;
-    } else {
-      if (isChecked(formData.is_agree_paid)) {
-        var nowDate = moment().format();
-        price = formData.price;
-        user.agreeList.paidContent = { agree: true, agreeDate: new Date(nowDate) };
-      }
-      user.save();
-    }
-  }
+//   if (isChecked(formData.is_paid)) {
+//     if (user.agreeList.paidContent.agree) {
+//       price = formData.price;
+//     } else {
+//       if (isChecked(formData.is_agree_paid)) {
+//         var nowDate = moment().format();
+//         price = formData.price;
+//         user.agreeList.paidContent = { agree: true, agreeDate: new Date(nowDate) };
+//       }
+//       user.save();
+//     }
+//   }
 
-  HashTag.findOne({name:formData.title_short})
-         .exec((err,result)=>{
-          if(err){next(err);}
-          var hashTags = [];
+//   HashTag.findOne({name:formData.title_short})
+//          .exec((err,result)=>{
+//           if(err){next(err);}
+//           var hashTags = [];
 
-          var newScenario = new Scenario({
-            author: user._id,
-            isFree: isChecked(formData.is_paid) ? false : true,
-            isAgreeComment: isChecked(formData.is_agree_comment),
-            rule: toObjectId(formData.rule),
-            price: isChecked(formData.is_paid) ? 0 : price,
-            versions: {
-              capacity: { max: capacityMax, min: capacityMin },
-              rating: formData.rating,
-              masterDifficulty: formData.masterDifficulty,
-              playerDifficulty: formData.playerDifficulty,
-              backgroundTag: toObjectId(formData.background_tag),
-              genreTags: toObjectId(formData.genre_tags),
-              subTags: toObjectId(formData.sub_tags),
-              orpgPredictingTime: orpgTime,
-              trpgPredictingTime: trpgTime,
-            }
-          });
-          newScenario.save()
-          if(result==null||result==undefined){
-            var newHash = new HashTag({
-              name:formData.title_short,
-              article: newScenario._id,
-              onModel :'Scenario'
-            })
-            newHash.save();
-            hashTags.push(newHash);
-          }else{
-            result.article = newScenario._id;
-            result.onModel = 'Scenario';
-            result.save();
-            hashTags.push(result);
-          }
-          newScenario.hashTags = hashTags;
-          newScenario.save()
-          .then(scenario => {
-            req.json({articleSetting: scenario});
-          })
-          .catch(err=>console.log(err));
+//           var newScenario = new Scenario({
+//             author: user._id,
+//             isFree: isChecked(formData.is_paid) ? false : true,
+//             isAgreeComment: isChecked(formData.is_agree_comment),
+//             rule: toObjectId(formData.rule),
+//             price: isChecked(formData.is_paid) ? 0 : price,
+//             versions: {
+//               capacity: { max: capacityMax, min: capacityMin },
+//               rating: formData.rating,
+//               masterDifficulty: formData.masterDifficulty,
+//               playerDifficulty: formData.playerDifficulty,
+//               backgroundTag: toObjectId(formData.background_tag),
+//               genreTags: toObjectId(formData.genre_tags),
+//               subTags: toObjectId(formData.sub_tags),
+//               orpgPredictingTime: orpgTime,
+//               trpgPredictingTime: trpgTime,
+//             }
+//           });
+//           newScenario.save()
+//           if(result==null||result==undefined){
+//             var newHash = new HashTag({
+//               name:formData.title_short,
+//               article: newScenario._id,
+//               onModel :'Scenario'
+//             })
+//             newHash.save();
+//             hashTags.push(newHash);
+//           }else{
+//             result.article = newScenario._id;
+//             result.onModel = 'Scenario';
+//             result.save();
+//             hashTags.push(result);
+//           }
+//           newScenario.hashTags = hashTags;
+//           newScenario.save()
+//           .then(scenario => {
+//             req.json({articleSetting: scenario});
+//           })
+//           .catch(err=>console.log(err));
 
-          // var newChronicle = new Chronicle({
-          //   title: formData.title,
-          //   author: user._id,
-          //   onModel: 'Scenario',//TODO:ENUM 값으로 바꿀것
-          //   works: [newScenario._id]
-          // });
-          // newChronicle.save()
-          //   .then(chronicle => {
-          //     req.flash("info", "성공적으로 발행되었습니다.");
-          //     res.redirect("/scenarios");
-          //   })
-          //   .catch(err=>console.log(err));
-        });
+//           // var newChronicle = new Chronicle({
+//           //   title: formData.title,
+//           //   author: user._id,
+//           //   onModel: 'Scenario',//TODO:ENUM 값으로 바꿀것
+//           //   works: [newScenario._id]
+//           // });
+//           // newChronicle.save()
+//           //   .then(chronicle => {
+//           //     req.flash("info", "성공적으로 발행되었습니다.");
+//           //     res.redirect("/scenarios");
+//           //   })
+//           //   .catch(err=>console.log(err));
+//         });
 
-});
+// });
 
 router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
   Chronicle.findOne({ _id: toObjectId(req.param("id")), author: req.user._id, enabled: true }, function (err, chronicle) {
@@ -367,13 +375,14 @@ router.post("/make/:id", ensureAuthenticated, function (req, res, next) {
 });
 
 router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {
-  Scenario.findOne({ _id: toObjectId(req.param("id")), author: req.user._id })
+  console.log(req.params.id)
+  Scenario.findOne({ _id: toObjectId(req.params.id), author: req.user._id })
     .populate('author')
     .exec(function (err, result) {
       if (err) { return next(err); }
       if (!result) {
         req.flash("error", "잘못된 접속 방법입니다.");
-        return res.redirect("/scenarios/" + req.param("id"));
+        return res.redirect("/scenarios/" + req.params.id);
       }
       res.json({ result: result, masterTags: masterTags });
     });

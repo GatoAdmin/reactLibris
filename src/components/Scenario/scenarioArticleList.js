@@ -358,6 +358,16 @@ class ArticleList extends React.Component {
                 );
         }
     }
+
+    makeArticle(){
+        axios.post('/scenarios/make')
+            .then(res => {
+                window.location.href = `/scenarios/edit/${res.data.id}`;
+            })
+            .catch(function (err) {
+                console.log(err);
+            })
+    }
     render() {
         var select_rule;
         var select_genre;
@@ -386,7 +396,7 @@ class ArticleList extends React.Component {
 
         var header =
         <div>
-            {typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?<Button as={Link} to='/scenarios/make'>새로 만들기</Button>:null}
+            {typeof(this.props.currentUser) == 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!=null?<Button onClick={()=>this.makeArticle()}>새로 만들기</Button>:null}
             <div className="search_window">
                 {this.state.is_show_detail_filter?
                 <div className="form-box">

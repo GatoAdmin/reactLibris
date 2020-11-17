@@ -13,7 +13,8 @@ const ScenarioSchema = new Schema({
     rule: {type: Schema.Types.ObjectId, ref: 'MasterTag'},//String,
     hashTags:[{type: Schema.Types.ObjectId, ref:'HashTag'}],
     summary:{type:String},
-    title: String,
+    title: {type:String, default:"제목 없음"},
+    titleShort: {type:String},
     notice:{type: String},
     banner : {
         imageName :{type:String, default:"none",require:true}, //표기될 이미지
@@ -21,18 +22,18 @@ const ScenarioSchema = new Schema({
     },
     versions: [{
         capacity: { max: { type: Number, default: 1 }, min: { type: Number, default: 1 } },//인원수
-        rating: Number,
+        rating:  {type:Number, defalut: 0, enum: [ 0,7,12,15,19]},
         orpgPredictingTime: { type: Number },
         trpgPredictingTime: { type: Number },
         censoredGrade: [{
-            exposure: Number, //노출
-            sex: Number, //성행위
-            violence: Number, //폭력
-            language: Number, //언어
+            exposure: {type:Number, defalut: 0, enum: [ 0,1,2,3,4]}, //노출
+            sex: {type:Number, defalut: 0, enum: [ 0,1,2,3,4]}, //성행위
+            violence: {type:Number, defalut: 0, enum: [ 0,1,2,3,4]}, //폭력
+            language: {type:Number, defalut: 0, enum: [ 0,1,2,3,4]}, //언어
             etc: [String]
         }],
-        masterDifficulty: Number,
-        playerDifficulty:Number,
+        masterDifficulty: {type:Number, defalut: 0, min:0, max:5},
+        playerDifficulty:{type:Number, defalut: 0, min:0, max:5},
         content: [{ type: String }], //본문. TODO: Quill에 맞춰서 수정할것.
         backgroundTag:{type: Schema.Types.ObjectId, ref: 'MasterTag'},
         genreTags:[{type: Schema.Types.ObjectId, ref: 'MasterTag'}],
@@ -46,7 +47,8 @@ const ScenarioSchema = new Schema({
     }],
     isAgreeComment: { type: Boolean, default: false },
     isFree: { type: Boolean, default: true },
-    isOpened: { type: Boolean, default: true },
+    isPublish: { type: Boolean, default: false },
+    isOpened: { type: Boolean, default: false },
     // stopped: {
     //     isStopped: { type: Boolean, default: false },
     //     reason: { type: String }
