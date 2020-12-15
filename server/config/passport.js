@@ -63,6 +63,7 @@ function (userEmail,tokenId,done) {
     const {email_verified, name, email} = response.payload;
     if(email_verified){
       User.findOne({'connections.connectType':'Google','connections.email':email})
+      .populate('saveScenarios saveReplays')
       .exec((err, user)=>{
         if(err){
           console.log(err);
@@ -134,6 +135,7 @@ passport.use("login",new LocalStrategy({
 module.exports = passport => {
     passport.use(new JwtStrategy(opts, (jwt_payload, done) =>{
         User.findById(jwt_payload.id)
+            .populate('saveScenarios saveReplays')
             .then(user => {
                 if(user) {
                     return done(null, user);
@@ -148,9 +150,14 @@ module.exports = passport => {
       });
       //id를 사용자 개체로 전환
       passport.deserializeUser(function(id,done){
-        User.findById(id,function(err,user){
-          done(err,user);
-        });
+        User.findById(id)
+            .populate('saveScenarios saveReplays')
+            .exec(function(err, user){
+              done(err,user);
+            });
+        // User.findById(id,function(err,user){
+        //   done(err,user);
+        // });
       });
     
 };

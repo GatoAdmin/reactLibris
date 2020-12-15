@@ -1,6 +1,7 @@
 import React from 'react';
-import { Button,Grid, Menu,Image } from 'semantic-ui-react'
+import { Button,Grid, Menu,Image, Icon } from 'semantic-ui-react'
 import Search from './Search';
+import Shortcut from './navShort';
 import {Link } from 'react-router-dom';
 
 class Navbar extends React.Component{
@@ -51,10 +52,10 @@ class Navbar extends React.Component{
           <Menu className="user-buttons" secondary>
             <Menu.Item className="menu-button" name="news"      active={this.state.activeItem === 'news'} onClick={this.handleItemClick} as={Link} to='/news'>새소식</Menu.Item>    
              {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="library" active={this.state.activeItem === 'library'} onClick={this.handleItemClick} as={Link} to='/library'>내 책장</Menu.Item>:null}
-             {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="profile"   active={this.state.activeItem === 'profile'} onClick={this.handleItemClick} as={Link} to={`/user/${this.props.currentUser!==null?this.props.currentUser.userName:''}`}>프로필</Menu.Item> :null}
-             {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="user"      active={this.state.activeItem === 'user'} onClick={this.handleItemClick} as={Link} to='/user'>내 정보</Menu.Item>    :null}
-             {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" as={Link} to='/logout'>로그아웃</Menu.Item>:<Menu.Item className="menu-button" name="login" active={this.state.activeItem === 'login'} onClick={this.handleItemClick} as={Link} to='/login'>로그인</Menu.Item>}
-            
+             {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="shortcut"   active={this.state.activeItem === 'shortcut'} onClick={this.handleItemClick} as={Button}><Icon name="plus"/></Menu.Item> :null}
+             {/* {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="profile"   active={this.state.activeItem === 'profile'} onClick={this.handleItemClick} as={Link} to={`/user/${this.props.currentUser!==null?this.props.currentUser.userName:''}`}>프로필</Menu.Item> :null}
+             {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="user"      active={this.state.activeItem === 'user'} onClick={this.handleItemClick} as={Link} to='/user'>내 정보</Menu.Item>    :null} */}
+             {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?null:<Menu.Item className="menu-button" name="login" active={this.state.activeItem === 'login'} onClick={this.handleItemClick} as={Link} to='/login'>로그인</Menu.Item>}            
           </Menu>
             {/* <Button.Group className="user-buttons">
             {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)&&this.state.currentUser!=undefined?<Button className="menu-button" as={Link} to='/library'>내 책장</Button>:null}
@@ -65,6 +66,7 @@ class Navbar extends React.Component{
           </Grid.Column>
         </Grid.Row>
       </Grid>
+      {this.state.activeItem === 'shortcut'?<Shortcut currentUser={this.props.currentUser}/>:null}
   </nav>);
   }
 }

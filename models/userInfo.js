@@ -254,6 +254,23 @@ UserInfoSchema.virtual('chronicles', {
     //         };
     //     },
 });
+UserInfoSchema.virtual('saveScenarios', {
+    ref: 'Scenario',
+    localField: '_id',
+    foreignField: 'author',
+    justOne: false,
+    options: { sort: { created: -1 }, limit: 5 },
+    match:{$and:[{enabled:true},{isOpened:false}]}
+});
+
+UserInfoSchema.virtual('saveReplays', {
+    ref: 'Replay',
+    localField: '_id',
+    foreignField: 'author',
+    justOne: false,
+    options: { sort: { created: -1 }, limit: 5 },
+    match:{$and:[{enabled:true},{isOpened:false}]}
+});
 
 UserInfoSchema.set('toObject', { virtuals: true });
 UserInfoSchema.set('toJSON', { virtuals: true,
