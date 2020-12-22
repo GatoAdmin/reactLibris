@@ -13,12 +13,13 @@ const ReplaySchema = new Schema({
     hashTags:[{type: Schema.Types.ObjectId, ref:'HashTag'}],
     summary:{type:String},
     notice:{type: String},
-    title: String,
+    title: {type:String, default:"제목 없음"},
     banner : {
         imageName :{type:String, default:"none",require:true}, //표기될 이미지
         imageData:{type:String, require:true},
     },
     versions: [{
+        title: {type:String, default:"제목 없음"},
         peoples: {
             master: String,
             players: [{

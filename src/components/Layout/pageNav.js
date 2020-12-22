@@ -14,13 +14,15 @@ class Navbar extends React.Component{
     }
     this.state={
       currentUser:props.currentUser,
-      activeItem:active
+      activeItem:active,
+      activeSideMenu:false
     }
   }
   handleItemClick = (e, { name }) => this.setState({ activeItem: name })
   
+  handleSideMenuClick = () => {console.log("사이드메뉴우"); this.setState((prevState) =>({ activeSideMenu: !prevState.activeSideMenu }))}
+  
   render (){
-    console.log(this.state.currentUser)
     return (
     <nav className='menu-wrapper'>
       <Grid>
@@ -52,7 +54,7 @@ class Navbar extends React.Component{
           <Menu className="user-buttons" secondary>
             <Menu.Item className="menu-button" name="news"      active={this.state.activeItem === 'news'} onClick={this.handleItemClick} as={Link} to='/news'>새소식</Menu.Item>    
              {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="library" active={this.state.activeItem === 'library'} onClick={this.handleItemClick} as={Link} to='/library'>내 책장</Menu.Item>:null}
-             {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="shortcut"   active={this.state.activeItem === 'shortcut'} onClick={this.handleItemClick} as={Button}><Icon name="plus"/></Menu.Item> :null}
+             {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="shortcut" onClick={this.handleSideMenuClick} as={Button}><Icon name="sidebar" fitted/></Menu.Item> :null}
              {/* {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="profile"   active={this.state.activeItem === 'profile'} onClick={this.handleItemClick} as={Link} to={`/user/${this.props.currentUser!==null?this.props.currentUser.userName:''}`}>프로필</Menu.Item> :null}
              {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="user"      active={this.state.activeItem === 'user'} onClick={this.handleItemClick} as={Link} to='/user'>내 정보</Menu.Item>    :null} */}
              {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?null:<Menu.Item className="menu-button" name="login" active={this.state.activeItem === 'login'} onClick={this.handleItemClick} as={Link} to='/login'>로그인</Menu.Item>}            
@@ -66,7 +68,7 @@ class Navbar extends React.Component{
           </Grid.Column>
         </Grid.Row>
       </Grid>
-      {this.state.activeItem === 'shortcut'?<Shortcut currentUser={this.props.currentUser}/>:null}
+      {this.state.activeSideMenu?<Shortcut currentUser={this.props.currentUser} handleSideMenuClick={this.handleSideMenuClick}/>:null}
   </nav>);
   }
 }

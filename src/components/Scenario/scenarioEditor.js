@@ -11,7 +11,7 @@ class Maker extends React.Component {
         this.state = {
             chronicle_id: "",
             current_user: props.currentUser,
-            is_open_setting:true,
+            is_open_setting:false,
             is_check_paid: true,
             is_agree_paid: false,
             article_id: null,
@@ -23,6 +23,7 @@ class Maker extends React.Component {
             background_tag:"",
             genre_tags:[],
             sub_tags:[],
+            rule:"",
             is_agree_comment:true,
             orpgPredictingTime: 0,
             trpgPredictingTime:0,
@@ -36,29 +37,30 @@ class Maker extends React.Component {
     }
 
     componentDidMount() {  
-        var urlStringLast  = window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
-        if(urlStringLast!="make"){
-            this.setState({chronicle_id:urlStringLast});
-        }
+        // var urlStringLast  = window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
+        // if(urlStringLast!="make"){
+        //     this.setState({chronicle_id:urlStringLast});
+        // }
         let getArticle = () => {
             axios.post(window.location.href)
                 .then(res => {
-                    console.log(res.data.result)
                     var newArticle = res.data.result.versions.length>0?false:true;
                     this.setState({
+                        is_open_setting:newArticle,
                         master_tags: res.data.masterTags,
                         result:res.data.result,
                         article_id:res.data.result._id,
                         title:res.data.result.title,
                         title_short:res.data.result.titleShort,
-                        rating: newArticle?0:res.data.result.lastVersion.rating,
+                        rule: newArticle?"":res.data.result.rule,
+                        rating: newArticle?0:res.data.result.carte.rating,
                         is_agree_comment:res.data.result.isAgreeComment,
-                        orpgPredictingTime: newArticle?0:res.data.result.lastVersion.orpgPredictingTime,
-                        trpgPredictingTime:newArticle?0:res.data.result.lastVersion.trpgPredictingTime,
-                        masterDifficulty:newArticle?0:res.data.result.lastVersion.masterDifficulty,
-                        playerDifficulty:newArticle?0:res.data.result.lastVersionplayerDifficulty,
-                        capacity_min:newArticle?0:res.data.result.lastVersion.capacity.min,
-                        capacity_max:newArticle?0:res.data.result.lastVersion.capacity.max,
+                        orpgPredictingTime:newArticle?0:res.data.result.carte.orpgPredictingTime,
+                        trpgPredictingTime:newArticle?0:res.data.result.carte.trpgPredictingTime,
+                        masterDifficulty:newArticle?0:res.data.result.carte.masterDifficulty,
+                        playerDifficulty:newArticle?0:res.data.result.carteplayerDifficulty,
+                        capacity_min:newArticle?0:res.data.result.carte.capacity.min,
+                        capacity_max:newArticle?0:res.data.result.carte.capacity.max,
                         is_paid:!res.data.result.isFree,
                         price:res.data.result.price,    
                     });
@@ -77,10 +79,8 @@ class Maker extends React.Component {
 
         if (data.checked) {
             multiple_capacity.classList.remove('hidden');
-        console.log(multiple_capacity);
         } else {
             multiple_capacity.classList.add('hidden');
-        console.log(multiple_capacity);
         }
     }
 
@@ -173,7 +173,7 @@ class Maker extends React.Component {
         
         component = (
             <div id="form-container" className="container">
-                <Form method="POST" action={`/scenarios/make/${this.state.chronicle_id }`} onSubmit={()=>this.convertQuill()}>
+                <Form method="POST" action={`/scenarios/edit/save/${this.state.article_id }`} onSubmit={()=>this.convertQuill()}>
                     <Form.Input size="massive" type="text"  name="title"  value={this.state.title} onChange={this.onChangeForm} placeholder="제목을 입력해 주세요"/>
                     <Form.Input type="text"  name="title_short" value={this.state.title_short} onChange={this.onChangeForm} placeholder="시나리오 줄임말을 스페이스바 없이 입력해주세요"/>
                     <div className="row form-group">
@@ -181,7 +181,8 @@ class Maker extends React.Component {
                         <input name="article" type="hidden" />
                         <QuillEditor changeQuill={this.changeQuill} setValue={last !== undefined&&last!==null?last.content:null}  />
                     </div>
-                    <Button className="btn btn-primary" color="purple" type="submit">발행</Button>
+                    <Button className="btn btn-primary" color="purple" type="submit" name="save">저장</Button>
+                    <Button className="btn btn-primary" color="purple" type="submit" name="publication">발행</Button>
                 </Form >
             </div >
         );
@@ -191,6 +192,7 @@ class Maker extends React.Component {
     setOpenSetting(bool){
         this.setState({is_open_setting:bool});
     }
+
     render(){
         var currentUser = this.props.currentUser;
         var masterTags = this.state.master_tags;
@@ -200,6 +202,7 @@ class Maker extends React.Component {
         var select_background;
         var select_sub_tags;
         if(masterTags.length>0){
+            console.log(this.state.rule);
             var ruleTags = masterTags.find(tags => tags.name === "rule");
             select_rule = ruleTags.tags.map((tag, id) => {
                         return { value: tag._id, key: id.toString(), text:tag.tag };
@@ -218,19 +221,20 @@ class Maker extends React.Component {
             })
         }
         var component = (<div>
-            <Modal onClose={()=>this.setOpenSetting(false)} onOpen={()=>this.setOpenSetting(true)} open={this.state.is_open_setting} closeIcon>
+            <Modal onClose={()=>this.setOpenSetting(false)} onOpen={()=>this.setOpenSetting(true)} open={this.state.is_open_setting} closeIcon trigger={<Button><Icon name="setting" fitted/></Button>}>
                 <Modal.Header>설정</Modal.Header>
                 <Modal.Content>
-                    <Form method="POST" action={`/scenarios/make/setting/${this.state.chronicle_id }`} onSubmit={()=>this.convertQuill()}>
+                    <Form id="setting-form" method="POST" action={`/scenarios/edit/setting/save/${this.state.article_id }`} >
                         <Grid>
                             <Grid.Row>
                                 <Grid.Column width={4}><Label className="border-none" size="big"  basic>사용 룰</Label></Grid.Column>
                                 <Grid.Column width={12}>
-                                    <Form.Select 
+                                    <Dropdown
+                                        selection 
                                         name= "rule"
                                         // onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
                                         options={select_rule}
-                                        defalutValue={result!==null?result.rule:null}
+                                        defalutValue={this.state.rule!==null?this.state.rule:null}
                                         placeholder='사용 룰'/>  
                                 </Grid.Column>
                             </Grid.Row>
@@ -243,8 +247,8 @@ class Maker extends React.Component {
                                 <Grid.Column width={4}><Label className="border-none"  size="big" basic>필요 인원수</Label></Grid.Column>
                                 <Grid.Column width={12}>
                                     <Form.Group className="text-left" inline>       
-                                        <Form.Input className="search-number " type="number" name="capacity_min" onChange={()=>this.onScenarioSearchChange} min={1} placeholder="최소 인원수"/>
-                                        <span id="multiple_capacity" className="hidden"><Form.Input className="search-number search-number-right" label="~" type="number" name="capacity_max" onChange={()=>this.onScenarioSearchChange} min={1} placeholder="최대 인원수"/></span>
+                                        <Form.Input className="search-number " type="number" name="capacity_min" onChange={()=>this.onScenarioSearchChange} defalutValue={this.state.capacity_min} min={1} placeholder="최소 인원수"/>
+                                        <span id="multiple_capacity" className="hidden"><Form.Input className="search-number search-number-right" label="~" type="number" name="capacity_max" onChange={()=>this.onScenarioSearchChange} defalutValue={this.state.capacity_max} min={1} placeholder="최대 인원수"/></span>
                                     </Form.Group>  
                                 </Grid.Column>
                             </Grid.Row>
@@ -331,11 +335,13 @@ class Maker extends React.Component {
                 <Modal.Actions>
                     <Button color='black' onClick={() => this.setOpenSetting(false)}>닫기</Button>
                     <Button
-                    content="저장"
-                    labelPosition='right'
-                    icon='checkmark'
-                    onClick={() => this.setOpenSetting(false)}
-                    positive
+                        type="submit"
+                        form="setting-form"
+                        content="저장"
+                        labelPosition='right'
+                        icon='checkmark'
+                        // onClick={() => this.setOpenSetting(false)}
+                        positive
                     />
                 </Modal.Actions>
             </Modal>

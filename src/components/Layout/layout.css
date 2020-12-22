@@ -79,6 +79,15 @@ a:hover {color: violet!important;}
     width: 1400px;
     margin: auto;
 }
+.screen-dimmer{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    top: 0px;
+    left: 0px;
+}
+
 .ql-editor{
     min-height: 500px;
 }
@@ -91,7 +100,8 @@ a:hover {color: violet!important;}
 .shortcut-menu{
     z-index: 1000;
     position: fixed;
-    right: calc(50% - 700px);
+    right: calc(50% - 700px);    
+    top: 170px;
 }
 
 .menu-button.active.item {

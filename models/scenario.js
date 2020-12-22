@@ -21,6 +21,12 @@ const ScenarioSchema = new Schema({
         imageData:{type:String, require:true},
     },
     versions: [{
+        title: {type:String, default:"제목 없음"},
+        content: [{ type: String }], //본문. TODO: Quill에 맞춰서 수정할것.
+        checked: { isChecked: { type: Boolean, default: false }, date: { type: Date } },
+        created: { type: Date, default: Date.now }
+    }],
+    carte:{//카르테, 시나리오 설정들을 저장함
         capacity: { max: { type: Number, default: 1 }, min: { type: Number, default: 1 } },//인원수
         rating:  {type:Number, defalut: 0, enum: [ 0,7,12,15,19]},
         orpgPredictingTime: { type: Number },
@@ -34,13 +40,10 @@ const ScenarioSchema = new Schema({
         }],
         masterDifficulty: {type:Number, defalut: 0, min:0, max:5},
         playerDifficulty:{type:Number, defalut: 0, min:0, max:5},
-        content: [{ type: String }], //본문. TODO: Quill에 맞춰서 수정할것.
         backgroundTag:{type: Schema.Types.ObjectId, ref: 'MasterTag'},
         genreTags:[{type: Schema.Types.ObjectId, ref: 'MasterTag'}],
         subTags: [{type: Schema.Types.ObjectId, ref: 'MasterTag'}],//[String],
-        checked: { isChecked: { type: Boolean, default: false }, date: { type: Date } },
-        created: { type: Date, default: Date.now }
-    }],
+    },
     viewUsers: [{
         user:{type:Schema.Types.ObjectId, ref:'UserInfo'},
         created:{ type: Date, default: Date.now }

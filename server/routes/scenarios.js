@@ -388,13 +388,14 @@ router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {
     });
 });
 
-router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
-  Scenario.findOne({ _id: toObjectId(req.param("id")), author: req.user._id, enabled: true }, function (err, scenario) {
+
+
+router.post("/edit/setting/save/:id", ensureAuthenticated, function (req, res, next) {
+  Scenario.findOne({ _id: toObjectId(req.params.id), author: req.user._id, enabled: true }, function (err, scenario) {
     if (err) { return next(err); }
     if (!scenario) { return next(404); }
-
+    
     var formData = req.body;
-    var article = formData.article;
     var capacityMin = 1;
     var capacityMax = 1;
     var trpgTime = 1;
@@ -425,28 +426,87 @@ router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
       }
     }
     
-    scenario.title= formData.title;
-    scenario.versions.push({
+    scenario.rule= toObjectId(formData.rule);
+    scenario.carte = {
       capacity: { max: capacityMax, min: capacityMin },
       rating: formData.rating,
       masterDifficulty: formData.masterDifficulty,
       playerDifficulty: formData.playerDifficulty,
-      content: article,
       backgroundTag: toObjectId(formData.background_tag),
       genreTags: toObjectId(formData.genre_tags),
       subTags: toObjectId(formData.sub_tags),
       orpgPredictingTime: orpgTime,
       trpgPredictingTime: trpgTime,
-    });
+    };
     scenario.isFree = isChecked(formData.is_paid) ? false : true;
     scenario.isAgreeComment = isChecked(formData.is_agree_comment);
     scenario.price = isChecked(formData.is_paid) ? 0 : price;
     scenario.save(err, result => {
       if (err) { console.error(err); return next(err); }
       req.flash("info", "성공적으로 수정되었습니다.");
-      return res.redirect("/scenarios/view/" + req.param("id"));
+      return res.redirect("/scenarios/edit/" + req.params.id);
     });
 
+  });
+});
+
+
+router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
+  Scenario.findOne({ _id: toObjectId(req.params.id), author: req.user._id, enabled: true }, function (err, scenario) {
+    if (err) { return next(err); }
+    if (!scenario) { return next(404); }
+    var formData = req.body;
+    var article = formData.article;
+    // var capacityMin = 1;
+    // var capacityMax = 1;
+    // var trpgTime = 1;
+    // var orpgTime = 1;
+    // var price = 0;
+    var user = req.user;
+    /*capacityMin = formData.capacity_min;
+    capacityMax = isChecked(formData.is_multiple_capacity) ? formData.capacity_max : formData.capacity_min;
+
+    if (isChecked(formData.is_online_time)) {
+      orpgTime = formData.predicting_time;
+      trpgTime = null;
+    } else {
+      orpgTime = null;
+      trpgTime = formData.predicting_time;
+    }
+
+    if (isChecked(formData.is_paid)) {
+      if (user.agreeList.paidContent.agree) {
+        price = formData.price;
+      } else {
+        if (isChecked(formData.is_agree_paid)) {
+          var nowDate = moment().format();
+          price = formData.price;
+          user.agreeList.paidContent = { agree: true, agreeDate: new Date(nowDate) };
+        }
+        user.save();
+      }
+    }
+    */
+    scenario.title= formData.title;
+    scenario.versions.push({
+      title:formData.title,
+      content: article,
+    });
+    var isSave = true;
+    if(formData.publication!==undefined){
+      scenario.isOpened = true;
+      isSave = false;
+    }
+    
+    scenario.save(err, result => {
+      if (err) { console.error(err); return next(err); }
+      req.flash("info", "성공적으로 수정되었습니다.");
+      if(!isSave){
+        return res.redirect("/scenarios/view/" + req.params.id);
+      }else{
+        return res.redirect("/scenarios/edit/" + req.params.id);
+      }
+    });
   });
 });
 

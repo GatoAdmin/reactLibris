@@ -57,7 +57,6 @@ router.post('/', function(req, res, next) {
     currentUser = [];
   }else{
     currentUser = req.user;
-    console.log(currentUser.saveScenarios)
   }
   res.json({currentUser:currentUser})
 });
