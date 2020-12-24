@@ -217,9 +217,9 @@ router.post("/login",passport.authenticate("login",{failureFlash: true }),(req,r
 router.post('/login/google', passport.authenticate('google',{failureFlash: true }),(req,res)=>{
   if(req.session.current_url != "undefined"&&req.session.current_url != undefined){
     console.log(req.session.current_url)
-    res.json({redirect:req.session.current_url, currentUser:req.user})
+    return res.json({redirect:req.session.current_url, currentUser:req.user})
   }else{
-    res.json({redirect:"/", currentUser:req.user})
+    return res.json({redirect:"/", currentUser:req.user})
   }
 }
 );

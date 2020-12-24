@@ -149,7 +149,6 @@ ScenarioSchema.pre(/^find/, function(next) {
         });
 });
 
-
 ScenarioSchema.virtual('ruleTag').get(function(){
     var tag = "";
     var masterTag = masterTags.find(tag=>tag.name==="rule");
@@ -158,6 +157,40 @@ ScenarioSchema.virtual('ruleTag').get(function(){
         tag = tag_check.tag;        
     }
     return tag;
+});
+
+ScenarioSchema.virtual('backgroundTag').get(function(){
+    var tag = "";
+    var masterTag = masterTags.find(tag=>tag.name==="background");
+    var tag_check = masterTag.tags.find(tag=>tag._id.equals(this.carte.backgroundTag));
+
+    tag = tag_check!==undefined?tag_check.tag:"";
+    return tag;
+});
+
+ScenarioSchema.virtual('genreTags').get(function(){
+    var tags = [];
+    var masterTag = masterTags.find(tag=>tag.name==="genre");
+    var genreTags = [];
+    this.carte.genreTags.map((genreTag)=>{
+        var findResult = masterTag.tags.find(tags=>tags._id.equals(genreTag));
+        genreTags.push(findResult!=undefined?findResult.tag:"");
+    });
+    tags = genreTags;
+    return tags;
+});
+
+ScenarioSchema.virtual('subTags').get(function(){
+    var tags = [];
+    var masterTag = masterTags.find(tag=>tag.name==="subTag");
+    var subTags = [];
+    this.carte.subTags.map((subTag)=>{
+        var findResult = masterTag.tags.find(tags=>tags._id.equals(subTag));
+        subTags.push(findResult!=undefined?findResult.tag:"");
+    });
+    tags = subTags;
+    
+    return tags;
 });
 
 ScenarioSchema.methods.findAuthorUserName = function(obj){
@@ -185,43 +218,45 @@ ScenarioSchema.methods.filterSearchWord = function(searchWord){
 ScenarioSchema.set('toObject', { virtuals: true });
 ScenarioSchema.set('toJSON', { virtuals: true,
     transform: function(doc,ret, options){
-        if(masterTags==undefined || masterTags==null){
-            MasterTag.find({enabled:true})
-            .exec((err,tags)=>{
-                if(err){console.log(err); return false};
-                masterTags = tags;
-                console.log(masterTags);
-                });
-        }
+        // if(masterTags==undefined || masterTags==null){
+        //     MasterTag.find({enabled:true})
+        //     .exec((err,tags)=>{
+        //         if(err){console.log(err); return false};
+        //         masterTags = tags;
+        //         console.log(masterTags);
+        //         });
+        // }
 
-        if(ret.ruleTag != "" && ret.ruleTag != undefined){
-            delete ret.rule;
-        }
+        // if(ret.ruleTag != "" && ret.ruleTag != undefined){
+        //     delete ret.rule;
+        // }
 
         delete ret.viewUsers;
         delete ret.decommendUsers;
-        var backgroundMasterTags = masterTags.find(tag=>tag.name==="background").tags;
-        var genreMasterTags = masterTags.find(tag=>tag.name==="genre").tags;
-        var subMasterTags = masterTags.find(tag=>tag.name==="subTag").tags;
+        // var backgroundMasterTags = masterTags.find(tag=>tag.name==="background").tags;
+        // var genreMasterTags = masterTags.find(tag=>tag.name==="genre").tags;
+        // var subMasterTags = masterTags.find(tag=>tag.name==="subTag").tags;
 
+        // if(ret.carte !== undefined){
+        //     var findBackground= backgroundMasterTags.find(tags=>tags._id.equals(ret.carte.backgroundTag));
+        //     ret.carte.backgroundTag = findBackground!=undefined?findBackground.tag:"";
+        //     var subTags = [];
+        //     ret.carte.subTags.map((subTag)=>{
+        //         var findResult = subMasterTags.find(tags=>tags._id.equals(subTag));
+        //         subTags.push(findResult!=undefined?findResult.tag:""); 
+        //     });
+        //     ret.carte.subTags = subTags;
+        //     var genreTags = [];
+        //     ret.carte.genreTags.map((genreTag)=>{
+        //         var findResult = genreMasterTags.find(tags=>tags._id.equals(genreTag));
+        //         genreTags.push(findResult!=undefined?findResult.tag:"");
+        //     });
+        //     ret.carte.genreTags = genreTags;
+        // }
         if(ret.versions != undefined){
             // ret.versions=
-            ret.versions.map((version)=>{
-                var findBackground= backgroundMasterTags.find(tags=>tags._id.equals(version.backgroundTag));
-                version.backgroundTag = findBackground!=undefined?findBackground.tag:"";
-                var subTags = [];
-                version.subTags.map((subTag)=>{
-                    var findResult = subMasterTags.find(tags=>tags._id.equals(subTag));
-                    subTags.push(findResult!=undefined?findResult.tag:""); 
-                });
-                version.subTags = subTags;
-                var genreTags = [];
-                version.genreTags.map((genreTag)=>{
-                    var findResult = genreMasterTags.find(tags=>tags._id.equals(genreTag));
-                    genreTags.push(findResult!=undefined?findResult.tag:"");
-                });
-                version.genreTags = genreTags;
-            })
+            // ret.versions.map((version)=>{
+            // })
             ret.lastVersion = ret.versions[ret.versions.length-1];
         }
         return ret;

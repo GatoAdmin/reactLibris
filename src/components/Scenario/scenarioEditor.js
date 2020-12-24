@@ -27,8 +27,8 @@ class Maker extends React.Component {
             is_agree_comment:true,
             orpgPredictingTime: 0,
             trpgPredictingTime:0,
-            masterDifficulty:0,
-            playerDifficulty:0,
+            master_difficulty:1,
+            player_difficulty:1,
             is_paid:false,
             price:0,    
             capacity_min:0,
@@ -45,6 +45,7 @@ class Maker extends React.Component {
             axios.post(window.location.href)
                 .then(res => {
                     var newArticle = res.data.result.versions.length>0?false:true;
+                    console.log(res.data.result);
                     this.setState({
                         is_open_setting:newArticle,
                         master_tags: res.data.masterTags,
@@ -52,13 +53,16 @@ class Maker extends React.Component {
                         article_id:res.data.result._id,
                         title:res.data.result.title,
                         title_short:res.data.result.titleShort,
-                        rule: newArticle?"":res.data.result.rule,
+                        rule: newArticle?"":res.data.result.rule,//res.data.masterTags.find(ts=>ts.name==="rule").tags.find(t=>t.tag===res.data.result.ruleTag)._id ,
+                        background_tag:newArticle?"":res.data.result.carte.backgroundTag,//res.data.masterTags.find(ts=>ts.name==="background").tags.find(t=>t.tag===res.data.result.carte.backgroundTag)._id,
+                        genre_tags:newArticle?[]:res.data.result.carte.genreTags,
+                        sub_tags:newArticle?[]:res.data.result.carte.subTags,
                         rating: newArticle?0:res.data.result.carte.rating,
                         is_agree_comment:res.data.result.isAgreeComment,
                         orpgPredictingTime:newArticle?0:res.data.result.carte.orpgPredictingTime,
                         trpgPredictingTime:newArticle?0:res.data.result.carte.trpgPredictingTime,
-                        masterDifficulty:newArticle?0:res.data.result.carte.masterDifficulty,
-                        playerDifficulty:newArticle?0:res.data.result.carteplayerDifficulty,
+                        master_difficulty:newArticle?0:res.data.result.carte.masterDifficulty,
+                        player_difficulty:newArticle?0:res.data.result.carte.playerDifficulty,
                         capacity_min:newArticle?0:res.data.result.carte.capacity.min,
                         capacity_max:newArticle?0:res.data.result.carte.capacity.max,
                         is_paid:!res.data.result.isFree,
@@ -193,6 +197,51 @@ class Maker extends React.Component {
         this.setState({is_open_setting:bool});
     }
 
+    onScenarioChange = (e, data) => {
+        console.log(data)
+        this.setState({
+            [data.name]: data.value
+        }
+        );
+    }
+    
+    onScenarioRating = (e, data) => {
+        console.log(this.state[data.name])
+        this.setState({
+            [data.name]: data.rating
+        }
+        );
+    }
+
+    onScenarioSelected = (e, data) => {
+        this.setState({
+            [data.name]: data.value
+        }
+        );
+    }
+    sendCarte(e,data){
+        var formData = new FormData(e.target);
+        formData.append("rule",this.state.rule);
+        formData.append("master_difficulty",this.state.master_difficulty);
+        formData.append("player_difficulty",this.state.player_difficulty);
+        formData.append("background_tag",this.state.background_tag);
+        formData.append("genre_tags",this.state.genre_tags);
+        formData.append("sub_tags",this.state.sub_tags);
+
+        var object = {};
+        for (var pair of formData.entries()) { object[pair[0]] = pair[1]; console.log(pair[0]+ ', ' + pair[1]); }
+        //{headers: {'Content-Type': 'multipart/form-data' }}
+        console.log(JSON.stringify(object));
+        axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,{data:JSON.stringify(object)})
+        .then((res)=>{if(res.data.success){
+            console.log("설정이 저장되었습니다.");
+            // console.log(res.data.document.imageData);
+            // return <Redirect to={`/news/chronicle/`}/>
+        }})
+        .catch((err)=>{console.log(err);});
+        return true;
+    }
+
     render(){
         var currentUser = this.props.currentUser;
         var masterTags = this.state.master_tags;
@@ -220,131 +269,133 @@ class Maker extends React.Component {
                 return { value: tag._id, key: id.toString(), text:tag.tag };
             })
         }
+        //action={`/scenarios/edit/setting/save/${this.state.article_id }`}
+        var carteModal = result!==null?(<Modal onClose={()=>this.setOpenSetting(false)} onOpen={()=>this.setOpenSetting(true)} open={this.state.is_open_setting} closeIcon trigger={<Button><Icon name="setting" fitted/></Button>}>
+        <Modal.Header>설정</Modal.Header>
+        <Modal.Content>
+            <Form id="setting-form" method="POST" onSubmit={(e)=>this.sendCarte(e)} >
+                <Grid>
+                    <Grid.Row>
+                        <Grid.Column width={4}><Label className="border-none" size="big"  basic>사용 룰</Label></Grid.Column>
+                        <Grid.Column width={12}>
+                            <Form.Select 
+                                name="rule"
+                                // onChange={(e,data)=>{console.log(data.value)}}"5e71d50eafdc0818e8eccadc"
+                                onChange={(e,data)=>this.onScenarioSelected(e,data)}
+                                options={select_rule}
+                                value={this.state.rule!==null?this.state.rule:null}
+                                placeholder='사용 룰'/>  
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column>
+                            <Label className="border-none" size="large" basic>이 시나리오는 가변적인 인원수에 대응할 수 있습니다.</Label><Checkbox name="is_multiple_capacity" value="check" onChange={(e,data)=>this.changeCapacityType(e,data)} />
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column width={4}><Label className="border-none"  size="big" basic>필요 인원수</Label></Grid.Column>
+                        <Grid.Column width={12}>
+                            <Form.Group className="text-left" inline>       
+                                <Form.Input className="search-number " type="number" name="capacity_min" onChange={(e,data)=>this.onScenarioChange(e,data)} value={this.state.capacity_min} min={1} placeholder="최소 인원수"/>
+                                <span id="multiple_capacity" className="hidden"><Form.Input className="search-number search-number-right" label="~" type="number" name="capacity_max" onChange={()=>this.onScenarioChange} defalutValue={this.state.capacity_max} min={1} placeholder="최대 인원수"/></span>
+                            </Form.Group>  
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column width={4}><Label className="border-none" size="big" basic>플레이 시간</Label></Grid.Column>
+                        <Grid.Column width={12}>
+                            <Form.Group className="text-left" inline>
+                                <Form.Input className="search-number " type="number" name="predicting_time" onChange={(e,data)=>this.onScenarioChange(e,data)} min={0} value={this.state.orpgPredictingTime!==null?this.state.orpgPredictingTime:this.state.trpgPredictingTime} placeholder="시간"/>
+                                {/* <Form.Input className="search-number search-number-right" label="~" type="number" name="predicting_time_max" onChange={(e,data)=>this.onScenarioChange(e,data)} min={0} placeholder="최대"/> */}
+                            </Form.Group>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column width={4}><Label className="border-none" size="big" basic>마스터 난이도</Label></Grid.Column>
+                        <Grid.Column width={12}>
+                            <Rating  name="master_difficulty" icon="star" maxRating={5} size="massive" onRate={(e,data)=>this.onScenarioRating(e,data)} rating={this.state.master_difficulty} clearable/>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column width={4}><Label className="border-none" size="big" basic>플레이어 난이도</Label></Grid.Column>
+                        <Grid.Column width={12}>
+                            <Rating name="player_difficulty" icon="star" maxRating={5} size="massive" onRate={(e,data)=>this.onScenarioRating(e,data)} rating={this.state.player_difficulty} clearable/>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column width={4}><Label className="border-none" size="big" basic>배경</Label></Grid.Column>
+                        <Grid.Column width={12}>
+                            <Form.Select 
+                                    name="background_tag"
+                                    onChange={(e,data)=>this.onScenarioSelected(e,data)}
+                                    options={select_background}
+                                    value={this.state.background_tag}
+                                    placeholder='시나리오 배경'/> 
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column width={4}><Label className="border-none" size="big" basic>장르</Label></Grid.Column>
+                        <Grid.Column width={12}>
+                            <Form.Select 
+                                    name="genre_tags"
+                                    multiple
+                                    onChange={(e,data)=>this.onScenarioSelected(e,data)}
+                                    options={select_genre}
+                                    value={this.state.genre_tags}
+                                    placeholder='시나리오의 장르'/> 
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column width={4}><Label className="border-none" size="big" basic>분위기</Label></Grid.Column>
+                        <Grid.Column width={12}>
+                            <Form.Select 
+                                    name="sub_tags"
+                                    multiple
+                                    onChange={(e,data)=>this.onScenarioSelected(e,data)}
+                                    options={select_sub_tags}
+                                    value={this.state.sub_tags}
+                                    placeholder='분위기'/> 
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column width={8}><Label className="border-none" size="large" basic>댓글 허용</Label><Checkbox name="is_agree_comment" defaultChecked value="check"/></Grid.Column>
+                        <Grid.Column width={8}><Label className="border-none" size="large" basic>유료 발행</Label><Checkbox name="is_paid" value="check" onChange={this.checkPaid} checked={this.state.is_check_paid}/></Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row id="paid_box">
+                        <Grid.Column>
+                            <Grid>
+                                <Grid.Row>
+                                    <Grid.Column width={16}>
+                                        {/* <!-- 약관 페이지가 완성되면 이곳에 패널로 추가하여 보여줄 것 --> */}
+                                        <Label className="border-none" size="large" basic>유료 발행시 가격을 수정하거나 게시물을 삭제할 수 없습니다. 동의하십니까?<Link>(자세히 알아보기)</Link></Label>
+                                        <Checkbox id="agree_paid" label="" name="is_agree_paid" value="check" readOnly={this.state.is_agree_paid} onChange={this.checkAgreePaid} checked={this.state.is_agree_paid}/>
+                                    </Grid.Column>
+                                </Grid.Row>
+                                <Grid.Row id="price_manage" className="hidden " >
+                                    <Grid.Column width={4}><Label className="border-none" size="big" basic>발행 가격(<Icon fitted name="sticky note"/>)</Label></Grid.Column>
+                                    <Grid.Column width={12}><Form.Input name="price" type="number" min={1} placeholder="가격"/></Grid.Column>
+                                </Grid.Row>
+                            </Grid>
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+            </Form >
+        </Modal.Content>
+        <Modal.Actions>
+            <Button color='black' onClick={() => this.setOpenSetting(false)}>닫기</Button>
+            <Button
+                type="submit"
+                form="setting-form"
+                content="저장"
+                labelPosition='right'
+                icon='checkmark'
+                // onClick={() => this.setOpenSetting(false)}
+                positive
+            />
+        </Modal.Actions>
+    </Modal>):null;
         var component = (<div>
-            <Modal onClose={()=>this.setOpenSetting(false)} onOpen={()=>this.setOpenSetting(true)} open={this.state.is_open_setting} closeIcon trigger={<Button><Icon name="setting" fitted/></Button>}>
-                <Modal.Header>설정</Modal.Header>
-                <Modal.Content>
-                    <Form id="setting-form" method="POST" action={`/scenarios/edit/setting/save/${this.state.article_id }`} >
-                        <Grid>
-                            <Grid.Row>
-                                <Grid.Column width={4}><Label className="border-none" size="big"  basic>사용 룰</Label></Grid.Column>
-                                <Grid.Column width={12}>
-                                    <Dropdown
-                                        selection 
-                                        name= "rule"
-                                        // onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
-                                        options={select_rule}
-                                        defalutValue={this.state.rule!==null?this.state.rule:null}
-                                        placeholder='사용 룰'/>  
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column>
-                                    <Label className="border-none" size="large" basic>이 시나리오는 가변적인 인원수에 대응할 수 있습니다.</Label><Checkbox name="is_multiple_capacity" value="check" onChange={(e,data)=>this.changeCapacityType(e,data)} />
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column width={4}><Label className="border-none"  size="big" basic>필요 인원수</Label></Grid.Column>
-                                <Grid.Column width={12}>
-                                    <Form.Group className="text-left" inline>       
-                                        <Form.Input className="search-number " type="number" name="capacity_min" onChange={()=>this.onScenarioSearchChange} defalutValue={this.state.capacity_min} min={1} placeholder="최소 인원수"/>
-                                        <span id="multiple_capacity" className="hidden"><Form.Input className="search-number search-number-right" label="~" type="number" name="capacity_max" onChange={()=>this.onScenarioSearchChange} defalutValue={this.state.capacity_max} min={1} placeholder="최대 인원수"/></span>
-                                    </Form.Group>  
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column width={4}><Label className="border-none" size="big" basic>플레이 시간</Label></Grid.Column>
-                                <Grid.Column width={12}>
-                                    <Form.Group className="text-left" inline>
-                                        <Form.Input className="search-number " type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최소"/>
-                                        <Form.Input className="search-number search-number-right" label="~" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/>
-                                    </Form.Group>
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column width={4}><Label className="border-none" size="big" basic>마스터 난이도</Label></Grid.Column>
-                                <Grid.Column width={12}>
-                                    <Rating  name="master_difficulty" icon="star" defaultRating={1} maxRating={5} size="massive" clearable/>
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column width={4}><Label className="border-none" size="big" basic>플레이어 난이도</Label></Grid.Column>
-                                <Grid.Column width={12}>
-                                    <Rating name="player_difficulty" icon="star" defaultRating={1} maxRating={5} size="massive" clearable/>
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column width={4}><Label className="border-none" size="big" basic>배경</Label></Grid.Column>
-                                <Grid.Column width={12}>
-                                    <Form.Select 
-                                            name= "background_tag"
-                                            // onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
-                                            options={select_background}
-                                            // value={this.state.filter_rule}
-                                            placeholder='시나리오 배경'/> 
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column width={4}><Label className="border-none" size="big" basic>장르</Label></Grid.Column>
-                                <Grid.Column width={12}>
-                                    <Form.Select 
-                                            name= "genre_tags"
-                                            multiple
-                                            // onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
-                                            options={select_genre}
-                                            // value={this.state.filter_rule}
-                                            placeholder='시나리오의 장르'/> 
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column width={4}><Label className="border-none" size="big" basic>분위기</Label></Grid.Column>
-                                <Grid.Column width={12}>
-                                    <Form.Select 
-                                            name= "sub_tags"
-                                            multiple
-                                            // onChange={(e,data)=>this.onScenarioSearchSelected(e,data)}
-                                            options={select_sub_tags}
-                                            // value={this.state.filter_rule}
-                                            placeholder='분위기'/> 
-                                </Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row>
-                                <Grid.Column width={8}><Label className="border-none" size="large" basic>댓글 허용</Label><Checkbox name="is_agree_comment" defaultChecked value="check"/></Grid.Column>
-                                <Grid.Column width={8}><Label className="border-none" size="large" basic>유료 발행</Label><Checkbox name="is_paid" value="check" defaultChecked onChange={this.checkPaid} checked={this.state.is_check_paid}/></Grid.Column>
-                            </Grid.Row>
-                            <Grid.Row id="paid_box">
-                                <Grid.Column>
-                                    <Grid>
-                                        <Grid.Row>
-                                            <Grid.Column width={16}>
-                                                {/* <!-- 약관 페이지가 완성되면 이곳에 패널로 추가하여 보여줄 것 --> */}
-                                                <Label className="border-none" size="large" basic>유료 발행시 가격을 수정하거나 게시물을 삭제할 수 없습니다. 동의하십니까?<Link>(자세히 알아보기)</Link></Label>
-                                                <Checkbox id="agree_paid" label="" name="is_agree_paid" value="check" readOnly={this.state.is_agree_paid} onChange={this.checkAgreePaid} checked={this.state.is_agree_paid}/>
-                                            </Grid.Column>
-                                        </Grid.Row>
-                                        <Grid.Row id="price_manage" className="hidden " >
-                                            <Grid.Column width={4}><Label className="border-none" size="big" basic>발행 가격(<Icon fitted name="sticky note"/>)</Label></Grid.Column>
-                                            <Grid.Column width={12}><Form.Input name="price" type="number" min={1} placeholder="가격"/></Grid.Column>
-                                        </Grid.Row>
-                                    </Grid>
-                                </Grid.Column>
-                            </Grid.Row>
-                        </Grid>
-                    </Form >
-                </Modal.Content>
-                <Modal.Actions>
-                    <Button color='black' onClick={() => this.setOpenSetting(false)}>닫기</Button>
-                    <Button
-                        type="submit"
-                        form="setting-form"
-                        content="저장"
-                        labelPosition='right'
-                        icon='checkmark'
-                        // onClick={() => this.setOpenSetting(false)}
-                        positive
-                    />
-                </Modal.Actions>
-            </Modal>
+            {carteModal}
             {this.getDetail()}
         </div>
             );

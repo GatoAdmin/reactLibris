@@ -395,7 +395,8 @@ router.post("/edit/setting/save/:id", ensureAuthenticated, function (req, res, n
     if (err) { return next(err); }
     if (!scenario) { return next(404); }
     
-    var formData = req.body;
+    var formData = JSON.parse(req.body.data);
+    console.log(formData);
     var capacityMin = 1;
     var capacityMax = 1;
     var trpgTime = 1;
@@ -425,13 +426,12 @@ router.post("/edit/setting/save/:id", ensureAuthenticated, function (req, res, n
         user.save();
       }
     }
-    
     scenario.rule= toObjectId(formData.rule);
     scenario.carte = {
       capacity: { max: capacityMax, min: capacityMin },
       rating: formData.rating,
-      masterDifficulty: formData.masterDifficulty,
-      playerDifficulty: formData.playerDifficulty,
+      masterDifficulty: formData.master_difficulty,
+      playerDifficulty: formData.player_difficulty,
       backgroundTag: toObjectId(formData.background_tag),
       genreTags: toObjectId(formData.genre_tags),
       subTags: toObjectId(formData.sub_tags),
@@ -444,7 +444,8 @@ router.post("/edit/setting/save/:id", ensureAuthenticated, function (req, res, n
     scenario.save(err, result => {
       if (err) { console.error(err); return next(err); }
       req.flash("info", "성공적으로 수정되었습니다.");
-      return res.redirect("/scenarios/edit/" + req.params.id);
+      return res.json({success:true});
+      // return res.redirect("/scenarios/edit/" + req.params.id);
     });
 
   });
@@ -874,10 +875,14 @@ function checkAfterAlignType(alignType){
 }
 
 function toObjectId(strings) {
-  if (Array.isArray(strings)) {
-    return strings.map(string=>mongoose.Types.ObjectId(string));
+  if(strings!==undefined&&strings!==null&&strings!==""){
+    if (Array.isArray(strings)) {
+      return strings.map(string=>mongoose.Types.ObjectId(string));
+    }
+    return mongoose.Types.ObjectId(strings);
+  }else{
+    return null;
   }
-  return mongoose.Types.ObjectId(strings);
 }
 function lastIndex(array) {
   return array[array.length - 1];
