@@ -128,9 +128,9 @@ class ArticleList extends React.Component {
         this.setState({page_size: pageSize });
       };
 
-    onScenarioSearchChange = (e) => {
+    onScenarioSearchChange = (e, data) => {
         this.setState({
-            [e.target.name]: e.target.value
+            [data.name]: data.value
         }
         );
     }
@@ -260,9 +260,9 @@ class ArticleList extends React.Component {
                                             <Card.Header className="ellipsis"><Link to={"/scenarios/view/"+data._id}>{data.title}</Link></Card.Header>
                                             <Card.Meta><Link to={"/user/"+data.author.userName}><Icon name="user"/>{data.author.userName}</Link></Card.Meta>
                                             <Card.Meta className="card-tags">
-                                                <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',latest.backgroundTag)}  content={latest.backgroundTag} icon='hashtag' />                                                
-                                                    {latest.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_genre',tag)}  content={tag} icon='hashtag' />}) }                                               
-                                                    {latest.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                                
+                                                <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',data.backgroundTag)}  content={data.backgroundTag} icon='hashtag' />                                                
+                                                    {data.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_genre',tag)}  content={tag} icon='hashtag' />}) }                                               
+                                                    {data.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                                
                                                     {/* {data.hashTags.map((tag, id) => { return <Label className="tag-item" key={id.toString()}  content={tag} icon='hashtag' />}) } */}                                               
                                             </Card.Meta>
                                         </Card.Content>
@@ -447,16 +447,16 @@ class ArticleList extends React.Component {
                                    
                                 <div className='detail-filter-secondary'>
                                     <Form.Group className="text-left" inline>    
-                                        <Form.Input className="search-number " type="number" name="filter_capacity_min" onChange={()=>this.onScenarioSearchChange} min={1} label='인원수' placeholder="최소"/>
+                                        <Form.Input className="search-number " type="number" name="filter_capacity_min" onChange={(e, data)=>this.onScenarioSearchChange(e, data)} min={1} label='인원수' placeholder="최소"/>
                                             {/* <Label className='dash'>~</Label> */}
-                                        <Form.Input className="search-number search-number-right" label="" type="number" name="filter_capacity_max" onChange={()=>this.onScenarioSearchChange} min={1} placeholder="최대"/>
+                                        <Form.Input className="search-number search-number-right" label="" type="number" name="filter_capacity_max" onChange={(e, data)=>this.onScenarioSearchChange(e, data)} min={1} placeholder="최대"/>
                                     </Form.Group>
-                                <Form.Group className="text-left" inline><Form.Input className="search-number " type="number" name="filter_time_min" onChange={()=>this.onScenarioSearchChange} min={0} label='시간' placeholder="최소"/>
+                                <Form.Group className="text-left" inline><Form.Input className="search-number " type="number" name="filter_time_min" onChange={(e, data)=>this.onScenarioSearchChange(e, data)} min={0} label='시간' placeholder="최소"/>
                                     {/* <Label className='dash'>~</Label> */}
-                                    <Form.Input className="search-number search-number-right" label="" type="number" name="filter_time_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/></Form.Group>                                                       
-                                <Form.Group className="text-left" inline><Form.Input className="search-number" type="number" name="filter_price_min" onChange={()=>this.onScenarioSearchChange} min={0} label='가격' placeholder="최소"/>
+                                    <Form.Input className="search-number search-number-right" label="" type="number" name="filter_time_max" onChange={(e, data)=>this.onScenarioSearchChange(e, data)} min={0} placeholder="최대"/></Form.Group>                                                       
+                                <Form.Group className="text-left" inline><Form.Input className="search-number" type="number" name="filter_price_min" onChange={(e, data)=>this.onScenarioSearchChange(e, data)} min={0} label='가격' placeholder="최소"/>
                                     {/* <Label className='dash'>~</Label> */}
-                                    <Form.Input className="search-number search-number-right" label="" type="number" name="filter_price_max" onChange={()=>this.onScenarioSearchChange} min={0} placeholder="최대"/></Form.Group>
+                                    <Form.Input className="search-number search-number-right" label="" type="number" name="filter_price_max" onChange={(e, data)=>this.onScenarioSearchChange(e, data)} min={0} placeholder="최대"/></Form.Group>
                             
                                 </div>  
                             </Form.Group>

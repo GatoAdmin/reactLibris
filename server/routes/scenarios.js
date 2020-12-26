@@ -714,12 +714,12 @@ router.post("/search", function (req, res, next) {  var page= 0;
  
     if (search.filter_background.length > 0) {
       if (search.filter_background[0] != "") {
-        Object.assign(before_searchs, {'versions.backgroundTag':{ $in: toObjectId(search.filter_background) }});
+        Object.assign(before_searchs, {'carte.backgroundTag':{ $in: toObjectId(search.filter_background) }});
       }
     }
     if (search.filter_genre.length > 0) {
       if (search.filter_genre[0] != "") {
-        Object.assign(before_searchs,  { 'versions.genreTags':{ $in: toObjectId(search.filter_genre) }});
+        Object.assign(before_searchs,  { 'carte.genreTags':{ $in: toObjectId(search.filter_genre) }});
       }
     }
     if (search.filter_rule.length > 0) {
@@ -729,19 +729,26 @@ router.post("/search", function (req, res, next) {  var page= 0;
     }
     if (search.filter_sub_tags.length > 0) {
       if (search.filter_sub_tags[0] != "") {
-        Object.assign(before_searchs, {'versions.subTags':{ $in: toObjectId(search.filter_sub_tags) }});
+        Object.assign(before_searchs, {'carte.subTags':{ $in: toObjectId(search.filter_sub_tags) }});
       }
     }
     
     if (search.filter_price_min != "" || search.filter_price_max != "") {
       before_searchs.price = convertGteLte(search.filter_price_min, search.filter_price_max) ;
     }
+    if (search.filter_capacity_min != "" || search.filter_capacity_max != "") {
+      Object.assign(before_searchs, {'carte.capacity': convertGteLte(search.filter_capacity_min, search.filter_capacity_max) });
+    }
+    if (search.filter_time_min != "" || search.filter_time_max != "") {
+      // Object.assign(before_searchs, {'carte.orpgPredictingTime': convertGteLte(search.filter_time_min, search.filter_time_max) });
+      // Object.assign(before_searchs, {'carte.trpgPredictingTime': convertGteLte(search.filter_time_min, search.filter_time_max) });
+      Object.assign(before_searchs,{$or:[{'carte.trpgPredictingTime': convertGteLte(search.filter_time_min, search.filter_time_max) },{'carte.orpgPredictingTime': convertGteLte(search.filter_time_min, search.filter_time_max) }]} );
+    }
   }
   
     var findSearch = before_searchs;
     findSearch.enabled = true;
     findSearch.isOpened= true;
-    console.log(findSearch)
     Scenario.count(findSearch,function (err, count){
       if (err) { console.log(err); next(err); }
       Scenario.find(findSearch)

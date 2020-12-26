@@ -172,11 +172,13 @@ ScenarioSchema.virtual('genreTags').get(function(){
     var tags = [];
     var masterTag = masterTags.find(tag=>tag.name==="genre");
     var genreTags = [];
-    this.carte.genreTags.map((genreTag)=>{
-        var findResult = masterTag.tags.find(tags=>tags._id.equals(genreTag));
-        genreTags.push(findResult!=undefined?findResult.tag:"");
-    });
-    tags = genreTags;
+    if(this.carte.genreTags){
+        this.carte.genreTags.map((genreTag)=>{
+            var findResult = masterTag.tags.find(tags=>tags._id.equals(genreTag));
+            genreTags.push(findResult!=undefined?findResult.tag:"");
+        });
+        tags = genreTags;
+    }
     return tags;
 });
 
@@ -184,12 +186,14 @@ ScenarioSchema.virtual('subTags').get(function(){
     var tags = [];
     var masterTag = masterTags.find(tag=>tag.name==="subTag");
     var subTags = [];
-    this.carte.subTags.map((subTag)=>{
-        var findResult = masterTag.tags.find(tags=>tags._id.equals(subTag));
-        subTags.push(findResult!=undefined?findResult.tag:"");
-    });
-    tags = subTags;
     
+    if(this.carte.subTags){
+        this.carte.subTags.map((subTag)=>{
+            var findResult = masterTag.tags.find(tags=>tags._id.equals(subTag));
+            subTags.push(findResult!=undefined?findResult.tag:"");
+        });
+        tags = subTags;
+    }
     return tags;
 });
 

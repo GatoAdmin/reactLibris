@@ -183,13 +183,13 @@ class ScenarioView extends React.Component {
                             <Grid.Column >
                                 <Icon.Group size="large">
                                     <Icon name="user outline" fitted size="large" color='blue'/>
-                                    <Icon color="white" fitted>{version.capacity.min}</Icon>
+                                    <Icon color="white" fitted>{result.carte.capacity.min}</Icon>
                                 </Icon.Group>
-                                {(version.capacity.min != version.capacity.max)?(<span><span>~</span>         
+                                {(result.carte.capacity.min != result.carte.capacity.max)?(<span><span>~</span>         
                                     
                                 <Icon.Group size="large">
                                     <Icon name="user outline" fitted size="large" color='purple'/>
-                                    <Icon  color="white" fitted>{version.capacity.max}</Icon>
+                                    <Icon  color="white" fitted>{result.carte.capacity.max}</Icon>
                                 </Icon.Group></span>):null}
                             </Grid.Column>
                             <Grid.Column > 
@@ -197,10 +197,10 @@ class ScenarioView extends React.Component {
                             </Grid.Column>
                             <Grid.Column >         
                                 <span className="predictingTime">
-                                    {version.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
+                                    {result.carte.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
                                 </span>
                                 <span>
-                                    {version.orpgPredictingTime==null?version.trpgPredictingTime:version.orpgPredictingTime}
+                                    {result.carte.orpgPredictingTime==null?result.carte.trpgPredictingTime:result.carte.orpgPredictingTime}
                                 </span>
                                 <span> 시간</span>
                             </Grid.Column>
@@ -213,7 +213,7 @@ class ScenarioView extends React.Component {
                         </Grid.Row>
                         <Grid.Row>
                             <Grid.Column>                            
-                                {version.rating != null ? <span>{version.rating} 금</span> : <Icon.Group size="large"><Icon size="large" fitted name="circle outline"/><Icon fitted size="small"><b>ALL</b></Icon></Icon.Group>}
+                                {result.carte.rating != null ? <span>{result.carte.rating} 금</span> : <Icon.Group size="large"><Icon size="large" fitted name="circle outline"/><Icon fitted size="small"><b>ALL</b></Icon></Icon.Group>}
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row className="width-auto">
@@ -221,7 +221,7 @@ class ScenarioView extends React.Component {
                                 배경 
                             </Grid.Column>
                             <Grid.Column  className="display-conents">       
-                                <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',version.backgroundTag)}  content={version.backgroundTag} icon='hashtag' />  
+                                <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',result.carte.backgroundTag)}  content={result.carte.backgroundTag} icon='hashtag' />  
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row className="width-auto">
@@ -229,7 +229,7 @@ class ScenarioView extends React.Component {
                                 장르 
                             </Grid.Column>
                             <Grid.Column  className="display-conents">                                                       
-                                {version.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_genre',tag)}  content={tag} icon='hashtag' />}) }                                               
+                                {result.carte.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_genre',tag)}  content={tag} icon='hashtag' />}) }                                               
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row className="width-auto">
@@ -237,7 +237,7 @@ class ScenarioView extends React.Component {
                                 분위기 
                             </Grid.Column>
                             <Grid.Column className="display-conents">         
-                            {version.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                        
+                            {result.carte.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                        
                             </Grid.Column>
                         </Grid.Row>
                     </Grid> */}
@@ -268,21 +268,21 @@ class ScenarioView extends React.Component {
                             <Table.Cell >
                                 <Icon.Group size="large">
                                     <Icon name="user outline" fitted size="large" color='blue'/>
-                                    <Icon color="white" fitted>{version.capacity.min}</Icon>
+                                    <Icon color="white" fitted>{result.carte.capacity.min}</Icon>
                                 </Icon.Group>
-                                {(version.capacity.min != version.capacity.max)?(<span><span>~</span>         
+                                {(result.carte.capacity.min != result.carte.capacity.max)?(<span><span>~</span>         
                                     
                                 <Icon.Group size="large">
                                     <Icon name="user outline" fitted size="large" color='purple'/>
-                                    <Icon  color="white" fitted>{version.capacity.max}</Icon>
+                                    <Icon  color="white" fitted>{result.carte.capacity.max}</Icon>
                                 </Icon.Group></span>):null}
                             </Table.Cell>
                             <Table.Cell >         
                                 <span className="predictingTime">
-                                    {version.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
+                                    {result.carte.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
                                 </span>
                                 <span>
-                                    {version.orpgPredictingTime==null?version.trpgPredictingTime:version.orpgPredictingTime}
+                                    {result.carte.orpgPredictingTime==null?result.carte.trpgPredictingTime:result.carte.orpgPredictingTime}
                                 </span>
                                 <span> 시간</span>
                             </Table.Cell>
@@ -292,7 +292,7 @@ class ScenarioView extends React.Component {
                         </Table.Row>
                         <Table.Row>
                             <Table.Cell >                            
-                                {version.rating != null ? <span>{version.rating} 금</span> : <Icon.Group size="large"><Icon size="large" fitted name="circle outline"/><Icon fitted size="small"><b>ALL</b></Icon></Icon.Group>}
+                                {result.carte.rating != null ? <span>{result.carte.rating} 금</span> : <Icon.Group size="large"><Icon size="large" fitted name="circle outline"/><Icon fitted size="small"><b>ALL</b></Icon></Icon.Group>}
                             </Table.Cell >
                         </Table.Row>
                         <Table.Row className="width-auto">
@@ -300,7 +300,7 @@ class ScenarioView extends React.Component {
                                 배경 
                             </Table.Cell >
                             <Table.Cell  className="display-conents">       
-                                <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',version.backgroundTag)}  content={version.backgroundTag} icon='hashtag' />  
+                                <Label className="tag-item background-tag" as={Button} onClick={()=>this.onClickTag('filter_background',result.backgroundTag)}  content={result.backgroundTag} icon='hashtag' />  
                             </Table.Cell >
                         </Table.Row>
                         <Table.Row className="width-auto">
@@ -308,7 +308,7 @@ class ScenarioView extends React.Component {
                                 장르 
                             </Table.Cell >
                             <Table.Cell   className="display-conents">                                                       
-                                {version.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_genre',tag)}  content={tag} icon='hashtag' />}) }                                               
+                                {result.genreTags.map((tag, id) => { return <Label className="tag-item genre-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_genre',tag)}  content={tag} icon='hashtag' />}) }                                               
                             </Table.Cell >
                         </Table.Row>
                         <Table.Row className="width-auto">
@@ -316,7 +316,7 @@ class ScenarioView extends React.Component {
                                 분위기 
                             </Table.Cell >
                             <Table.Cell  className="display-conents">         
-                            {version.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                        
+                            {result.subTags.map((tag, id) => { return <Label className="tag-item sub-tag" key={id.toString()}  as={Button} onClick={()=>this.onClickTag('filter_sub_tags',tag)}  content={tag} icon='hashtag' />}) }                                        
                             </Table.Cell >
                         </Table.Row>
                         </Table.Body>
@@ -365,23 +365,23 @@ class ScenarioView extends React.Component {
                             <span>
                                 플레이 인원 :
                             </span>
-                            <span>{version.capacity.min}</span>
-                            {(version.capacity.min != version.capacity.max)?(<span><span>~</span>         
-                                <span>{version.capacity.max}</span></span>):null}
+                            <span>{result.carte.capacity.min}</span>
+                            {(result.carte.capacity.min != result.carte.capacity.max)?(<span><span>~</span>         
+                                <span>{result.carte.capacity.max}</span></span>):null}
                             <span> 인</span>
                         </div>
                         <div>
                             <span>플레이 시간: </span>
                             <span className="predictingTime">
-                                {version.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
+                                {result.carte.orpgPredictingTime==null?"오프라인으로":"온라인으로"}
                             </span>
                             <span>
-                                {version.orpgPredictingTime==null?version.trpgPredictingTime:version.orpgPredictingTime}
+                                {result.carte.orpgPredictingTime==null?result.carte.trpgPredictingTime:result.carte.orpgPredictingTime}
                             </span>
                             <span> 시간</span>
                         </div>
                         <div>
-                            {version.rating != null ? <span>{version.rating} 금</span> : <span>전체 이용가</span>}
+                            {result.carte.rating != null ? <span>{result.carte.rating} 금</span> : <span>전체 이용가</span>}
                         </div>
                         <div>
                             <span>가격 :</span>
@@ -393,7 +393,7 @@ class ScenarioView extends React.Component {
                                     <span>배경 : </span>
                                 </li>
                                 <li className="tag_item">
-                                    #{version.backgroundTag}
+                                    #{result.backgroundTag}
                                 </li>
                             </ul>
                         </div>
@@ -402,7 +402,7 @@ class ScenarioView extends React.Component {
                                 <li>
                                     <span>장르 : </span>
                                 </li>
-                                {version.genreTags.map( (tag, index)=>(
+                                {result.genreTags.map( (tag, index)=>(
                                     <li className="tag_item" key={index}>
                                         #{tag}
                                     </li>
@@ -412,9 +412,9 @@ class ScenarioView extends React.Component {
                         <div>
                             <ul>
                                 <li>
-                                    <span>태그 : </span>
+                                    <span>분위기 : </span>
                                 </li>
-                                {version.subTags.map((tag, index)=>(
+                                {result.subTags.map((tag, index)=>(
                                     <li className="tag_item" key={index}> 
                                         #{tag}
                                     </li>
