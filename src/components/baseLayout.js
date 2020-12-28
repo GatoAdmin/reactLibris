@@ -21,6 +21,8 @@ import SearchResult from './Main/searchResult';
 import Footer from './Layout/footer';
 import Navbar from './Layout/pageNav';
 import Landing from './Main/landing';
+
+
 class BaseLayout extends React.Component {
   constructor(props) {
       super(props);
@@ -66,13 +68,15 @@ class BaseLayout extends React.Component {
     });
   }
   render() {
+    var url = window.location.href.split('/');
+    var isEdit = url[2]==="edit"?true:false;
   return (
     <div className="base">
       <CookiesProvider>
-
-      <header>
+        {isEdit?<header>
         <Navbar currentUser={this.state.currentUser}/>
-      </header>
+      </header>:null}
+      
       <div className='contents-wrapper'>
         <Switch>
               <Route exact path="/" component={(props)=><Main currentUser={this.state.currentUser}{...props}/>} />
@@ -99,7 +103,9 @@ class BaseLayout extends React.Component {
 
         </Switch>
         </div>
-    <Footer/>
+        
+        {isEdit?<Footer/>:null}
+    
       </CookiesProvider>
   </div>
   );}

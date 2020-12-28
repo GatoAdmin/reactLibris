@@ -150,102 +150,63 @@ class Maker extends React.Component {
 
     getDetail() {
         var component;
-        var masterTags = this.state.master_tags;
-        var select_rule;
-        var select_genre;
-        var select_background;
-        var select_sub_tags;
         let last = this.state.result!=null?this.state.result.lastVersion:null;
-        if(masterTags.length>0){
-            var ruleTags = masterTags.find(tags => tags.name === "rule");
-            select_rule = ruleTags.tags.map((tag, id) => {
-                        return { value: tag._id, key: id.toString(), text:tag.tag };
-                    })
-            var genreTags = masterTags.find(tags => tags.name === "genre");
-            select_genre = genreTags.tags.map((tag, id) => {
-                return { value: tag._id, key: id.toString(), text:tag.tag };
-            })
-            var backgroundTags = masterTags.find(tags => tags.name === "background");
-            select_background = backgroundTags.tags.map((tag, id) => {
-                return { value: tag._id, key: id.toString(), text:tag.tag };
-            })
-            var subTags = masterTags.find(tags => tags.name === "subTag");
-            select_sub_tags = subTags.tags.map((tag, id) => {
-                return { value: tag._id, key: id.toString(), text:tag.tag };
-            })
-        }
-        
+        // var masterTags = this.state.master_tags;
+        // var select_rule;
+        // var select_genre;
+        // var select_background;
+        // var select_sub_tags;
+        // if(masterTags.length>0){
+        //     var ruleTags = masterTags.find(tags => tags.name === "rule");
+        //     select_rule = ruleTags.tags.map((tag, id) => {
+        //                 return { value: tag._id, key: id.toString(), text:tag.tag };
+        //             })
+        //     var genreTags = masterTags.find(tags => tags.name === "genre");
+        //     select_genre = genreTags.tags.map((tag, id) => {
+        //         return { value: tag._id, key: id.toString(), text:tag.tag };
+        //     })
+        //     var backgroundTags = masterTags.find(tags => tags.name === "background");
+        //     select_background = backgroundTags.tags.map((tag, id) => {
+        //         return { value: tag._id, key: id.toString(), text:tag.tag };
+        //     })
+        //     var subTags = masterTags.find(tags => tags.name === "subTag");
+        //     select_sub_tags = subTags.tags.map((tag, id) => {
+        //         return { value: tag._id, key: id.toString(), text:tag.tag };
+        //     })
+        // }
+        console.log(last !== undefined&&last!==null?last.content[0]:null)
         component = (
             <div id="form-container" className="container">
-                <Form method="POST" action={`/scenarios/edit/save/${this.state.article_id }`} onSubmit={()=>this.convertQuill()}>
+                <Form method="POST" id='edit-form' action={`/scenarios/edit/save/${this.state.article_id }`} onSubmit={()=>this.convertQuill()}>
                     <Form.Input size="massive" type="text"  name="title"  value={this.state.title} onChange={this.onChangeForm} placeholder="제목을 입력해 주세요"/>
                     <Form.Input type="text"  name="title_short" value={this.state.title_short} onChange={this.onChangeForm} placeholder="시나리오 줄임말을 스페이스바 없이 입력해주세요"/>
                     <div className="row form-group">
                         <label htmlFor="article">내용</label>
                         <input name="article" type="hidden" />
-                        <QuillEditor changeQuill={this.changeQuill} setValue={last !== undefined&&last!==null?last.content:null}  />
+                        {last !== undefined&&last!==null?<QuillEditor changeQuill={this.changeQuill} setValue={last.content[0]}  />:null}
                     </div>
-                    <Button className="btn btn-primary" color="purple" type="submit" name="save">저장</Button>
-                    <Button className="btn btn-primary" color="purple" type="submit" name="publication">발행</Button>
+                    {/* <Button className="btn btn-primary" color="purple" type="submit" name="save">저장</Button>
+                    <Button className="btn btn-primary" color="purple" type="submit" name="publication">발행</Button> */}
                 </Form >
             </div >
         );
         return component;
     }
 
-    setOpenSetting(bool){
-        this.setState({is_open_setting:bool});
-    }
-
-    onScenarioChange = (e, data) => {
-        console.log(data)
-        this.setState({
-            [data.name]: data.value
-        }
+    getHeader(){
+        var component = (
+            <header>
+                    {this.state.result!==null?this.getModal():null}
+                    <Button className="btn btn-primary" form='edit-form' color="purple" type="submit" name="save">저장</Button>
+                    <Button className="btn btn-primary" form='edit-form' color="purple" type="submit" name="publication">발행</Button>
+            </header>
         );
-    }
-    
-    onScenarioRating = (e, data) => {
-        console.log(this.state[data.name])
-        this.setState({
-            [data.name]: data.rating
-        }
-        );
+        return component;
     }
 
-    onScenarioSelected = (e, data) => {
-        this.setState({
-            [data.name]: data.value
-        }
-        );
-    }
-    sendCarte(e,data){
-        var formData = new FormData(e.target);
-        formData.append("rule",this.state.rule);
-        formData.append("master_difficulty",this.state.master_difficulty);
-        formData.append("player_difficulty",this.state.player_difficulty);
-        formData.append("background_tag",this.state.background_tag);
-        formData.append("genre_tags",this.state.genre_tags);
-        formData.append("sub_tags",this.state.sub_tags);
-
-        var object = {};
-        for (var pair of formData.entries()) { object[pair[0]] = pair[1]; console.log(pair[0]+ ', ' + pair[1]); }
-        //{headers: {'Content-Type': 'multipart/form-data' }}
-        console.log(JSON.stringify(object));
-        axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,{data:JSON.stringify(object)})
-        .then((res)=>{if(res.data.success){
-            console.log("설정이 저장되었습니다.");
-            // console.log(res.data.document.imageData);
-            // return <Redirect to={`/news/chronicle/`}/>
-        }})
-        .catch((err)=>{console.log(err);});
-        return true;
-    }
-
-    render(){
-        var currentUser = this.props.currentUser;
+    getModal(){
+        
         var masterTags = this.state.master_tags;
-        var result = this.state.result;
         var select_rule;
         var select_genre;
         var select_background;
@@ -269,8 +230,8 @@ class Maker extends React.Component {
                 return { value: tag._id, key: id.toString(), text:tag.tag };
             })
         }
-        //action={`/scenarios/edit/setting/save/${this.state.article_id }`}
-        var carteModal = result!==null?(<Modal onClose={()=>this.setOpenSetting(false)} onOpen={()=>this.setOpenSetting(true)} open={this.state.is_open_setting} closeIcon trigger={<Button><Icon name="setting" fitted/></Button>}>
+
+        return(<Modal onClose={()=>this.setOpenSetting(false)} onOpen={()=>this.setOpenSetting(true)} open={this.state.is_open_setting} closeIcon trigger={<Button><Icon name="setting" fitted/></Button>}>
         <Modal.Header>설정</Modal.Header>
         <Modal.Content>
             <Form id="setting-form" method="POST" onSubmit={(e)=>this.sendCarte(e)} >
@@ -393,9 +354,64 @@ class Maker extends React.Component {
                 positive
             />
         </Modal.Actions>
-    </Modal>):null;
+    </Modal>);
+    }
+
+    setOpenSetting(bool){
+        this.setState({is_open_setting:bool});
+    }
+
+    onScenarioChange = (e, data) => {
+        console.log(data)
+        this.setState({
+            [data.name]: data.value
+        }
+        );
+    }
+    
+    onScenarioRating = (e, data) => {
+        console.log(this.state[data.name])
+        this.setState({
+            [data.name]: data.rating
+        }
+        );
+    }
+
+    onScenarioSelected = (e, data) => {
+        this.setState({
+            [data.name]: data.value
+        }
+        );
+    }
+    sendCarte(e,data){
+        var formData = new FormData(e.target);
+        formData.append("rule",this.state.rule);
+        formData.append("master_difficulty",this.state.master_difficulty);
+        formData.append("player_difficulty",this.state.player_difficulty);
+        formData.append("background_tag",this.state.background_tag);
+        formData.append("genre_tags",this.state.genre_tags);
+        formData.append("sub_tags",this.state.sub_tags);
+
+        var object = {};
+        for (var pair of formData.entries()) { object[pair[0]] = pair[1]; console.log(pair[0]+ ', ' + pair[1]); }
+        //{headers: {'Content-Type': 'multipart/form-data' }}
+        console.log(JSON.stringify(object));
+        axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,{data:JSON.stringify(object)})
+        .then((res)=>{if(res.data.success){
+            console.log("설정이 저장되었습니다.");
+            // console.log(res.data.document.imageData);
+            // return <Redirect to={`/news/chronicle/`}/>
+        }})
+        .catch((err)=>{console.log(err);});
+        return true;
+    }
+
+    render(){
+        // var currentUser = this.props.currentUser;
+        // var result = this.state.result;
+        //action={`/scenarios/edit/setting/save/${this.state.article_id }`}
         var component = (<div>
-            {carteModal}
+            {this.getHeader()}
             {this.getDetail()}
         </div>
             );

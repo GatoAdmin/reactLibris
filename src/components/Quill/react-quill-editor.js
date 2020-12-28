@@ -13,7 +13,8 @@ const e = React.createElement;
 class Editor extends React.Component {
     
     constructor (props) {
-      super(props)
+      super(props);
+      console.log(props.setValue)
       var setValue = props.setValue===""?null:JSON.parse(props.setValue);
       this.state = {theme: 'snow',value:setValue, setValue:setValue }
       this.handleChange = this.handleChange.bind(this)
