@@ -196,6 +196,7 @@ class Maker extends React.Component {
     getHeader(){
         var component = (
             <header>
+                    <Button className="btn btn-primary" type="button" onClick={()=>this.props.history.goBack()}><Icon name="angle left" fitted/></Button>
                     {this.state.result!==null?this.getModal():null}
                     <Button className="btn btn-primary" form='edit-form' color="purple" type="submit" name="save">저장</Button>
                     <Button className="btn btn-primary" form='edit-form' color="purple" type="submit" name="publication">발행</Button>

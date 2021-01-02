@@ -107,12 +107,12 @@ class Profile extends Component {
         let edit;
         let detail;
         var masterCanRules;
-        if(user!=null){
+        if(user!==null){
             var introduction = (user.profile.introduction===undefined||user.profile.introduction==="")?null:user.profile.introduction;
             quillViewer = <QuillViewer setValue={introduction} />;
             quillEdit = <QuillEditor  changeQuill={this.changeQuill}  setValue={introduction}/>;
         }
-        if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser!==null&&user!==null) {
+        if (typeof(currentUser) === 'object'&&!Array.isArray(currentUser)&&currentUser!==null&&user!==null) {
             if (currentUser.userEmail === user.userEmail) {
                 editIntro = (<div id="form-container" className="container">
                     <form method="POST" action={"/user/" + user.userName + "/introudtion/save"} onSubmit={()=>this.convertQuill()}>
@@ -132,18 +132,18 @@ class Profile extends Component {
             editIntro = quillViewer
         }
 
-        if (user != null) {
+        if (user !== null) {
             masterCanRules = user.profile.canMasterRules.map((value, index) => (
                 <List.Item>
                     <List.Content>
-                        <List.Header>룰 :{value.rule_kind == "ETC" ? value.rule : masterTagRules.find(tag => tag._id === value.rule_tag).tag}</List.Header>
+                        <List.Header>룰 :{value.rule_kind === "ETC" ? value.rule : masterTagRules.find(tag => tag._id === value.rule_tag).tag}</List.Header>
                         <List.List>
-                        {(user.profile.canMasterScenarios != undefined && user.profile.canMasterScenarios != null)? (
+                        {(user.profile.canMasterScenarios !== undefined && user.profile.canMasterScenarios !== null)? (
                                 user.profile.canMasterScenarios.map((scenario, s_index) => (
-                                    (scenario.rule_kind == "ETC" && value.rule_kind == "ETC") ?
+                                    (scenario.rule_kind === "ETC" && value.rule_kind === "ETC") ?
                                         (scenario.rule===value.rule ?
                                             <List.Item><List.Content><List.Description>시나리오 : {scenario.title} | {scenario.author} 작</List.Description></List.Content></List.Item> : null) :
-                                        ((value.rule_tag != "" && value.rule_tag != undefined) && (scenario.rule_tag != undefined && scenario.rule_tag != "")) ?
+                                        ((value.rule_tag !== "" && value.rule_tag !== undefined) && (scenario.rule_tag !== undefined && scenario.rule_tag !== "")) ?
                                             ((value.rule_tag===scenario.rule_tag) ? <List.Item> <List.Content><List.Description>시나리오 : {scenario.title} | {scenario.author} 작</List.Description></List.Content> </List.Item>: null) : null
 
                                 ))
@@ -177,14 +177,14 @@ class Profile extends Component {
                     <List.List>
                         <List.Item>
                             {user.profile.contacts.map((value, index) => (
-                                value.contactType == 'twitter' ? (
+                                value.contactType === 'twitter' ? (
                                     <List.Content>
                                         <a href={`https://twitter.com/${value.contact}`} >
                                             <List.Icon name='twitter' />
                                            {value.contact}
                                         </a>
                                     </List.Content>
-                                ) : (value.contactType == 'email' ? (
+                                ) : (value.contactType === 'email' ? (
                                 <List.Content>
                                     <List.Icon name='mail' />
                                     {/* <img className="contact_type_icon email" sizes="30x30" width="30" src="https://thumbs.dreamstime.com/b/email-icon-isolated-white-background-open-envelope-pictogram-line-mail-symbol-website-design-app-ui-vector-illustration-106510001.jpg" /> */}
@@ -192,7 +192,7 @@ class Profile extends Component {
                                 </List.Content>
                                 ) :
 
-                                    /* }else if(value.contactType=='디스코드'){
+                                    /* }else if(value.contactType==='디스코드'){
                                         <List.Item>
                                             <List.Icon name='discord' />
                                             <a href="https://twitter.com/{ value.contact }">
@@ -200,7 +200,7 @@ class Profile extends Component {
                                                 { value.contact}
                                             </a>
                                         </List.Item>
-                                    } else if(value.contactType=='카카오톡 톡방') {
+                                    } else if(value.contactType==='카카오톡 톡방') {
                                         <List.Item>
                                             <List.Icon name='discord' />
                                             <a href="https://twitter.com/{ value.contact ">
@@ -208,7 +208,7 @@ class Profile extends Component {
                                                 { value.contact
                                             </a>
                                         </List.Item>
-                                    } else if(value.contactType=='kakaotalk') {
+                                    } else if(value.contactType==='kakaotalk') {
                                         <List.Item>
                                             <List.Icon name='discord' />
                                             <!-- <a href="https://twitter.com/{ value.contact "> -->
@@ -216,13 +216,13 @@ class Profile extends Component {
                                             { value.contact
                                             <!-- </a> -->
                                         </List.Item>*/
-                                    (value.contactType == 'telegram' ? (<List.Content>
+                                    (value.contactType === 'telegram' ? (<List.Content>
                                         <a href={`https://telegram.me/${value.contact}`}>
                                             <List.Icon name='telegram' />
                                             {value.contact}
                                         </a>
                                     </List.Content>
-                                    ) : (value.contactType == 'instagram' ? (
+                                    ) : (value.contactType === 'instagram' ? (
                                         <List.Content>
                                             <a href={`https://www.instagram.com/${value.contact}/?hl=ko`}>
                                             <List.Icon name='instagram' />
@@ -240,14 +240,14 @@ class Profile extends Component {
                             <List.Content>
                                 <List.Header>선호하는 플레이 스타일</List.Header>
                                 <List.List>
-                                {(user.profile.preferPlayStyle.playTypes != undefined && user.profile.preferPlayStyle.playTypes != null) ? (
+                                {(user.profile.preferPlayStyle.playTypes !== undefined && user.profile.preferPlayStyle.playTypes !== null) ? (
                                     user.profile.preferPlayStyle.playTypes.map((value, index) => {
                                         return <List.Item><List.Content>{value}
                                         </List.Content></List.Item>
                                     })
                                 ) : null}
 
-                                {(user.profile.preferPlayStyle.canConditions != undefined && user.profile.preferPlayStyle.canConditions != null) ?
+                                {(user.profile.preferPlayStyle.canConditions !== undefined && user.profile.preferPlayStyle.canConditions !== null) ?
                                     (user.profile.preferPlayStyle.canConditions.map((value, index) => {
                                         return <List.Item><List.Content>{value}
                                         </List.Content></List.Item>
@@ -255,13 +255,13 @@ class Profile extends Component {
                                 </List.List>
                             </List.Content>
                         ) : null}
-                        {(user.profile.haveRules != undefined && user.profile.haveRules != null) ?
+                        {(user.profile.haveRules !== undefined && user.profile.haveRules !== null) ?
                             (<List.Item>
                                 <List.Header>가지고 있는 룰</List.Header>
                                 <List.List>
                                     {user.profile.haveRules.map((value, index) => (
                                         <List.Item>
-                                            <List.Content>{value.rule_kind == "ETC" ? value.rule : (value.rule_kind != null && value.rule_kind != undefined) ?
+                                            <List.Content>{value.rule_kind === "ETC" ? value.rule : (value.rule_kind !== null && value.rule_kind !== undefined) ?
                                                 masterTagRules.find(tag => tag._id === value.rule_tag).tag : null}
                                             </List.Content>
                                         </List.Item>
@@ -277,7 +277,7 @@ class Profile extends Component {
                                 </List.List>
                             </List.Item>
                             ) : null}
-                        {(user.profile.canMasterRules != undefined && user.profile.canMasterRules != null) ? (
+                        {(user.profile.canMasterRules !== undefined && user.profile.canMasterRules !== null) ? (
                             <List.Item>
                                 <List.Header>마스터링 가능</List.Header>
                                 <List.Content>
@@ -287,19 +287,19 @@ class Profile extends Component {
                                 </List.Content>
                             </List.Item>
                         ) : null}
-                        {(user.profile.preferRules != undefined && user.profile.preferRules != null) ? (
+                        {(user.profile.preferRules !== undefined && user.profile.preferRules !== null) ? (
                             <List.Item>
                                 <List.Header>선호하는 룰</List.Header>
                                 <List.List>
                                     {user.profile.preferRules.map((value, index) => {
-                                        return <List.Item>{value.rule_kind == "ETC" ? value.rule : masterTagRules.find(tag => tag._id === value.rule_tag).tag}</List.Item>
+                                        return <List.Item>{value.rule_kind === "ETC" ? value.rule : masterTagRules.find(tag => tag._id === value.rule_tag).tag}</List.Item>
                                     })}
-                                    {/* <!-- < if(user.profile.wishfulScenarios != undefined &&user.profile.wishfulScenarios != null){ -->
-                                 <!-- < if(user.profile.preferRules.find(scenario=>scenario.rule==value.title) != undefined ){
+                                    {/* <!-- < if(user.profile.wishfulScenarios !== undefined &&user.profile.wishfulScenarios !== null){ -->
+                                 <!-- < if(user.profile.preferRules.find(scenario=>scenario.rule===value.title) !== undefined ){
                                  <List>
                                      <List.Item>시나리오</List.Item>
                                      < user.profile.canMasterScenarios.map((scenario,s_index)=>{
-                                         < if( scenario.rule == value.title ){
+                                         < if( scenario.rule === value.title ){
                                              <List.Item>< scenario.title |< supplement.author 작</List.Item>
                                          <}
                                      <})
@@ -310,19 +310,19 @@ class Profile extends Component {
                             </List.Item>
                         ) : null}
 
-                        {(user.profile.wentToScenarios != undefined && user.profile.wentToScenarios != null) ?
+                        {(user.profile.wentToScenarios !== undefined && user.profile.wentToScenarios !== null) ?
                             (
                                 <List.Item>
                                     <List.Header>다녀온 시나리오</List.Header>
                                     <List.List>
                                         {user.profile.wentToScenarios.map((value, index) => {
                                             return <List.Item>{value.title}  | {value.author}  작</List.Item>
-                                            // <!-- < if(user.profile.wishfulScenarios != undefined &&user.profile.wishfulScenarios != null){ -->
-                                            //     <!-- < if(user.profile.preferRules.find(scenario=>scenario.rule==value.title) != undefined ){
+                                            // <!-- < if(user.profile.wishfulScenarios !== undefined &&user.profile.wishfulScenarios !== null){ -->
+                                            //     <!-- < if(user.profile.preferRules.find(scenario=>scenario.rule===value.title) !== undefined ){
                                             // <List>
                                             //     <List.Item>시나리오</List.Item>
                                             //      {user.profile.canMasterScenarios.map((scenario,s_index)=>{
-                                            //          {scenario.rule == value.title?<List.Item> {scenario.title} |{supplement.author} 작</List.Item>:null}
+                                            //          {scenario.rule === value.title?<List.Item> {scenario.title} |{supplement.author} 작</List.Item>:null}
                                             //     })}
                                             // </List>
                                             //     <} -->
@@ -331,7 +331,7 @@ class Profile extends Component {
                                     </List.List>
                                 </List.Item>
                             ) : null}
-                        {(user.profile.ngMaterials != undefined && user.profile.ngMaterials != null) ?
+                        {(user.profile.ngMaterials !== undefined && user.profile.ngMaterials !== null) ?
                             (user.profile.ngMaterials.length > 0 ? (
                                 <List.Item>
                                     <List.Header>NG 소재</List.Header>
@@ -360,8 +360,8 @@ render() {
     let blockPage;
     let reportedConent;
     let calendar_edit;
-    let calendar = user!=null?<BigCalendar onChange={this.onDateClickChange} calendar={user.profile.calendar} value={this.state.date} />:null
-    if (typeof(currentUser) == 'object'&&!Array.isArray(currentUser)&&currentUser !== null&&user!==null) {
+    let calendar = user!==null?<BigCalendar onChange={this.onDateClickChange} calendar={user.profile.calendar} value={this.state.date} />:null
+    if (typeof(currentUser) === 'object'&&!Array.isArray(currentUser)&&currentUser !== null&&user!==null) {
             reportedConent =<UserReport user={user._id}/>;
             if(this.state.isReported){
                 reportedConent =<div>
@@ -390,7 +390,7 @@ render() {
     }
     return (
         <div>
-            <h1>{user != null ? user.userName : ""}의 마이페이지</h1>
+            <h1>{user !== null ? user.userName : ""}의 마이페이지</h1>
             <div>
                 {reportedConent}
                 {blockPage}

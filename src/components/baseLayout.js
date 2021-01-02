@@ -1,8 +1,8 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import axios from 'axios';
 import { CookiesProvider } from 'react-cookie';
 import './Layout/layout.css';
-import {Switch, Route, Link,useHistory, Redirect } from 'react-router-dom';
+import {Switch, Route, Link, withRouter ,useLocation, Redirect } from 'react-router-dom';
 import AuthRoute from './Layout/AuthRoute';
 import Main from './Main';
 import About from './About';
@@ -22,12 +22,13 @@ import Footer from './Layout/footer';
 import Navbar from './Layout/pageNav';
 import Landing from './Main/landing';
 
-
 class BaseLayout extends React.Component {
   constructor(props) {
       super(props);
+      var url = this.props.location.pathname.split('/');
       this.state = {
-          currentUser: null
+          currentUser: null,
+          isEdit:url.length>2?(url[2]==="edit"?true:false):false
       };
   }
   login = (login_info) => {
@@ -67,15 +68,25 @@ class BaseLayout extends React.Component {
         console.log(err);
     });
   }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.location.pathname !== prevProps.location.pathname) {
+      var url = this.props.location.pathname.split('/');
+      if(url.length >2){
+        this.setState({isEdit:url[2]==="edit"?true:false});
+      }else{
+        this.setState({isEdit:false});
+      }
+    }
+  }
+
   render() {
-    var url = window.location.href.split('/');
-    var isEdit = url[2]==="edit"?true:false;
   return (
     <div className="base">
       <CookiesProvider>
-        {isEdit?<header>
+        {this.state.isEdit?null:<header>
         <Navbar currentUser={this.state.currentUser}/>
-      </header>:null}
+      </header>}
       
       <div className='contents-wrapper'>
         <Switch>
@@ -104,10 +115,10 @@ class BaseLayout extends React.Component {
         </Switch>
         </div>
         
-        {isEdit?<Footer/>:null}
+        {this.state.isEdit?null:<Footer/>}
     
       </CookiesProvider>
   </div>
   );}
 }
-export default BaseLayout;
+export default withRouter(props=><BaseLayout {...props}/>);

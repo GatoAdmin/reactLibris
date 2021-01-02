@@ -76,7 +76,7 @@ class Home extends React.Component {
                                 <h3>새소식</h3>
                                 <Item.Group divided>
                                     {this.state.news.map((notice,index)=>{
-                                        return <Item>
+                                        return <Item key={index}>
                                             <Item.Image src={notice.banner.length>0?"/assets/images/"+notice.banner[0].imageData:src} size="tiny"/>
                                             <Item.Content>
                                                 <Item.Header>{notice.title}</Item.Header>        

@@ -8,7 +8,6 @@ import Home from './home';
 function Main({ currentUser,match })  {
   const [cookies, setCookie] = useCookies(['libris_visite']);
   // var is_visite = cookies.get('libris_visite')||false; 
-  console.log(cookies.libris_visite);
   return (
       <div>
         <div>

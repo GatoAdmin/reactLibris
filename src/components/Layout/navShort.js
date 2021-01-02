@@ -31,15 +31,13 @@ class Navbar extends React.Component{
   }
   
   render (){
-    console.log("테스트");
-
     return (
     <div className="screen-dimmer" onClick={()=>this.props.handleSideMenuClick()}>
       <nav className='menu-wrapper shortcut-menu'>
         {this.state.activeItem === 'articles'?
-        <Menu className="user-buttons" vertical>
-          <Menu.Item>
-            <h3>임시 저장글</h3> <Button onClick={()=>this.makeArticle()}>새로 만들기</Button>
+        <Menu className="user-buttons temp-save-menu" vertical>
+          <Menu.Item className="display-flex justify-content-space-between">
+            <div className="display-flex" as={Link} to=""><h3 className="temp-save-text">임시 저장글</h3><Icon name="angle right" className="margin-auto"/></div><Button className="float-right" color="violet" onClick={()=>this.makeArticle()}>새로 만들기</Button>
           </Menu.Item>
           {this.props.currentUser.saveScenarios.map((scenario,index)=>{
             return (
