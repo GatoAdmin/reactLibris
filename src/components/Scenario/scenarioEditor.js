@@ -386,18 +386,22 @@ class Maker extends React.Component {
         }
         );
     }
+
     sendCarte(e,data){
         var formData = new FormData(e.target);
         formData.append("rule",this.state.rule);
         formData.append("master_difficulty",this.state.master_difficulty);
         formData.append("player_difficulty",this.state.player_difficulty);
         formData.append("background_tag",this.state.background_tag);
-        formData.append("genre_tags",this.state.genre_tags);
-        formData.append("sub_tags",this.state.sub_tags);
+        // formData.append("genre_tags",this.state.genre_tags);
+        // formData.append("sub_tags",this.state.sub_tags);
 
         var object = {};
         for (var pair of formData.entries()) { object[pair[0]] = pair[1]; console.log(pair[0]+ ', ' + pair[1]); }
         //{headers: {'Content-Type': 'multipart/form-data' }}
+        object.genre_tags = this.state.genre_tags;
+        object.sub_tags = this.state.sub_tags;
+        
         console.log(JSON.stringify(object));
         axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,{data:JSON.stringify(object)})
         .then((res)=>{if(res.data.success){
