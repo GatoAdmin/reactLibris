@@ -88,7 +88,7 @@ class BaseLayout extends React.Component {
         <Navbar currentUser={this.state.currentUser}/>
       </header>}
       
-      <div className='contents-wrapper'>
+      <div className={`contents-wrapper ${this.state.isEdit?'editor-wrapper':''}`}>
         <Switch>
               <Route exact path="/" component={(props)=><Main currentUser={this.state.currentUser}{...props}/>} />
               <Route path="/about" component={About} />

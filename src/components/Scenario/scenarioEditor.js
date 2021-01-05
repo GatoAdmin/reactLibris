@@ -176,7 +176,7 @@ class Maker extends React.Component {
         // }
         console.log(last !== undefined&&last!==null?last.content[0]:null)
         component = (
-            <div id="form-container" className="container">
+            <div id="editor-form-container" className="container">
                 <Form method="POST" id='edit-form' action={`/scenarios/edit/save/${this.state.article_id }`} onSubmit={()=>this.convertQuill()}>
                     <Form.Input size="massive" type="text"  name="title"  value={this.state.title} onChange={this.onChangeForm} placeholder="제목을 입력해 주세요"/>
                     <Form.Input type="text"  name="title_short" value={this.state.title_short} onChange={this.onChangeForm} placeholder="시나리오 줄임말을 스페이스바 없이 입력해주세요"/>
@@ -196,10 +196,12 @@ class Maker extends React.Component {
     getHeader(){
         var component = (
             <header>
+                <nav className="menu-wrapper editor-menu">
                     <Button className="btn btn-primary" type="button" onClick={()=>this.props.history.goBack()}><Icon name="angle left" fitted/></Button>
                     {this.state.result!==null?this.getModal():null}
                     <Button className="btn btn-primary" form='edit-form' color="purple" type="submit" name="save">저장</Button>
                     <Button className="btn btn-primary" form='edit-form' color="purple" type="submit" name="publication">발행</Button>
+                </nav>
             </header>
         );
         return component;

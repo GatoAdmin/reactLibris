@@ -33,7 +33,7 @@ class Navbar extends React.Component{
   render (){
     return (
     <div className="screen-dimmer" onClick={()=>this.props.handleSideMenuClick()}>
-      <nav className='menu-wrapper shortcut-menu'>
+      <nav className='shortcut-menu'>
         {this.state.activeItem === 'articles'?
         <Menu className="user-buttons temp-save-menu" vertical>
           <Menu.Item className="display-flex justify-content-space-between">

@@ -7,6 +7,15 @@ footer{
     margin-top: 100px;
     color:white;
 }
+
+header{
+    width: 1402px;
+    position: fixed;
+    margin-left: -2px;
+    z-index: 999;
+    background-color: #FFFFFF;
+}
+
 #root{
     max-width: 1920px;
     min-width: 1500px;
@@ -96,9 +105,17 @@ a:hover {color: violet!important;}
     top: 0px;
     left: 0px;
 }
-
+#editor-form-container{
+    padding-top: 80px;
+}
 .ql-editor{
     min-height: 500px;
+}
+.editor-wrapper{
+    padding-top: 0px !important;
+}
+.editor-menu.menu-wrapper{
+    padding: 5px;
 }
 .menu-button:hover {
     background-color:  rgb(70, 18, 70)!important;
@@ -281,6 +298,10 @@ a:hover {color: violet!important;}
 }
 .menu-bar>.column{
     padding: 0 !important;
+}
+
+.contents-wrapper{
+    padding-top: 180px;
 }
 
 .slider-box{
