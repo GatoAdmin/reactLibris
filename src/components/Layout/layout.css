@@ -148,6 +148,9 @@ a:hover {color: violet!important;}
     margin-top: auto!important;
     margin-bottom: auto!important;
 }
+#setting-form .row{
+    padding-bottom: 0.5rem;
+}
 /* ::-webkit-scrollbar {
     -webkit-appearance: none;
   }

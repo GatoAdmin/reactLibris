@@ -12,6 +12,7 @@ class Maker extends React.Component {
             chronicle_id: "",
             current_user: props.currentUser,
             is_open_setting:false,
+            is_open_carte_save_check:false,
             is_check_paid: true,
             is_agree_paid: false,
             article_id: null,
@@ -151,29 +152,6 @@ class Maker extends React.Component {
     getDetail() {
         var component;
         let last = this.state.result!=null?this.state.result.lastVersion:null;
-        // var masterTags = this.state.master_tags;
-        // var select_rule;
-        // var select_genre;
-        // var select_background;
-        // var select_sub_tags;
-        // if(masterTags.length>0){
-        //     var ruleTags = masterTags.find(tags => tags.name === "rule");
-        //     select_rule = ruleTags.tags.map((tag, id) => {
-        //                 return { value: tag._id, key: id.toString(), text:tag.tag };
-        //             })
-        //     var genreTags = masterTags.find(tags => tags.name === "genre");
-        //     select_genre = genreTags.tags.map((tag, id) => {
-        //         return { value: tag._id, key: id.toString(), text:tag.tag };
-        //     })
-        //     var backgroundTags = masterTags.find(tags => tags.name === "background");
-        //     select_background = backgroundTags.tags.map((tag, id) => {
-        //         return { value: tag._id, key: id.toString(), text:tag.tag };
-        //     })
-        //     var subTags = masterTags.find(tags => tags.name === "subTag");
-        //     select_sub_tags = subTags.tags.map((tag, id) => {
-        //         return { value: tag._id, key: id.toString(), text:tag.tag };
-        //     })
-        // }
         console.log(last !== undefined&&last!==null?last.content[0]:null)
         component = (
             <div id="editor-form-container" className="container">
@@ -357,6 +335,24 @@ class Maker extends React.Component {
                 positive
             />
         </Modal.Actions>
+        <Modal 
+          centered
+          onClose={() => this.setCarteSaveCheckOpen(false)}
+          open={this.state.is_open_carte_save_check}
+          size='small'
+        >
+          <Modal.Header>설정 저장</Modal.Header>
+          <Modal.Content>
+            <p>설정이 저장되었습니다.</p>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button
+              icon='check'
+              content='확인'
+              onClick={() => this.setCarteSaveCheckOpen(false)}
+            />
+          </Modal.Actions>
+        </Modal>
     </Modal>);
     }
 
@@ -364,6 +360,9 @@ class Maker extends React.Component {
         this.setState({is_open_setting:bool});
     }
 
+    setCarteSaveCheckOpen(bool){
+        this.setState({is_open_carte_save_check:bool});
+    }
     onScenarioChange = (e, data) => {
         console.log(data)
         this.setState({
@@ -406,6 +405,7 @@ class Maker extends React.Component {
         axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,{data:JSON.stringify(object)})
         .then((res)=>{if(res.data.success){
             console.log("설정이 저장되었습니다.");
+            this.setCarteSaveCheckOpen(true);
             // console.log(res.data.document.imageData);
             // return <Redirect to={`/news/chronicle/`}/>
         }})
