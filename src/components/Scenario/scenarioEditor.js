@@ -5,6 +5,7 @@ import {Link} from 'react-router-dom';
 import { Grid, Card, Icon, Form, Rating,Image, Table, Button, Label, Select, Dropdown,Checkbox, Input, Modal } from 'semantic-ui-react'
 import '../../index.css';
 
+const DefaultImg = 'https://react.semantic-ui.com/images/wireframe/image.png'
 class Maker extends React.Component {    
     constructor(props) {
         super();
@@ -34,6 +35,8 @@ class Maker extends React.Component {
             price:0,    
             capacity_min:0,
             capacity_max:0,
+            multer_image:DefaultImg,
+            set_uploaded_img:null,
         };
     }
 
@@ -140,13 +143,18 @@ class Maker extends React.Component {
         about.value = JSON.stringify(quillContents);
         return true;
       };
-      changeQuill=(e)=>{
+    changeQuill=(e)=>{
           console.log(e);
           this.setState({article:e});
       }
 
-      onChangeForm=(e, data)=>{
+    onChangeForm=(e, data)=>{
         this.setState({[data.name]: data.value });
+    }
+
+    changeImage=(e)=>{
+        this.setState({multer_image:URL.createObjectURL(e.target.files[0]),
+            set_uploaded_img:e.target.files[0]});
     }
 
     getDetail() {
@@ -217,6 +225,14 @@ class Maker extends React.Component {
         <Modal.Content>
             <Form id="setting-form" method="POST" onSubmit={(e)=>this.sendCarte(e)} >
                 <Grid>
+                    <Grid.Row>
+                        <Grid.Column  width={4}>
+                            <Form.Input type="file" onChange={(e)=>this.changeImage(e)} className="img-rounded"/>
+                        </Grid.Column>
+                        <Grid.Column  width={12}>
+                            <Image src={this.state.multer_image} alt="upload-image" size='small' wrapped label="업로드 이미지"/>
+                        </Grid.Column>
+                    </Grid.Row>
                     <Grid.Row>
                         <Grid.Column width={4}><Label className="border-none" size="big"  basic>사용 룰</Label></Grid.Column>
                         <Grid.Column width={12}>
@@ -391,7 +407,9 @@ class Maker extends React.Component {
         formData.append("rule",this.state.rule);
         formData.append("master_difficulty",this.state.master_difficulty);
         formData.append("player_difficulty",this.state.player_difficulty);
-        formData.append("background_tag",this.state.background_tag);
+        formData.append("background_tag",this.state.background_tag);       
+        formData.append("imageName","multer-image-"+Date.now());
+        // formData.append("imageData",this.state.setUploadedImg);
         // formData.append("genre_tags",this.state.genre_tags);
         // formData.append("sub_tags",this.state.sub_tags);
 
@@ -400,8 +418,8 @@ class Maker extends React.Component {
         //{headers: {'Content-Type': 'multipart/form-data' }}
         object.genre_tags = this.state.genre_tags;
         object.sub_tags = this.state.sub_tags;
-        
-        console.log(JSON.stringify(object));
+        object.imageData = this.state.set_uploaded_img;
+
         axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,{data:JSON.stringify(object)})
         .then((res)=>{if(res.data.success){
             console.log("설정이 저장되었습니다.");
