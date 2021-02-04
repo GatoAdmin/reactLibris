@@ -185,7 +185,15 @@ a:hover {color: violet!important;}
     height: 50px!important;
     overflow: hidden;
 }
-
+.card_banner{
+    width: 263px;
+    height: 218px;
+    overflow: hidden;
+}
+.card_banner>img{
+    min-height: -webkit-fill-available;
+    /* min-height: fit-content; */
+}
 .user-image img{
     width: 50px!important;
     height: 50px!important;
