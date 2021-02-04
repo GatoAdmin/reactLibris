@@ -70,7 +70,8 @@ class Maker extends React.Component {
                         capacity_min:newArticle?0:res.data.result.carte.capacity.min,
                         capacity_max:newArticle?0:res.data.result.carte.capacity.max,
                         is_paid:!res.data.result.isFree,
-                        price:res.data.result.price,    
+                        price:res.data.result.price,  
+                        multer_image: res.data.result.banner?"/"+res.data.result.banner.imageData:DefaultImg
                     });
                 })
                 .catch(function (err) {
@@ -160,7 +161,6 @@ class Maker extends React.Component {
     getDetail() {
         var component;
         let last = this.state.result!=null?this.state.result.lastVersion:null;
-        console.log(last !== undefined&&last!==null?last.content[0]:null)
         component = (
             <div id="editor-form-container" className="container">
                 <Form method="POST" id='edit-form' action={`/scenarios/edit/save/${this.state.article_id }`} onSubmit={()=>this.convertQuill()}>
@@ -169,10 +169,8 @@ class Maker extends React.Component {
                     <div className="row form-group">
                         <label htmlFor="article">내용</label>
                         <input name="article" type="hidden" />
-                        {last !== undefined&&last!==null?<QuillEditor changeQuill={this.changeQuill} setValue={last.content[0]}  />:null}
+                        {last !== undefined&&last!==null?<QuillEditor changeQuill={this.changeQuill} defaultValue={last.content[0]}  />:null}
                     </div>
-                    {/* <Button className="btn btn-primary" color="purple" type="submit" name="save">저장</Button>
-                    <Button className="btn btn-primary" color="purple" type="submit" name="publication">발행</Button> */}
                 </Form >
             </div >
         );
@@ -201,7 +199,6 @@ class Maker extends React.Component {
         var select_background;
         var select_sub_tags;
         if(masterTags.length>0){
-            console.log(this.state.rule);
             var ruleTags = masterTags.find(tags => tags.name === "rule");
             select_rule = ruleTags.tags.map((tag, id) => {
                         return { value: tag._id, key: id.toString(), text:tag.tag };
@@ -219,23 +216,37 @@ class Maker extends React.Component {
                 return { value: tag._id, key: id.toString(), text:tag.tag };
             })
         }
-
+//this.state.multer_image
         return(<Modal onClose={()=>this.setOpenSetting(false)} onOpen={()=>this.setOpenSetting(true)} open={this.state.is_open_setting} closeIcon trigger={<Button><Icon name="setting" fitted/></Button>}>
         <Modal.Header>설정</Modal.Header>
         <Modal.Content>
             <Form id="setting-form" method="POST" onSubmit={(e)=>this.sendCarte(e)} >
                 <Grid>
                     <Grid.Row>
-                        <Grid.Column  width={4}>
-                            <Form.Input type="file" onChange={(e)=>this.changeImage(e)} className="img-rounded"/>
+                        <Grid.Column width={4}><Label className="border-none" size="big"  basic>사용 룰</Label></Grid.Column>
+                        <Grid.Column width={4}>
+                            <Form.Select 
+                                name="rule"
+                                onChange={(e,data)=>this.onScenarioSelected(e,data)}
+                                options={select_rule}
+                                value={this.state.rule!==null?this.state.rule:null}
+                                placeholder='사용 룰'/>  
                         </Grid.Column>
-                        <Grid.Column  width={12}>
-                            <Image src={this.state.multer_image} alt="upload-image" size='small' wrapped label="업로드 이미지"/>
+                        <Grid.Column width={8}>
+                            <Form.Input type="file" onChange={(e)=>this.changeImage(e)} className="img-rounded"/>
                         </Grid.Column>
                     </Grid.Row>
                     <Grid.Row>
+                        <Grid.Column width={8}>
+                            {/* <Label className="border-none" size="large" basic>이 시나리오는 가변적인 인원수에 대응할 수 있습니다.</Label><Checkbox name="is_multiple_capacity" value="check" onChange={(e,data)=>this.changeCapacityType(e,data)} /> */}
+                        </Grid.Column>
+                        <Grid.Column width={8}>
+                            <Image src={this.state.multer_image} alt="upload-image" size='small' wrapped/>
+                        </Grid.Column>
+                    </Grid.Row>
+                    {/* <Grid.Row>
                         <Grid.Column width={4}><Label className="border-none" size="big"  basic>사용 룰</Label></Grid.Column>
-                        <Grid.Column width={12}>
+                        <Grid.Column width={4}>
                             <Form.Select 
                                 name="rule"
                                 // onChange={(e,data)=>{console.log(data.value)}}"5e71d50eafdc0818e8eccadc"
@@ -244,12 +255,23 @@ class Maker extends React.Component {
                                 value={this.state.rule!==null?this.state.rule:null}
                                 placeholder='사용 룰'/>  
                         </Grid.Column>
-                    </Grid.Row>
+                        
+                        <Grid.Column  width={8}>
+                            <Grid>
+                                <Grid.Row>
+                                    <Form.Input type="file" onChange={(e)=>this.changeImage(e)} className="img-rounded"/>
+                                </Grid.Row>
+                                <Grid.Row>
+                            <Image src={this.state.multer_image} alt="upload-image" size='small' wrapped/>
+                                </Grid.Row>
+                            </Grid>
+                        </Grid.Column>
+                    </Grid.Row>*/}
                     <Grid.Row>
                         <Grid.Column>
                             <Label className="border-none" size="large" basic>이 시나리오는 가변적인 인원수에 대응할 수 있습니다.</Label><Checkbox name="is_multiple_capacity" value="check" onChange={(e,data)=>this.changeCapacityType(e,data)} />
                         </Grid.Column>
-                    </Grid.Row>
+                    </Grid.Row> 
                     <Grid.Row>
                         <Grid.Column width={4}><Label className="border-none"  size="big" basic>필요 인원수</Label></Grid.Column>
                         <Grid.Column width={12}>
@@ -270,13 +292,11 @@ class Maker extends React.Component {
                     </Grid.Row>
                     <Grid.Row>
                         <Grid.Column width={4}><Label className="border-none" size="big" basic>마스터 난이도</Label></Grid.Column>
-                        <Grid.Column width={12}>
+                        <Grid.Column width={4}>
                             <Rating  name="master_difficulty" icon="star" maxRating={5} size="massive" onRate={(e,data)=>this.onScenarioRating(e,data)} rating={this.state.master_difficulty} clearable/>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
                         <Grid.Column width={4}><Label className="border-none" size="big" basic>플레이어 난이도</Label></Grid.Column>
-                        <Grid.Column width={12}>
+                        <Grid.Column width={4}>
                             <Rating name="player_difficulty" icon="star" maxRating={5} size="massive" onRate={(e,data)=>this.onScenarioRating(e,data)} rating={this.state.player_difficulty} clearable/>
                         </Grid.Column>
                     </Grid.Row>
@@ -407,34 +427,27 @@ class Maker extends React.Component {
         formData.append("rule",this.state.rule);
         formData.append("master_difficulty",this.state.master_difficulty);
         formData.append("player_difficulty",this.state.player_difficulty);
-        formData.append("background_tag",this.state.background_tag);       
+        formData.append("background_tag",this.state.background_tag);     
+        formData.append("genre_tags",this.state.genre_tags);
+        formData.append("sub_tags",this.state.sub_tags);  
         formData.append("imageName","multer-image-"+Date.now());
-        // formData.append("imageData",this.state.setUploadedImg);
+        formData.append("imageData",this.state.set_uploaded_img);
         // formData.append("genre_tags",this.state.genre_tags);
         // formData.append("sub_tags",this.state.sub_tags);
 
         var object = {};
         for (var pair of formData.entries()) { object[pair[0]] = pair[1]; console.log(pair[0]+ ', ' + pair[1]); }
-        //{headers: {'Content-Type': 'multipart/form-data' }}
-        object.genre_tags = this.state.genre_tags;
-        object.sub_tags = this.state.sub_tags;
-        object.imageData = this.state.set_uploaded_img;
-
-        axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,{data:JSON.stringify(object)})
+        
+        axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,formData)
         .then((res)=>{if(res.data.success){
             console.log("설정이 저장되었습니다.");
             this.setCarteSaveCheckOpen(true);
-            // console.log(res.data.document.imageData);
-            // return <Redirect to={`/news/chronicle/`}/>
         }})
         .catch((err)=>{console.log(err);});
         return true;
     }
 
     render(){
-        // var currentUser = this.props.currentUser;
-        // var result = this.state.result;
-        //action={`/scenarios/edit/setting/save/${this.state.article_id }`}
         var component = (<div>
             {this.getHeader()}
             {this.getDetail()}

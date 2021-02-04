@@ -76,6 +76,7 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use('/upload', express.static('upload'));
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
 app.use('/replays', replaysRouter);

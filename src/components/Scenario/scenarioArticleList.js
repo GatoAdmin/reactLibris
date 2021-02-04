@@ -255,7 +255,7 @@ class ArticleList extends React.Component {
                                 var latest = data.lastVersion;
                                 return (
                                     <Card key = {index.toString()} >
-                                        <Image as={Link} to={"/scenarios/view/"+data._id} src={data.banner!=undefined&&data.banner.length>0?"/assets/images/"+data.banner[0].imageData:src} wrapped ui={false} />
+                                        <Image as={Link} to={"/scenarios/view/"+data._id} src={data.banner!=undefined?data.banner.imageData!==undefined?"/"+data.banner.imageData:src:src} wrapped ui={false} />
                                         <Card.Content>
                                             <Card.Header className="ellipsis"><Link to={"/scenarios/view/"+data._id}>{data.title}</Link></Card.Header>
                                             <Card.Meta><Link to={"/user/"+data.author.userName}><Icon name="user"/>{data.author.userName}</Link></Card.Meta>

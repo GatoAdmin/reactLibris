@@ -167,7 +167,7 @@ class ScenarioView extends React.Component {
             infoTab = (
                 <div className="meta-data-box font-mm">
                     <div>
-                        <Image className="article-banner" centered src={result.banner!==undefined?result.banner.imageData!==undefined?"/assets/images/"+result.banner.imageData:userSrc:userSrc}/>
+                        <Image className="article-banner" centered src={result.banner!==undefined?result.banner.imageData!==undefined?"/"+result.banner.imageData:userSrc:userSrc}/>
                     </div>
                     {/* <Grid padded columns='equal'>
                         <Grid.Row className="width-auto font-mm">

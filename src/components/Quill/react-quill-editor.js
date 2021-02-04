@@ -14,9 +14,9 @@ class Editor extends React.Component {
     
     constructor (props) {
       super(props);
-      console.log(props.setValue)
-      var setValue = props.setValue===""?null:JSON.parse(props.setValue);
-      this.state = {theme: 'snow',value:setValue, setValue:setValue }
+      console.log(props.defaultValue)
+      var defaultValue = props.defaultValue===""?null:JSON.parse(props.defaultValue);
+      this.state = {theme: 'snow',value:defaultValue, defaultValue:defaultValue }
       this.handleChange = this.handleChange.bind(this)
     }
 
@@ -39,7 +39,7 @@ class Editor extends React.Component {
                       theme:this.state.theme,
                       onChange:this.handleChange,
                       value:this.state.value,
-                      defaultValue:this.state.setValue,
+                      defaultValue:this.state.defaultValue,
                       modules:Editor.modules,
                       formats:Editor.formats,
                       bounds:'.editor-box',
