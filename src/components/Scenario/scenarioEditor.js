@@ -27,14 +27,15 @@ class Maker extends React.Component {
             sub_tags:[],
             rule:"",
             is_agree_comment:true,
-            orpgPredictingTime: 0,
-            trpgPredictingTime:0,
+            orpgPredictingTime: 1,
+            trpgPredictingTime:1,
+            predicting_time:1,
             master_difficulty:1,
             player_difficulty:1,
             is_paid:false,
             price:0,    
-            capacity_min:0,
-            capacity_max:0,
+            capacity_min:1,
+            capacity_max:1,
             multer_image:DefaultImg,
             set_uploaded_img:null,
         };
@@ -67,8 +68,8 @@ class Maker extends React.Component {
                         trpgPredictingTime:newArticle?0:res.data.result.carte.trpgPredictingTime,
                         master_difficulty:newArticle?0:res.data.result.carte.masterDifficulty,
                         player_difficulty:newArticle?0:res.data.result.carte.playerDifficulty,
-                        capacity_min:newArticle?0:res.data.result.carte.capacity.min,
-                        capacity_max:newArticle?0:res.data.result.carte.capacity.max,
+                        capacity_min:newArticle?1:res.data.result.carte.capacity.min,
+                        capacity_max:newArticle?1:res.data.result.carte.capacity.max,
                         is_paid:!res.data.result.isFree,
                         price:res.data.result.price,  
                         multer_image: res.data.result.banner?"/"+res.data.result.banner.imageData:DefaultImg
@@ -142,6 +143,7 @@ class Maker extends React.Component {
         var quillContents = this.state.article;
         var about = document.querySelector('input[name=article]');
         about.value = JSON.stringify(quillContents);
+        console.log(about.value)
         return true;
       };
     changeQuill=(e)=>{
@@ -169,7 +171,7 @@ class Maker extends React.Component {
                     <div className="row form-group">
                         <label htmlFor="article">내용</label>
                         <input name="article" type="hidden" />
-                        {last !== undefined&&last!==null?<QuillEditor changeQuill={this.changeQuill} defaultValue={last.content[0]}  />:null}
+                        {this.state.result&&this.state.result.version!==null?<QuillEditor changeQuill={this.changeQuill} defaultValue={last !== undefined&&last!==null?last.content[0]:""}/>:null}
                     </div>
                 </Form >
             </div >
@@ -277,7 +279,7 @@ class Maker extends React.Component {
                         <Grid.Column width={12}>
                             <Form.Group className="text-left" inline>       
                                 <Form.Input className="search-number " type="number" name="capacity_min" onChange={(e,data)=>this.onScenarioChange(e,data)} value={this.state.capacity_min} min={1} placeholder="최소 인원수"/>
-                                <span id="multiple_capacity" className="hidden"><Form.Input className="search-number search-number-right" label="~" type="number" name="capacity_max" onChange={()=>this.onScenarioChange} defalutValue={this.state.capacity_max} min={1} placeholder="최대 인원수"/></span>
+                                <span id="multiple_capacity" className="hidden"><Form.Input className="search-number search-number-right" label="~" type="number" name="capacity_max" onChange={(e,data)=>this.onScenarioChange(e,data)} value={this.state.capacity_max} min={1} placeholder="최대 인원수"/></span>
                             </Form.Group>  
                         </Grid.Column>
                     </Grid.Row>
@@ -285,7 +287,7 @@ class Maker extends React.Component {
                         <Grid.Column width={4}><Label className="border-none" size="big" basic>플레이 시간</Label></Grid.Column>
                         <Grid.Column width={12}>
                             <Form.Group className="text-left" inline>
-                                <Form.Input className="search-number " type="number" name="predicting_time" onChange={(e,data)=>this.onScenarioChange(e,data)} min={0} value={this.state.orpgPredictingTime!==null?this.state.orpgPredictingTime:this.state.trpgPredictingTime} placeholder="시간"/>
+                                <Form.Input className="search-number " type="number" name="predicting_time" onChange={(e,data)=>this.onScenarioChange(e,data)} min={0} value={this.state.predicting_time} placeholder="시간"/>
                                 {/* <Form.Input className="search-number search-number-right" label="~" type="number" name="predicting_time_max" onChange={(e,data)=>this.onScenarioChange(e,data)} min={0} placeholder="최대"/> */}
                             </Form.Group>
                         </Grid.Column>
@@ -345,7 +347,7 @@ class Maker extends React.Component {
                                 <Grid.Row>
                                     <Grid.Column width={16}>
                                         {/* <!-- 약관 페이지가 완성되면 이곳에 패널로 추가하여 보여줄 것 --> */}
-                                        <Label className="border-none" size="large" basic>유료 발행시 가격을 수정하거나 게시물을 삭제할 수 없습니다. 동의하십니까?<Link>(자세히 알아보기)</Link></Label>
+                                        <Label className="border-none" size="large" basic>유료 발행시 가격을 수정하거나 게시물을 삭제할 수 없습니다. 동의하십니까?<Link to="/">(자세히 알아보기)</Link></Label>
                                         <Checkbox id="agree_paid" label="" name="is_agree_paid" value="check" readOnly={this.state.is_agree_paid} onChange={this.checkAgreePaid} checked={this.state.is_agree_paid}/>
                                     </Grid.Column>
                                 </Grid.Row>
@@ -401,6 +403,12 @@ class Maker extends React.Component {
     }
     onScenarioChange = (e, data) => {
         console.log(data)
+        if(data.name==="capacity_min"){
+            this.setState((preState)=>(
+                {capacity_max: preState.capacity_max>=data.value?preState.capacity_max:data.value}
+                )
+            );
+        }
         this.setState({
             [data.name]: data.value
         }

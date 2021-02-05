@@ -531,6 +531,7 @@ router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
     if (!scenario) { return next(404); }
     var formData = req.body;
     var article = formData.article;
+    console.log(article);
     var user = req.user;
     
     scenario.title= formData.title;

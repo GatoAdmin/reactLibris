@@ -14,15 +14,15 @@ class Editor extends React.Component {
     
     constructor (props) {
       super(props);
-      console.log(props.defaultValue)
-      var defaultValue = props.defaultValue===""?null:JSON.parse(props.defaultValue);
+      console.log(props.defaultValue===""||props.defaultValue==="undefined");
+      var defaultValue = props.defaultValue===""||props.defaultValue==="undefined"?null:JSON.parse(props.defaultValue);
       this.state = {theme: 'snow',value:defaultValue, defaultValue:defaultValue }
       this.handleChange = this.handleChange.bind(this)
     }
 
     handleChange=(html, delta, source, editor)=>{ //(html) {
       console.log(editor.getContents());
-        this.setState({ value: html });
+        // this.setState({ value: html });
         this.props.changeQuill(editor.getContents());
     }
 
@@ -38,7 +38,7 @@ class Editor extends React.Component {
                     {
                       theme:this.state.theme,
                       onChange:this.handleChange,
-                      value:this.state.value,
+                      // value:this.state.value,
                       defaultValue:this.state.defaultValue,
                       modules:Editor.modules,
                       formats:Editor.formats,
