@@ -151,6 +151,16 @@ a:hover {color: violet!important;}
 #setting-form .row{
     padding-bottom: 0.5rem;
 }
+:global(.dimmed.dimmable > .ui.modals.dimmer.visible) {
+    display: flex !important;
+  }
+  .modal {
+    height: auto;
+    top: auto;
+    left: auto;
+    bottom: auto;
+    right: auto;
+}
 /* ::-webkit-scrollbar {
     -webkit-appearance: none;
   }

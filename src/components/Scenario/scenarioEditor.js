@@ -336,7 +336,7 @@ class Maker extends React.Component {
             />
         </Modal.Actions>
         <Modal 
-          centered
+          centered ={true}
           onClose={() => this.setCarteSaveCheckOpen(false)}
           open={this.state.is_open_carte_save_check}
           size='small'
