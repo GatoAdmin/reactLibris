@@ -5,6 +5,7 @@ import {Link} from 'react-router-dom';
 import { Grid, Card, Icon, Form, Rating,Image, Table, Button, Label, Select, Dropdown,Checkbox, Input, Modal } from 'semantic-ui-react'
 import '../../index.css';
 
+const DefaultImg = 'https://react.semantic-ui.com/images/wireframe/image.png'
 class Maker extends React.Component {    
     constructor(props) {
         super();
@@ -26,14 +27,17 @@ class Maker extends React.Component {
             sub_tags:[],
             rule:"",
             is_agree_comment:true,
-            orpgPredictingTime: 0,
-            trpgPredictingTime:0,
+            orpgPredictingTime: 1,
+            trpgPredictingTime:1,
+            predicting_time:1,
             master_difficulty:1,
             player_difficulty:1,
             is_paid:false,
             price:0,    
-            capacity_min:0,
-            capacity_max:0,
+            capacity_min:1,
+            capacity_max:1,
+            multer_image:DefaultImg,
+            set_uploaded_img:null,
         };
     }
 
@@ -64,10 +68,11 @@ class Maker extends React.Component {
                         trpgPredictingTime:newArticle?0:res.data.result.carte.trpgPredictingTime,
                         master_difficulty:newArticle?0:res.data.result.carte.masterDifficulty,
                         player_difficulty:newArticle?0:res.data.result.carte.playerDifficulty,
-                        capacity_min:newArticle?0:res.data.result.carte.capacity.min,
-                        capacity_max:newArticle?0:res.data.result.carte.capacity.max,
+                        capacity_min:newArticle?1:res.data.result.carte.capacity.min,
+                        capacity_max:newArticle?1:res.data.result.carte.capacity.max,
                         is_paid:!res.data.result.isFree,
-                        price:res.data.result.price,    
+                        price:res.data.result.price,  
+                        multer_image: res.data.result.banner?"/"+res.data.result.banner.imageData:DefaultImg
                     });
                 })
                 .catch(function (err) {
@@ -138,21 +143,26 @@ class Maker extends React.Component {
         var quillContents = this.state.article;
         var about = document.querySelector('input[name=article]');
         about.value = JSON.stringify(quillContents);
+        console.log(about.value)
         return true;
       };
-      changeQuill=(e)=>{
+    changeQuill=(e)=>{
           console.log(e);
           this.setState({article:e});
       }
 
-      onChangeForm=(e, data)=>{
+    onChangeForm=(e, data)=>{
         this.setState({[data.name]: data.value });
+    }
+
+    changeImage=(e)=>{
+        this.setState({multer_image:URL.createObjectURL(e.target.files[0]),
+            set_uploaded_img:e.target.files[0]});
     }
 
     getDetail() {
         var component;
         let last = this.state.result!=null?this.state.result.lastVersion:null;
-        console.log(last !== undefined&&last!==null?last.content[0]:null)
         component = (
             <div id="editor-form-container" className="container">
                 <Form method="POST" id='edit-form' action={`/scenarios/edit/save/${this.state.article_id }`} onSubmit={()=>this.convertQuill()}>
@@ -161,10 +171,8 @@ class Maker extends React.Component {
                     <div className="row form-group">
                         <label htmlFor="article">내용</label>
                         <input name="article" type="hidden" />
-                        {last !== undefined&&last!==null?<QuillEditor changeQuill={this.changeQuill} setValue={last.content[0]}  />:null}
+                        {this.state.result&&this.state.result.version!==null?<QuillEditor changeQuill={this.changeQuill} defaultValue={last !== undefined&&last!==null?last.content[0]:""}/>:null}
                     </div>
-                    {/* <Button className="btn btn-primary" color="purple" type="submit" name="save">저장</Button>
-                    <Button className="btn btn-primary" color="purple" type="submit" name="publication">발행</Button> */}
                 </Form >
             </div >
         );
@@ -193,7 +201,6 @@ class Maker extends React.Component {
         var select_background;
         var select_sub_tags;
         if(masterTags.length>0){
-            console.log(this.state.rule);
             var ruleTags = masterTags.find(tags => tags.name === "rule");
             select_rule = ruleTags.tags.map((tag, id) => {
                         return { value: tag._id, key: id.toString(), text:tag.tag };
@@ -211,7 +218,7 @@ class Maker extends React.Component {
                 return { value: tag._id, key: id.toString(), text:tag.tag };
             })
         }
-
+//this.state.multer_image
         return(<Modal onClose={()=>this.setOpenSetting(false)} onOpen={()=>this.setOpenSetting(true)} open={this.state.is_open_setting} closeIcon trigger={<Button><Icon name="setting" fitted/></Button>}>
         <Modal.Header>설정</Modal.Header>
         <Modal.Content>
@@ -219,7 +226,29 @@ class Maker extends React.Component {
                 <Grid>
                     <Grid.Row>
                         <Grid.Column width={4}><Label className="border-none" size="big"  basic>사용 룰</Label></Grid.Column>
-                        <Grid.Column width={12}>
+                        <Grid.Column width={4}>
+                            <Form.Select 
+                                name="rule"
+                                onChange={(e,data)=>this.onScenarioSelected(e,data)}
+                                options={select_rule}
+                                value={this.state.rule!==null?this.state.rule:null}
+                                placeholder='사용 룰'/>  
+                        </Grid.Column>
+                        <Grid.Column width={8}>
+                            <Form.Input type="file" onChange={(e)=>this.changeImage(e)} className="img-rounded"/>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column width={8}>
+                            {/* <Label className="border-none" size="large" basic>이 시나리오는 가변적인 인원수에 대응할 수 있습니다.</Label><Checkbox name="is_multiple_capacity" value="check" onChange={(e,data)=>this.changeCapacityType(e,data)} /> */}
+                        </Grid.Column>
+                        <Grid.Column width={8}>
+                            <Image src={this.state.multer_image} alt="upload-image" size='small' wrapped/>
+                        </Grid.Column>
+                    </Grid.Row>
+                    {/* <Grid.Row>
+                        <Grid.Column width={4}><Label className="border-none" size="big"  basic>사용 룰</Label></Grid.Column>
+                        <Grid.Column width={4}>
                             <Form.Select 
                                 name="rule"
                                 // onChange={(e,data)=>{console.log(data.value)}}"5e71d50eafdc0818e8eccadc"
@@ -228,18 +257,29 @@ class Maker extends React.Component {
                                 value={this.state.rule!==null?this.state.rule:null}
                                 placeholder='사용 룰'/>  
                         </Grid.Column>
-                    </Grid.Row>
+                        
+                        <Grid.Column  width={8}>
+                            <Grid>
+                                <Grid.Row>
+                                    <Form.Input type="file" onChange={(e)=>this.changeImage(e)} className="img-rounded"/>
+                                </Grid.Row>
+                                <Grid.Row>
+                            <Image src={this.state.multer_image} alt="upload-image" size='small' wrapped/>
+                                </Grid.Row>
+                            </Grid>
+                        </Grid.Column>
+                    </Grid.Row>*/}
                     <Grid.Row>
                         <Grid.Column>
                             <Label className="border-none" size="large" basic>이 시나리오는 가변적인 인원수에 대응할 수 있습니다.</Label><Checkbox name="is_multiple_capacity" value="check" onChange={(e,data)=>this.changeCapacityType(e,data)} />
                         </Grid.Column>
-                    </Grid.Row>
+                    </Grid.Row> 
                     <Grid.Row>
                         <Grid.Column width={4}><Label className="border-none"  size="big" basic>필요 인원수</Label></Grid.Column>
                         <Grid.Column width={12}>
                             <Form.Group className="text-left" inline>       
                                 <Form.Input className="search-number " type="number" name="capacity_min" onChange={(e,data)=>this.onScenarioChange(e,data)} value={this.state.capacity_min} min={1} placeholder="최소 인원수"/>
-                                <span id="multiple_capacity" className="hidden"><Form.Input className="search-number search-number-right" label="~" type="number" name="capacity_max" onChange={()=>this.onScenarioChange} defalutValue={this.state.capacity_max} min={1} placeholder="최대 인원수"/></span>
+                                <span id="multiple_capacity" className="hidden"><Form.Input className="search-number search-number-right" label="~" type="number" name="capacity_max" onChange={(e,data)=>this.onScenarioChange(e,data)} value={this.state.capacity_max} min={1} placeholder="최대 인원수"/></span>
                             </Form.Group>  
                         </Grid.Column>
                     </Grid.Row>
@@ -247,20 +287,18 @@ class Maker extends React.Component {
                         <Grid.Column width={4}><Label className="border-none" size="big" basic>플레이 시간</Label></Grid.Column>
                         <Grid.Column width={12}>
                             <Form.Group className="text-left" inline>
-                                <Form.Input className="search-number " type="number" name="predicting_time" onChange={(e,data)=>this.onScenarioChange(e,data)} min={0} value={this.state.orpgPredictingTime!==null?this.state.orpgPredictingTime:this.state.trpgPredictingTime} placeholder="시간"/>
+                                <Form.Input className="search-number " type="number" name="predicting_time" onChange={(e,data)=>this.onScenarioChange(e,data)} min={0} value={this.state.predicting_time} placeholder="시간"/>
                                 {/* <Form.Input className="search-number search-number-right" label="~" type="number" name="predicting_time_max" onChange={(e,data)=>this.onScenarioChange(e,data)} min={0} placeholder="최대"/> */}
                             </Form.Group>
                         </Grid.Column>
                     </Grid.Row>
                     <Grid.Row>
                         <Grid.Column width={4}><Label className="border-none" size="big" basic>마스터 난이도</Label></Grid.Column>
-                        <Grid.Column width={12}>
+                        <Grid.Column width={4}>
                             <Rating  name="master_difficulty" icon="star" maxRating={5} size="massive" onRate={(e,data)=>this.onScenarioRating(e,data)} rating={this.state.master_difficulty} clearable/>
                         </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
                         <Grid.Column width={4}><Label className="border-none" size="big" basic>플레이어 난이도</Label></Grid.Column>
-                        <Grid.Column width={12}>
+                        <Grid.Column width={4}>
                             <Rating name="player_difficulty" icon="star" maxRating={5} size="massive" onRate={(e,data)=>this.onScenarioRating(e,data)} rating={this.state.player_difficulty} clearable/>
                         </Grid.Column>
                     </Grid.Row>
@@ -309,7 +347,7 @@ class Maker extends React.Component {
                                 <Grid.Row>
                                     <Grid.Column width={16}>
                                         {/* <!-- 약관 페이지가 완성되면 이곳에 패널로 추가하여 보여줄 것 --> */}
-                                        <Label className="border-none" size="large" basic>유료 발행시 가격을 수정하거나 게시물을 삭제할 수 없습니다. 동의하십니까?<Link>(자세히 알아보기)</Link></Label>
+                                        <Label className="border-none" size="large" basic>유료 발행시 가격을 수정하거나 게시물을 삭제할 수 없습니다. 동의하십니까?<Link to="/">(자세히 알아보기)</Link></Label>
                                         <Checkbox id="agree_paid" label="" name="is_agree_paid" value="check" readOnly={this.state.is_agree_paid} onChange={this.checkAgreePaid} checked={this.state.is_agree_paid}/>
                                     </Grid.Column>
                                 </Grid.Row>
@@ -365,6 +403,12 @@ class Maker extends React.Component {
     }
     onScenarioChange = (e, data) => {
         console.log(data)
+        if(data.name==="capacity_min"){
+            this.setState((preState)=>(
+                {capacity_max: preState.capacity_max>=data.value?preState.capacity_max:data.value}
+                )
+            );
+        }
         this.setState({
             [data.name]: data.value
         }
@@ -391,32 +435,27 @@ class Maker extends React.Component {
         formData.append("rule",this.state.rule);
         formData.append("master_difficulty",this.state.master_difficulty);
         formData.append("player_difficulty",this.state.player_difficulty);
-        formData.append("background_tag",this.state.background_tag);
+        formData.append("background_tag",this.state.background_tag);     
+        formData.append("genre_tags",this.state.genre_tags);
+        formData.append("sub_tags",this.state.sub_tags);  
+        formData.append("imageName","multer-image-"+Date.now());
+        formData.append("imageData",this.state.set_uploaded_img);
         // formData.append("genre_tags",this.state.genre_tags);
         // formData.append("sub_tags",this.state.sub_tags);
 
         var object = {};
         for (var pair of formData.entries()) { object[pair[0]] = pair[1]; console.log(pair[0]+ ', ' + pair[1]); }
-        //{headers: {'Content-Type': 'multipart/form-data' }}
-        object.genre_tags = this.state.genre_tags;
-        object.sub_tags = this.state.sub_tags;
         
-        console.log(JSON.stringify(object));
-        axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,{data:JSON.stringify(object)})
+        axios.post(`/scenarios/edit/setting/save/${this.state.article_id }`,formData)
         .then((res)=>{if(res.data.success){
             console.log("설정이 저장되었습니다.");
             this.setCarteSaveCheckOpen(true);
-            // console.log(res.data.document.imageData);
-            // return <Redirect to={`/news/chronicle/`}/>
         }})
         .catch((err)=>{console.log(err);});
         return true;
     }
 
     render(){
-        // var currentUser = this.props.currentUser;
-        // var result = this.state.result;
-        //action={`/scenarios/edit/setting/save/${this.state.article_id }`}
         var component = (<div>
             {this.getHeader()}
             {this.getDetail()}

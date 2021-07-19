@@ -11,11 +11,56 @@ var HashTag = mongoose.model('HashTag');
 var Report =  mongoose.model('Report');
 
 
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+const UPLOAD_PATH = "upload/"
+
+fs.readdir('upload', (error) => {
+  // uploads 폴더 없으면 생성
+  if (error) {
+      fs.mkdirSync('upload');
+  }
+})
+
+const storage = multer.diskStorage({
+  destination: function(req,file,cb){
+    cb(null,UPLOAD_PATH);
+  },
+  filename:function(req,file,cb){
+    let extension = path.extname(file.originalname);
+    let basename = path.basename(file.originalname, extension);
+    cb(null,basename+"_"+Date.now()+extension);
+  }
+});
+
+const fileFilter =(req,file,cb)=>{
+  if(file.mimetype==='image/jpeg'||file.mimetype==='image/jpg'||file.mimetype==='image/png'){
+    cb(null,true);
+  }else{
+    cb(null,false);
+  }
+}
+
+const upload = multer({
+  storage:storage,    
+  onError : function(err, next) {
+    console.log('error', err);
+  },
+  limits:{
+    fileSize:1024*1024*5
+  },
+  fileFilter:fileFilter
+})
+
+
 const bcrypt = require('bcryptjs');
 var moment = require('moment');
 const { merge } = require('.');
 require('moment-timezone');
 moment.tz.setDefault('Asia/Seoul');
+
 var nowDate = moment().format();
 var masterTags = null;
 MasterTag.aggregate().match({ enabled: true, })
@@ -390,18 +435,19 @@ router.post("/edit/:id", ensureAuthenticated, function (req, res, next) {
 
 
 
-router.post("/edit/setting/save/:id", ensureAuthenticated, function (req, res, next) {
+router.post("/edit/setting/save/:id",[ensureAuthenticated, upload.single('imageData')], function (req, res, next) {//[ensureAuthenticated, upload.single('imageData')]
   Scenario.findOne({ _id: toObjectId(req.params.id), author: req.user._id, enabled: true }, function (err, scenario) {
-    if (err) { return next(err); }
+    if (err) { console.log(err); return next(err); }
     if (!scenario) { return next(404); }
-    
-    var formData = JSON.parse(req.body.data);
-    console.log(formData);
+    var formData = req.body;//JSON.parse(req.body.data);
+    console.log(req.body);
     var capacityMin = 1;
     var capacityMax = 1;
     var trpgTime = 1;
     var orpgTime = 1;
     var price = 0;
+    var genreTags = formData.genre_tags;
+    var subTags = formData.sub_tags;
     var user = req.user;
     capacityMin = formData.capacity_min;
     capacityMax = isChecked(formData.is_multiple_capacity) ? formData.capacity_max : formData.capacity_min;
@@ -426,15 +472,42 @@ router.post("/edit/setting/save/:id", ensureAuthenticated, function (req, res, n
         user.save();
       }
     }
+    if(genreTags.indexOf(',')>-1){
+      genreTags = genreTags.split(',');
+    }
+    if(subTags.indexOf(',')>-1){
+      subTags = subTags.split(',');
+    }
+
+    
+    // 3. 파일 객체
+    let file = req.file
+    if(req.file){
+      // file을 table_nm 디렉토리로 이동 시킨다.
+      const full_path = UPLOAD_PATH+req.user._id
+      // 디렉토리가 없으면 생성한다.
+      !fs.existsSync(full_path) && fs.mkdirSync(full_path)
+    
+      // 파일을 이동시킨다.
+      fs.renameSync(UPLOAD_PATH+file.filename, full_path+"/"+file.filename)
+      if(file){
+        scenario.banner={
+          imageName:formData.imageName,
+          imageData:full_path+"/"+file.filename
+        };
+      }
+    }
+
     scenario.rule= toObjectId(formData.rule);
+
     scenario.carte = {
       capacity: { max: capacityMax, min: capacityMin },
       rating: formData.rating,
       masterDifficulty: formData.master_difficulty,
       playerDifficulty: formData.player_difficulty,
       backgroundTag: toObjectId(formData.background_tag),
-      genreTags: toObjectId(formData.genre_tags),
-      subTags: toObjectId(formData.sub_tags),
+      genreTags: toObjectId(genreTags),
+      subTags: toObjectId(subTags),
       orpgPredictingTime: orpgTime,
       trpgPredictingTime: trpgTime,
     };
@@ -458,36 +531,9 @@ router.post("/edit/save/:id", ensureAuthenticated, function (req, res, next) {
     if (!scenario) { return next(404); }
     var formData = req.body;
     var article = formData.article;
-    // var capacityMin = 1;
-    // var capacityMax = 1;
-    // var trpgTime = 1;
-    // var orpgTime = 1;
-    // var price = 0;
+    console.log(article);
     var user = req.user;
-    /*capacityMin = formData.capacity_min;
-    capacityMax = isChecked(formData.is_multiple_capacity) ? formData.capacity_max : formData.capacity_min;
-
-    if (isChecked(formData.is_online_time)) {
-      orpgTime = formData.predicting_time;
-      trpgTime = null;
-    } else {
-      orpgTime = null;
-      trpgTime = formData.predicting_time;
-    }
-
-    if (isChecked(formData.is_paid)) {
-      if (user.agreeList.paidContent.agree) {
-        price = formData.price;
-      } else {
-        if (isChecked(formData.is_agree_paid)) {
-          var nowDate = moment().format();
-          price = formData.price;
-          user.agreeList.paidContent = { agree: true, agreeDate: new Date(nowDate) };
-        }
-        user.save();
-      }
-    }
-    */
+    
     scenario.title= formData.title;
     scenario.versions.push({
       title:formData.title,
