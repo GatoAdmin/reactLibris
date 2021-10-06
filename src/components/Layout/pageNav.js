@@ -40,15 +40,9 @@ class Navbar extends React.Component{
           <Menu secondary>
             <Menu.Item className="menu-button" name="scenarios" active={this.state.activeItem === 'scenarios'} onClick={this.handleItemClick} as={Link} to='/scenarios'>시나리오</Menu.Item>
             <Menu.Item className="menu-button" name="replays"   active={this.state.activeItem === 'replays'} onClick={this.handleItemClick} as={Link} to='/replays'>리플레이</Menu.Item> 
-            <Menu.Item className="menu-button" name="about"     active={this.state.activeItem === 'about'} onClick={this.handleItemClick} as={Link} to='/about'>도움말</Menu.Item>       
-            
+            <Menu.Item className="menu-button" name="chat"   active={this.state.activeItem === 'chat'} onClick={this.handleItemClick} as={Link} to='/chat'>채팅</Menu.Item> 
+            <Menu.Item className="menu-button" name="about"     active={this.state.activeItem === 'about'} onClick={this.handleItemClick} as={Link} to='/about'>도움말</Menu.Item>                   
           </Menu>
-            {/* <Button.Group>
-            <Button className="menu-button" as={Link} to='/scenarios'>시나리오</Button>
-            <Button className="menu-button" as={Link} to='/replays'>리플레이</Button> 
-            <Button className="menu-button" as={Link} to='/news'>공지사항</Button>    
-            <Button className="menu-button" as={Link} to='/about'>도움말</Button>       
-            </Button.Group> */}
           </Grid.Column>
           <Grid.Column width={6}>
           <Menu className="user-buttons" secondary>
@@ -59,12 +53,6 @@ class Navbar extends React.Component{
              {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?<Menu.Item className="menu-button" name="user"      active={this.state.activeItem === 'user'} onClick={this.handleItemClick} as={Link} to='/user'>내 정보</Menu.Item>    :null} */}
              {typeof(this.props.currentUser) === 'object'&&!Array.isArray(this.props.currentUser)&&this.props.currentUser!==undefined?null:<Menu.Item className="menu-button" name="login" active={this.state.activeItem === 'login'} onClick={this.handleItemClick} as={Link} to='/login'>로그인</Menu.Item>}            
           </Menu>
-            {/* <Button.Group className="user-buttons">
-            {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)&&this.state.currentUser!=undefined?<Button className="menu-button" as={Link} to='/library'>내 책장</Button>:null}
-            {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)&&this.state.currentUser!=undefined?<Button className="menu-button" as={Link} to={`/user/${this.state.currentUser!=null?this.state.currentUser.userName:null}`}>프로필</Button>:null}
-            {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)&&this.state.currentUser!=undefined?<Button className="menu-button" as={Link} to='/user'>내 정보</Button>:null}
-            {typeof(this.state.currentUser) == 'object'&&!Array.isArray(this.state.currentUser)&&this.state.currentUser!=undefined?<Button className="menu-button" as={Link} to='/logout'>로그아웃</Button>:<Button as={Link} to='/login'>로그인</Button>} 
-            </Button.Group> */}
           </Grid.Column>
         </Grid.Row>
       </Grid>
