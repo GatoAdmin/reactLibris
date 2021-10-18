@@ -14,6 +14,7 @@ import User from './User';
 import Library from './Library';
 import Comment from './Comment';
 import Chronicle from './Chronicle';
+import Chat from './Chat';
 import Login from './Main/loginPage'
 import Logout from './Main/logoutPage';
 import Signup from './Main/signup';
@@ -101,8 +102,8 @@ class BaseLayout extends React.Component {
                 path="/library"
                 render={(props)=><Library currentUser={this.state.currentUser}{...props}/>}
               />
-              <Route path="/search" component={(props)=><SearchResult currentUser={this.state.currentUser}{...props}/>} /> 
-            
+             <Route path="/search" component={(props)=><SearchResult currentUser={this.state.currentUser}{...props}/>} /> 
+             <Route path="/chat" component={(props)=><Chat currentUser={this.state.currentUser}{...props}/>}/>
              <Route path="/comments" component={(props)=><Comment currentUser={this.state.currentUser}{...props}/>} />
              <Route path="/chronicles" component={(props)=><Chronicle currentUser={this.state.currentUser}{...props}/>} />
              <Route exact path={`/landing`} component={Landing} />
